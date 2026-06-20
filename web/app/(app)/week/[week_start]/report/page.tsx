@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/lib/supabase/server';
 import { DailyBreakdown } from '@/components/report/DailyBreakdown';
 import { CategoryTable } from '@/components/report/CategoryTable';
 import { SubCategoryTable } from '@/components/report/SubCategoryTable';
@@ -21,8 +21,8 @@ export default async function ReportPage({ params }: Props) {
 
   const r = rows ?? [];
   return (
-    <main className="mx-auto max-w-6xl px-6 py-6 space-y-8">
-      <h1 className="text-xl font-semibold tracking-tight">Weekly Report — {week_start}</h1>
+    <main className="mx-auto max-w-6xl px-4 md:px-6 py-6 space-y-8">
+      <h1 className="text-xl font-semibold tracking-tight">Weekly Report â€” {week_start}</h1>
       <section><h2 className="text-sm uppercase tracking-wide text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
       <section><h2 className="text-sm uppercase tracking-wide text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
       <section><h2 className="text-sm uppercase tracking-wide text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>

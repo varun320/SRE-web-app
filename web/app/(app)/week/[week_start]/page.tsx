@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/lib/supabase/server';
 import { EntryTable } from '@/components/timesheet/EntryTable';
 import { isMondayISO } from '@/lib/dates';
 import { notFound } from 'next/navigation';
@@ -33,10 +33,10 @@ export default async function WeekPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-7xl">
-      <div className="px-6 pt-8 pb-2 flex items-baseline justify-between">
+      <div className="px-4 md:px-6 pt-8 pb-2 flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Week of {week_start}</h1>
         <a href={`/week/${week_start}/report`} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-4 hover:underline">
-          View report →
+          View report â†’
         </a>
       </div>
       <EntryTable

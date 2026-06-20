@@ -77,12 +77,12 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
       <KpiStrip totals={totals} openingTil={openingTil} openingVacation={openingVacation} />
 
       {rows.length === 1 && !rows[0].main_category && !rows[0].description && !locked ? (
-        <div className="mx-6 mb-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 px-5 py-4 text-sm text-[var(--color-text-muted)]">
+        <div className="mx-4 md:mx-6 mb-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 px-5 py-4 text-sm text-[var(--color-text-muted)]">
           Nothing logged yet — fill in the empty row below to get started. Each row is one activity: pick a category, log hours per day, add a short description.
         </div>
       ) : null}
 
-      <div className="mx-6 mb-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] border border-[var(--color-border-soft)] overflow-hidden">
+      <div className="mx-4 md:mx-6 mb-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] border border-[var(--color-border-soft)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border-separate border-spacing-0">
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
@@ -117,7 +117,7 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
           </table>
         </div>
 
-        <div className="flex items-end justify-between px-6 py-4 border-t border-[var(--color-border-soft)] mt-2 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between px-4 md:px-6 py-4 border-t border-[var(--color-border-soft)] mt-2 gap-3 md:gap-4">
           <Button type="button" variant="outline" onClick={addRow} disabled={locked}>
             <Plus className="h-4 w-4 mr-1" /> Add row
           </Button>

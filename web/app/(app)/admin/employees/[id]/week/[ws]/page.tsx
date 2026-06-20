@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/lib/supabase/server';
 import { DecisionBar } from '@/components/admin/DecisionBar';
 import { DailyBreakdown } from '@/components/report/DailyBreakdown';
 import { CategoryTable } from '@/components/report/CategoryTable';
@@ -50,8 +50,8 @@ export default async function AdminWeekReview({ params }: Props) {
         <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{user?.employee_code}</div>
         <div className="text-lg font-semibold">{user?.full_name}</div>
         <div className="text-sm text-[var(--color-text-muted)]">
-          Week of {ws} · status <strong>{ts.status}</strong>
-          {ts.decline_reason ? ` · last reason: ${ts.decline_reason}` : ''}
+          Week of {ws} Â· status <strong>{ts.status}</strong>
+          {ts.decline_reason ? ` Â· last reason: ${ts.decline_reason}` : ''}
         </div>
       </div>
 
@@ -61,10 +61,10 @@ export default async function AdminWeekReview({ params }: Props) {
         </div>
       ) : (
         <>
-          <section className="px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
-          <section className="px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
-          <section className="px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>
-          <section className="px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by project</h2><ProjectTable rows={r} /></section>
+          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
+          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
+          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>
+          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by project</h2><ProjectTable rows={r} /></section>
         </>
       )}
 

@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -15,11 +15,11 @@ export default async function EmployeeDetail({ params }: Props) {
   const { data: vac } = await sb.from('v_vacation_balance').select('closing_balance').eq('user_id', id).maybeSingle();
 
   return (
-    <div className="px-6 py-6 space-y-6">
+    <div className="px-4 md:px-6 py-6 space-y-6">
       <div>
         <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{u.employee_code}</div>
         <h2 className="text-xl font-semibold">{u.full_name}</h2>
-        <div className="text-sm text-[var(--color-text-muted)]">{u.email} · {pos?.name ?? 'no position'} · {u.department ?? 'no dept'}</div>
+        <div className="text-sm text-[var(--color-text-muted)]">{u.email} Â· {pos?.name ?? 'no position'} Â· {u.department ?? 'no dept'}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 max-w-md">
@@ -40,7 +40,7 @@ export default async function EmployeeDetail({ params }: Props) {
             {weeks.map((w) => (
               <li key={w.id}>
                 <Link className="text-[var(--color-accent)] hover:underline font-mono" href={`/admin/employees/${id}/week/${w.week_start}`}>{w.week_start}</Link>
-                {' — '}
+                {' â€” '}
                 <span className="text-[var(--color-text-muted)]">{w.status}</span>
               </li>
             ))}
