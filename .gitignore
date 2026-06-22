@@ -10,3 +10,8 @@ supabase/.temp/
 dev-credentials.md
 web/test-results/
 web/playwright-report/
+
+# Python importer
+scripts/import/.venv/
+scripts/import/**/__pycache__/
+scripts/import/.pytest_cache/
