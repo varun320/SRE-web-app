@@ -27,11 +27,18 @@ export function StatusBanner({ status, declineReason }: { status: TimesheetStatu
       style={{ background: bg, color: fg }}
     >
       <Icon className="h-5 w-5 mt-0.5 shrink-0" aria-hidden />
-      <div className="text-sm leading-snug">
+      <div className="text-sm leading-snug flex-1">
         <div className="font-medium">{title}</div>
-        <div className="opacity-80">
-          {status === 'declined' && declineReason ? `Reason: ${declineReason}` : body}
-        </div>
+        {status === 'declined' && declineReason ? (
+          <>
+            <div className="mt-1 px-2 py-1 rounded-[var(--radius)] bg-white/40 text-[13px]">
+              <span className="opacity-70">Admin said:</span> <span className="font-medium">{declineReason}</span>
+            </div>
+            <div className="opacity-80 mt-1 text-xs">What to do next: edit the rows above and click Submit for approval again.</div>
+          </>
+        ) : (
+          <div className="opacity-80">{body}</div>
+        )}
       </div>
     </div>
   );

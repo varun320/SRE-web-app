@@ -28,6 +28,10 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
   const missingDescription = row.description.trim().length === 0;
   const missingProject = requiresProject && !row.project_id;
 
+  const maxDayInRow = DAY_KEYS.reduce((acc, k) => Math.max(acc, row[k] || 0), 0);
+  const isTilPayoutRow = sub?.name === 'TIL Payout';
+  const showOtHint = maxDayInRow > 8 && !isTilPayoutRow;
+
   return (
     <tr className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40 transition-colors">
       <td className="px-3 py-3"><CategoryCell
@@ -58,6 +62,11 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
           className={missingDescription ? 'border-[var(--color-status-declined-fg)]' : ''}
           aria-invalid={missingDescription}
         />
+        {showOtHint ? (
+          <span className="block text-[10px] text-[var(--color-status-submitted-fg)] mt-1">
+            → hours above 8/day count as overtime (added to TIL bank on approval)
+          </span>
+        ) : null}
       </td>
       <td className="px-3 py-3 text-right font-mono tabular-nums">{rowTotal.toFixed(2)}</td>
       <td className="px-3 py-3">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { HelpButton } from './HelpButton';
 
 export function Header({ email }: { email: string }) {
   return (
@@ -9,6 +10,7 @@ export function Header({ email }: { email: string }) {
           <Link href="/week/current">Week</Link>
           <Link href="/me/til">TIL</Link>
           <Link href="/me/vacation">Vacation</Link>
+          <HelpButton />
           <span className="text-[var(--color-text-muted)]">{email}</span>
           <form action="/auth/signout" method="post">
             <button type="submit" className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
