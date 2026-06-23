@@ -1,4 +1,10 @@
 create schema if not exists test_helpers;
+grant usage on schema test_helpers to authenticated, anon, public;
+
+-- Ensure authenticated role has standard table privileges (matches Supabase default)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
 
 create or replace function test_helpers.make_user(
   p_email text,
@@ -28,3 +34,5 @@ end$$;
 create or replace function test_helpers.sub_id(p_name text) returns uuid language sql stable as $$
   select id from public.sub_categories where name = p_name limit 1;
 $$;
+
+grant execute on all functions in schema test_helpers to authenticated, anon, public;
