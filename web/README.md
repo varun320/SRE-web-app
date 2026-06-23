@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SRE Timesheet — Web
 
-## Getting Started
+Next.js 15 + Tailwind v4 + shadcn/ui + Supabase JS. Implements the spec at
+`../docs/specs/2026-06-23-sre-timesheet-design.md`.
 
-First, run the development server:
+## Run
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+    cp .env.local.example .env.local         # paste anon + service-role keys from `supabase status`
+    npm install
+    npm run dev                              # http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Test
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    npm run test:unit
+    npm run test:e2e                         # needs SUPABASE_SERVICE_ROLE_KEY in .env.local
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Employee routes
 
-## Learn More
+- `/login` — password + magic-link sign-in
+- `/week/current` — redirects to `/week/<this-monday>`
+- `/week/[ws]` — weekly timesheet editor
+- `/week/[ws]/report` — read-only weekly report
+- `/me/til` — your TIL ledger history
+- `/me/vacation` — your vacation ledger history
 
-To learn more about Next.js, take a look at the following resources:
+## Admin routes (admin role required)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/admin` — approval queue (submitted timesheets awaiting decision)
+- `/admin/employees` — employee list
+- `/admin/employees/new` — create employee (server action, uses service-role)
+- `/admin/employees/[id]` — employee detail + balances + recent weeks
+- `/admin/employees/[id]/week/[ws]` — review any employee's week, approve/decline/unlock
+- `/admin/projects` — manage project numbers
+- `/admin/positions` — manage annual vacation hours per position
+- `/admin/approvals` — audit log (submit / approve / decline / unlock / ledger recomputes)

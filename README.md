@@ -22,6 +22,6 @@ Run locally:
 
 ## What's next
 
-- Plan 2: Employee web app (Next.js + Supabase Auth)
-- Plan 3: Admin web app (approvals, user/project management)
+- Plan 2: Employee web app — **COMPLETE**
+- Plan 3: Admin web app — **COMPLETE**  (E2E test deferred to Plan 4 or backlog)
 - Plan 4: Historical importer (Excel → DB)
