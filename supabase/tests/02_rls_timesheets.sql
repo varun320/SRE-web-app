@@ -1,5 +1,5 @@
 begin;
-\i helpers.sql
+\ir helpers.psql
 select plan(5);
 
 select test_helpers.make_user('alice@x','employee','Alice','E001') as alice \gset
