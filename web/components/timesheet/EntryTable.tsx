@@ -74,48 +74,56 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
       <StatusBanner status={timesheet.status} declineReason={timesheet.decline_reason} />
       <KpiStrip totals={totals} openingTil={openingTil} openingVacation={openingVacation} />
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-[var(--color-surface-2)] text-[var(--color-text-muted)]">
-            <tr>
-              <th className="text-left p-2">Category</th>
-              <th className="text-left p-2">Project #</th>
-              <th className="p-2">Mon</th><th className="p-2">Tue</th><th className="p-2">Wed</th>
-              <th className="p-2">Thu</th><th className="p-2">Fri</th><th className="p-2">Sat</th><th className="p-2">Sun</th>
-              <th className="text-left p-2">Description</th>
-              <th className="text-right p-2">Total</th>
-              <th className="p-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <EntryRow
-                key={i}
-                row={r}
-                index={i}
-                subCategories={subCategories}
-                projects={projects}
-                onChange={(next) => setRow(i, next)}
-                onRemove={() => removeRow(i)}
-                disabled={locked}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {rows.length === 1 && !rows[0].main_category && !rows[0].description ? (
+        <div className="mx-6 mb-3 text-sm text-[var(--color-text-muted)]">
+          Start by picking a main category for your first activity, then fill in hours and a short description.
+        </div>
+      ) : null}
 
-      <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--color-border)]">
-        <Button type="button" variant="outline" onClick={addRow} disabled={locked}>
-          <Plus className="h-4 w-4 mr-1" /> Add row
-        </Button>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-[var(--color-text-muted)]">{errors.length} validation issue{errors.length === 1 ? '' : 's'}</span>
-          <Button type="button" variant="outline" onClick={onSave} disabled={locked || save.isPending || !dirty}>
-            {save.isPending ? 'Saving…' : 'Save draft'}
+      <div className="mx-6 mb-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] border border-[var(--color-border-soft)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border-separate border-spacing-0">
+            <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
+              <tr>
+                <th className="text-left px-3 py-3 font-normal">Category</th>
+                <th className="text-left px-3 py-3 font-normal">Project #</th>
+                <th className="px-3 py-3 font-normal">Mon</th><th className="px-3 py-3 font-normal">Tue</th><th className="px-3 py-3 font-normal">Wed</th>
+                <th className="px-3 py-3 font-normal">Thu</th><th className="px-3 py-3 font-normal">Fri</th><th className="px-3 py-3 font-normal">Sat</th><th className="px-3 py-3 font-normal">Sun</th>
+                <th className="text-left px-3 py-3 font-normal">Description</th>
+                <th className="text-right px-3 py-3 font-normal">Total</th>
+                <th className="px-3 py-3 font-normal"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <EntryRow
+                  key={i}
+                  row={r}
+                  index={i}
+                  subCategories={subCategories}
+                  projects={projects}
+                  onChange={(next) => setRow(i, next)}
+                  onRemove={() => removeRow(i)}
+                  disabled={locked}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--color-border-soft)] mt-2">
+          <Button type="button" variant="outline" onClick={addRow} disabled={locked}>
+            <Plus className="h-4 w-4 mr-1" /> Add row
           </Button>
-          <Button type="button" onClick={onSubmit} disabled={locked || submit.isPending || errors.length > 0}>
-            {submit.isPending ? 'Submitting…' : 'Submit for approval'}
-          </Button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-[var(--color-text-muted)]">{errors.length} validation issue{errors.length === 1 ? '' : 's'}</span>
+            <Button type="button" variant="outline" onClick={onSave} disabled={locked || save.isPending || !dirty}>
+              {save.isPending ? 'Saving…' : 'Save draft'}
+            </Button>
+            <Button type="button" onClick={onSubmit} disabled={locked || submit.isPending || errors.length > 0}>
+              {submit.isPending ? 'Submitting…' : 'Submit for approval'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

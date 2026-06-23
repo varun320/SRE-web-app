@@ -139,3 +139,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .font-mono { font-family: var(--font-mono); }
+/* KPI number scale-bump on change */
+@keyframes kpi-bump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.kpi-value {
+  display: inline-block;
+  animation: kpi-bump var(--duration-normal) var(--ease-out);
+}
