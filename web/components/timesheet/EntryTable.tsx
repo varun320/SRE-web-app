@@ -85,15 +85,19 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
       <div className="mx-6 mb-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] border border-[var(--color-border-soft)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border-separate border-spacing-0">
-            <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
+            <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
               <tr>
-                <th className="text-left px-3 py-3 font-normal">Category</th>
-                <th className="text-left px-3 py-3 font-normal">Project #</th>
-                <th className="px-3 py-3 font-normal">Mon</th><th className="px-3 py-3 font-normal">Tue</th><th className="px-3 py-3 font-normal">Wed</th>
-                <th className="px-3 py-3 font-normal">Thu</th><th className="px-3 py-3 font-normal">Fri</th><th className="px-3 py-3 font-normal">Sat</th><th className="px-3 py-3 font-normal">Sun</th>
-                <th className="text-left px-3 py-3 font-normal">Description</th>
-                <th className="text-right px-3 py-3 font-normal">Total</th>
-                <th className="px-3 py-3 font-normal"></th>
+                <th className="text-left px-2 py-2 font-normal">Category</th>
+                <th className="text-left px-2 py-2 font-normal">Project #</th>
+                <th className="px-0.5 py-2 font-normal">Mon</th>
+                <th className="px-0.5 py-2 font-normal">Tue</th>
+                <th className="px-0.5 py-2 font-normal">Wed</th>
+                <th className="px-0.5 py-2 font-normal">Thu</th>
+                <th className="px-0.5 py-2 font-normal">Fri</th>
+                <th className="px-0.5 py-2 font-normal">Sat</th>
+                <th className="px-0.5 py-2 font-normal">Sun</th>
+                <th className="text-left px-2 py-2 font-normal">Description</th>
+                <th className="text-right px-2 py-2 font-normal">Total</th>
               </tr>
             </thead>
             <tbody>

@@ -25,7 +25,16 @@ export function CategoryCell({ mainCategory, subCategoryId, subCategories, onCha
         onValueChange={(v) => onChange({ mainCategory: v as MainCategory, subCategoryId: null })}
         disabled={disabled}
       >
-        <SelectTrigger className="h-9 w-36"><SelectValue placeholder="Main…" /></SelectTrigger>
+        <SelectTrigger
+          className="h-8 w-32"
+          style={mainCategory ? {
+            background: `var(--color-cat-${mainCategory === 'Project' ? 'project' : mainCategory === 'Admin' ? 'admin' : 'office'}-bg)`,
+            color: `var(--color-cat-${mainCategory === 'Project' ? 'project' : mainCategory === 'Admin' ? 'admin' : 'office'}-fg)`,
+            borderColor: `var(--color-cat-${mainCategory === 'Project' ? 'project' : mainCategory === 'Admin' ? 'admin' : 'office'}-border)`,
+          } : undefined}
+        >
+          <SelectValue placeholder="Main…" />
+        </SelectTrigger>
         <SelectContent>
           {MAIN.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
         </SelectContent>
@@ -35,7 +44,7 @@ export function CategoryCell({ mainCategory, subCategoryId, subCategories, onCha
         onValueChange={(v) => onChange({ mainCategory, subCategoryId: v })}
         disabled={disabled || !mainCategory}
       >
-        <SelectTrigger className="h-9 w-44"><SelectValue placeholder="Sub…" /></SelectTrigger>
+        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Sub…" /></SelectTrigger>
         <SelectContent>
           {filtered.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
         </SelectContent>

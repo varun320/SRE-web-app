@@ -20,6 +20,18 @@
   --color-status-declined-fg:    oklch(45% 0.14 50);
   --color-status-declined-bg:    oklch(95% 0.05 60);
 
+  --color-cat-project-bg:    oklch(95% 0.04 245);
+  --color-cat-project-fg:    oklch(40% 0.14 245);
+  --color-cat-project-border: oklch(70% 0.12 245);
+
+  --color-cat-admin-bg:      oklch(95% 0.05 70);
+  --color-cat-admin-fg:      oklch(40% 0.14 70);
+  --color-cat-admin-border:  oklch(70% 0.12 70);
+
+  --color-cat-office-bg:     oklch(95% 0.05 150);
+  --color-cat-office-fg:     oklch(38% 0.13 150);
+  --color-cat-office-border: oklch(68% 0.13 150);
+
   --color-success: oklch(60% 0.16 150);
   --color-warning: oklch(70% 0.16 60);
 
@@ -52,6 +64,18 @@
   --color-status-approved-fg:    oklch(85% 0.10 150);
   --color-status-declined-bg:    oklch(28% 0.06 50);
   --color-status-declined-fg:    oklch(85% 0.10 50);
+
+  --color-cat-project-bg:    oklch(28% 0.05 245);
+  --color-cat-project-fg:    oklch(80% 0.10 245);
+  --color-cat-project-border: oklch(55% 0.12 245);
+
+  --color-cat-admin-bg:      oklch(28% 0.06 70);
+  --color-cat-admin-fg:      oklch(80% 0.12 70);
+  --color-cat-admin-border:  oklch(55% 0.12 70);
+
+  --color-cat-office-bg:     oklch(28% 0.06 150);
+  --color-cat-office-fg:     oklch(80% 0.10 150);
+  --color-cat-office-border: oklch(55% 0.13 150);
 
   --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.3), 0 4px 12px oklch(0% 0 0 / 0.2);
 }

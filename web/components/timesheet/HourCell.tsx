@@ -21,7 +21,7 @@ export function HourCell({ value, onChange, disabled, ariaLabel }: Props) {
         const n = e.target.value === '' ? 0 : Number(e.target.value);
         onChange(Number.isFinite(n) && n >= 0 ? n : 0);
       }}
-      className="h-9 w-16 text-right font-mono tabular-nums"
+      className="h-8 w-14 px-1 text-right text-sm font-mono tabular-nums"
       aria-label={ariaLabel}
     />
   );
