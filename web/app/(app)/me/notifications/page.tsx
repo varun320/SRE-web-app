@@ -1,5 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { NotificationsList } from './NotificationsList';
+import { EmailPrefToggle } from '@/components/me/EmailPrefToggle';
 
 interface RawRow {
   id: string;
@@ -14,6 +15,11 @@ interface RawRow {
 
 export default async function NotificationsPage() {
   const sb = await getSupabaseServer();
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: pref } = user
+    ? await sb.from('users').select('email_notifications').eq('id', user.id).maybeSingle()
+    : { data: null };
+
   const { data, error } = await sb
     .from('notifications')
     .select(
@@ -51,6 +57,7 @@ export default async function NotificationsPage() {
           </p>
         </div>
       </header>
+      <EmailPrefToggle initial={Boolean(pref?.email_notifications)} />
       <NotificationsList initial={initial} />
     </main>
   );
