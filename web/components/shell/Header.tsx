@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { CalendarDays, Clock, Palmtree, Shield, Menu, X, LogOut } from 'lucide-react';
+import { CalendarDays, Clock, Palmtree, Shield, Menu, X, LogOut, Bell } from 'lucide-react';
 import { HelpButton } from './HelpButton';
+import { NotificationsBell } from './NotificationsBell';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,12 +106,14 @@ export function Header({ email, isAdmin }: HeaderProps) {
 
         {/* Right cluster — desktop */}
         <div className="hidden md:flex items-center gap-2">
+          <NotificationsBell />
           <HelpButton />
           <UserMenu email={email} initial={initial} />
         </div>
 
         {/* Mobile actions */}
         <div className="flex md:hidden items-center gap-1">
+          <NotificationsBell />
           <HelpButton />
           <button
             type="button"
@@ -242,6 +245,19 @@ function MobileDrawer({ open, onClose, items, pathname, email }: MobileDrawerPro
               </Link>
             );
           })}
+          <Link
+            href="/me/notifications"
+            aria-current={pathname.startsWith('/me/notifications') ? 'page' : undefined}
+            className={[
+              'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors',
+              pathname.startsWith('/me/notifications')
+                ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-medium'
+                : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
+            ].join(' ')}
+          >
+            <Bell className="h-4 w-4" />
+            Notifications
+          </Link>
           <div className="my-2 h-px bg-[var(--color-border-soft)]" />
           <div className="px-3 pt-1 pb-2">
             <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">

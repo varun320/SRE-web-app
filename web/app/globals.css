@@ -161,3 +161,14 @@ body {
   body { background: white !important; }
   .period-summary { box-shadow: none !important; }
 }
+
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-status-submitted-fg); }
+  50%      { box-shadow: 0 0 0 4px transparent; }
+}
+.notif-badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .notif-badge-pulse { animation: none; }
+}
