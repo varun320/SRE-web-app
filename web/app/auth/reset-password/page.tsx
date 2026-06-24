@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { Suspense, useEffect, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
@@ -13,6 +13,14 @@ import { updatePassword } from './actions';
 type Status = 'verifying' | 'ready' | 'invalid';
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordInner />
+    </Suspense>
+  );
+}
+
+function ResetPasswordInner() {
   const sp = useSearchParams();
   const code = sp.get('code');
   const [status, setStatus] = useState<Status>('verifying');
@@ -111,7 +119,7 @@ function InvalidLink() {
       <p className="text-sm text-[var(--color-text-muted)]">
         Reset links expire after one hour. Head back to the sign-in page and request a new one.
       </p>
-      <Button asChild className="w-full" render={<a href="/login" />}>Back to sign in</Button>
+      <Button className="w-full" render={<a href="/login">Back to sign in</a>} />
     </div>
   );
 }

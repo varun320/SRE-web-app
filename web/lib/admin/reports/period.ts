@@ -32,7 +32,7 @@ export async function fetchPeriodSummary(
   const { data, error } = await q;
   if (error) throw new Error(error.message);
 
-  const summaryRows = (data ?? []) as Omit<PeriodSummaryRow, 'til_closing' | 'vacation_closing'>[];
+  const summaryRows = (data ?? []) as unknown as Omit<PeriodSummaryRow, 'til_closing' | 'vacation_closing'>[];
 
   // Closings come from the ledger tables — one query per ledger, scoped to
   // the same date range. Joined in memory by (user_id, week_start).
