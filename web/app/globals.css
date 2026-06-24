@@ -149,3 +149,15 @@ body {
   display: inline-block;
   animation: kpi-bump var(--duration-normal) var(--ease-out);
 }
+
+@media print {
+  /* Strip chrome for clean PDF exports. */
+  header[class*="sticky"],
+  nav[aria-label],
+  [class*="AdminSubnav"],
+  [class*="ReportsSubnav"] {
+    display: none !important;
+  }
+  body { background: white !important; }
+  .period-summary { box-shadow: none !important; }
+}

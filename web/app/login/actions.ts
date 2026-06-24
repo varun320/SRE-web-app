@@ -12,6 +12,19 @@ export async function signInWithPassword(formData: FormData) {
   redirect('/');
 }
 
+export async function sendPasswordReset(formData: FormData) {
+  const email = String(formData.get('email') ?? '');
+  if (!email) return { error: 'Email is required.' };
+  const h = await headers();
+  const origin = h.get('origin') ?? 'http://localhost:3000';
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/reset-password`,
+  });
+  if (error) return { error: error.message };
+  return { ok: true };
+}
+
 export async function sendMagicLink(formData: FormData) {
   const email = String(formData.get('email') ?? '');
   const h = await headers();

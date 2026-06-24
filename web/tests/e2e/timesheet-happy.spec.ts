@@ -7,15 +7,18 @@ test('employee can sign in, add entries, save, and submit', async ({ page }) => 
   await provisionEmployee(email, password, `E${Math.floor(Math.random() * 9999)}`);
 
   await page.goto('/login');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
+  await page.locator('#email').fill(email);
+  await page.locator('#password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
 
-  await expect(page).toHaveURL(/\/week\/\d{4}-\d{2}-\d{2}/);
+  // Header nav appears post-auth; tolerates the / → /week/current → /week/YYYY-MM-DD chain.
+  await expect(page.getByRole('link', { name: /Timesheet|Week$/ }).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page).toHaveURL(/\/week\/\d{4}-\d{2}-\d{2}/, { timeout: 15_000 });
 
-  await page.getByRole('combobox').first().click();
+  // CategoryCell renders two base-ui Select triggers identified by their placeholders.
+  await page.getByText('Main…', { exact: true }).first().click();
   await page.getByRole('option', { name: 'Admin' }).click();
-  await page.getByRole('combobox').nth(1).click();
+  await page.getByText('Sub…', { exact: true }).first().click();
   await page.getByRole('option', { name: 'Administrative' }).click();
   await page.getByLabel('Mon hours row 1').fill('8');
   await page.getByPlaceholder('Description required').fill('Catch-up');

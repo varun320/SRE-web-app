@@ -6,6 +6,8 @@ import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { approveTimesheet } from '@/lib/admin/mutations';
 import { DeclineDialog } from './DeclineDialog';
 import { UnlockDialog } from './UnlockDialog';
+import { ForceSubmitDialog } from './ForceSubmitDialog';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -14,13 +16,27 @@ interface Props {
   status: TimesheetStatus;
 }
 
+const STATUS_TONE = {
+  draft:     'muted',
+  submitted: 'info',
+  approved:  'success',
+  declined:  'danger',
+} as const;
+
+const STATUS_LABEL = {
+  draft:     'Draft — employee editing',
+  submitted: 'Submitted — awaiting your review',
+  approved:  'Approved & locked',
+  declined:  'Declined — back to employee',
+} as const;
+
 export function DecisionBar({ timesheetId, status }: Props) {
   const router = useRouter();
   const qc = useQueryClient();
   const approve = useMutation({
     mutationFn: () => approveTimesheet(getSupabaseBrowser(), timesheetId, null),
     onSuccess: () => {
-      toast.success('Approved');
+      toast.success('Approved — week is now locked.');
       qc.invalidateQueries();
       router.refresh();
     },
@@ -28,22 +44,31 @@ export function DecisionBar({ timesheetId, status }: Props) {
   });
 
   return (
-    <div className="sticky bottom-4 mx-6 mb-6 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] px-4 py-3 flex items-center justify-between">
-      <span className="text-sm text-[var(--color-text-muted)]">
-        Current status: <strong className="text-[var(--color-text)]">{status}</strong>
-      </span>
-      <div className="flex gap-2">
-        {status === 'submitted' && (
-          <>
-            <DeclineDialog timesheetId={timesheetId} />
-            <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
-              {approve.isPending ? 'Approving…' : 'Approve'}
-            </Button>
-          </>
+    <div className="sticky bottom-4 mx-4 md:mx-6 mb-6 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur shadow-[var(--shadow-card)] p-3 md:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-[var(--color-text-muted)]">Status:</span>
+        <StatusBadge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</StatusBadge>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Approve — allowed from any non-approved state. */}
+        {status !== 'approved' && (
+          <Button onClick={() => approve.mutate()} disabled={approve.isPending} title="Mark this week approved and freeze its ledgers.">
+            {approve.isPending ? 'Approving…' : status === 'submitted' ? 'Approve' : 'Approve (override)'}
+          </Button>
         )}
+
+        {/* Decline — allowed from any non-declined state. */}
+        {status !== 'declined' && (
+          <DeclineDialog timesheetId={timesheetId} />
+        )}
+
+        {/* Unlock — only meaningful on approved. */}
         {status === 'approved' && <UnlockDialog timesheetId={timesheetId} />}
+
+        {/* Force-submit — only meaningful when draft or declined. */}
         {(status === 'draft' || status === 'declined') && (
-          <span className="text-xs text-[var(--color-text-muted)]">Employee is still editing — no admin actions available.</span>
+          <ForceSubmitDialog timesheetId={timesheetId} />
         )}
       </div>
     </div>
