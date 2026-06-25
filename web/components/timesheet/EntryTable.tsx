@@ -10,6 +10,20 @@ import { Plus } from 'lucide-react';
 import { computeTotals } from '@/lib/totals';
 import { useSaveEntries, useSubmit } from '@/lib/hooks';
 import { toast } from 'sonner';
+import { fireConfetti } from '@/components/ui/confetti';
+
+const SUBMIT_CHEERS = [
+  '🎉 Submitted — your future self thanks you.',
+  '✨ Locked in. Go enjoy your day.',
+  '🚀 Off to the admin queue. Nicely done.',
+  '🙌 Submitted for approval — you\'re ahead of the curve.',
+  '💪 One more week wrangled. Submitted.',
+  '🌟 Clean week, clean submit. Done.',
+  '☕ Submitted. Treat yourself to a coffee.',
+];
+function randomCheer(): string {
+  return SUBMIT_CHEERS[Math.floor(Math.random() * SUBMIT_CHEERS.length)];
+}
 
 interface Props {
   timesheet: Timesheet;
@@ -66,7 +80,8 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
     if (errors.length) { toast.error(`Fix ${errors.length} issue(s) before submitting`); return; }
     try {
       await submit.mutateAsync();
-      toast.success('Submitted for approval');
+      fireConfetti();
+      toast.success(randomCheer());
     } catch (e) { toast.error((e as Error).message); }
   };
 

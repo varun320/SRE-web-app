@@ -21,7 +21,11 @@ test('employee can sign in, add entries, save, and submit', async ({ page }) => 
   await expect(page.getByText('Saved')).toBeVisible();
 
   await page.getByRole('button', { name: 'Submit for approval' }).click();
-  await expect(page.getByText('Submitted for approval')).toBeVisible();
+  // Rotating success toast: any of the cheer messages mentions "Submitted",
+  // "Locked in", "Off to", "ahead", "wrangled", "Clean", or "Treat".
+  await expect(
+    page.getByText(/Submitted|Locked in|Off to|ahead|wrangled|Clean|Treat/i).first(),
+  ).toBeVisible({ timeout: 10_000 });
   // Submit doesn't router.refresh(), so the StatusBanner only updates on
   // page reload — reload to confirm the new state is persisted.
   await page.reload();
