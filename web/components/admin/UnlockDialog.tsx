@@ -10,7 +10,13 @@ import { unlockTimesheet } from '@/lib/admin/mutations';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-export function UnlockDialog({ timesheetId }: { timesheetId: string }) {
+interface Props {
+  timesheetId: string;
+  /** "inline" = compact pill suitable for table rows */
+  variant?: 'default' | 'inline';
+}
+
+export function UnlockDialog({ timesheetId, variant = 'default' }: Props) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const router = useRouter();
@@ -29,7 +35,13 @@ export function UnlockDialog({ timesheetId }: { timesheetId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="inline-flex items-center justify-center rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors">
+      <DialogTrigger
+        className={
+          variant === 'inline'
+            ? 'inline-flex items-center justify-center rounded-md px-2.5 py-1 text-xs font-medium text-[var(--color-accent)] hover:bg-[var(--color-accent-tint)] transition-colors'
+            : 'inline-flex items-center justify-center rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)] transition-colors'
+        }
+      >
         Unlock
       </DialogTrigger>
       <DialogContent className="max-w-md">
