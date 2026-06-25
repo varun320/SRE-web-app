@@ -7,6 +7,7 @@ import { CalendarDays, Clock, Palmtree, Shield, Menu, X, LogOut, Bell } from 'lu
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
 import { SnakeGame } from '@/components/fun/SnakeGame';
+import { useIdle } from '@/lib/hooks/useIdle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,8 @@ export function Header({ email, isAdmin }: HeaderProps) {
   const pathname = usePathname() ?? '';
   const [open, setOpen] = useState(false);
   const [snakeOpen, setSnakeOpen] = useState(false);
+  const idle = useIdle(30_000);
+  const wiggle = idle && !snakeOpen;
   const tapStreak = useRef<number[]>([]);
   const items = isAdmin ? [...BASE_NAV, ADMIN_ITEM] : BASE_NAV;
   const initial = (email?.[0] ?? '?').toUpperCase();
@@ -101,7 +104,10 @@ export function Header({ email, isAdmin }: HeaderProps) {
           <span
             aria-hidden
             onClick={(e) => { e.preventDefault(); onBrandTap(); }}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white cursor-pointer select-none active:scale-95 transition-transform"
+            className={[
+              'inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white cursor-pointer select-none active:scale-95 transition-transform',
+              wiggle ? 'brand-wiggle' : '',
+            ].join(' ')}
             style={{ background: 'var(--color-accent)' }}
             title="psst — tap me 5×"
           >

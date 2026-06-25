@@ -180,3 +180,16 @@ body {
 @media (prefers-reduced-motion: reduce) {
   @keyframes confetti-fall { 0%, 100% { opacity: 0; } }
 }
+
+@keyframes brand-wiggle {
+  0%, 70%, 100% { transform: rotate(0deg); }
+  75%  { transform: rotate(-9deg) scale(1.05); }
+  80%  { transform: rotate(8deg)  scale(1.05); }
+  85%  { transform: rotate(-6deg) scale(1.03); }
+  90%  { transform: rotate(5deg)  scale(1.02); }
+  95%  { transform: rotate(0deg); }
+}
+.brand-wiggle { animation: brand-wiggle 6s ease-in-out infinite; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .brand-wiggle { animation: none; }
+}
