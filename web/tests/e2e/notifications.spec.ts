@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
-import { provisionEmployee } from './setup';
+import { provisionEmployee, grantAdmin, signIn, signOut } from './setup';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -8,7 +8,7 @@ const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const ORG_ID = '00000000-0000-0000-0000-000000000001';
 const WEEK = '2026-02-02'; // a Monday
 
-test('submit notifies admins; approve notifies employee; mark-all-read clears badge', async ({ page }) => {
+test('submit notifies admins; approve notifies employee; mark-all-read clears badge', async ({ page, context }) => {
   const sb = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // --- Provision: admin + employee ---
@@ -18,11 +18,8 @@ test('submit notifies admins; approve notifies employee; mark-all-read clears ba
   const adminEmail = `e2e-admin-${Date.now()}@example.com`;
 
   const empId = await provisionEmployee(empEmail, password, empCode);
-  await provisionEmployee(adminEmail, password, `A${Math.floor(Math.random() * 9999)}`);
-
-  const { data: admin } = await sb.from('users').select('id').eq('email', adminEmail).single();
-  if (!admin) throw new Error('admin not provisioned');
-  await sb.from('user_roles').insert({ user_id: admin.id, role: 'admin' });
+  const adminId = await provisionEmployee(adminEmail, password, `A${Math.floor(Math.random() * 9999)}`);
+  await grantAdmin(adminId);
 
   // --- Seed a draft timesheet + 1 entry, then submit it AS the employee ---
   const { data: subSiteWork } = await sb.from('sub_categories').select('id').eq('name', 'Site Work').single();
@@ -62,16 +59,12 @@ test('submit notifies admins; approve notifies employee; mark-all-read clears ba
   const { data: adminInbox } = await sb
     .from('notifications')
     .select('id, kind')
-    .eq('user_id', admin.id);
+    .eq('user_id', adminId);
   expect(adminInbox).toHaveLength(1);
   expect(adminInbox![0].kind).toBe('timesheet_submitted');
 
   // --- Admin signs in via UI and sees the bell badge ---
-  await page.goto('/login');
-  await page.locator('#email').fill(adminEmail);
-  await page.locator('#password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('link', { name: /Timesheet|Week$/ }).first()).toBeVisible({ timeout: 30_000 });
+  await signIn(page, adminEmail, password);
 
   // Bell badge shows 1
   const bell = page.getByRole('button', { name: /Notifications.*1 unread/i }).first();
@@ -101,13 +94,8 @@ test('submit notifies admins; approve notifies employee; mark-all-read clears ba
   expect(empInbox![0].kind).toBe('timesheet_approved');
 
   // --- Employee signs in, sees badge, marks all read ---
-  // Wipe admin's session cookies before reusing the browser for the employee
-  await page.context().clearCookies();
-  await page.goto('/login');
-  await page.locator('#email').fill(empEmail);
-  await page.locator('#password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('link', { name: /Timesheet|Week$/ }).first()).toBeVisible({ timeout: 30_000 });
+  await signOut(context);
+  await signIn(page, empEmail, password);
 
   const empBell = page.getByRole('button', { name: /Notifications.*1 unread/i }).first();
   await expect(empBell).toBeVisible({ timeout: 30_000 });

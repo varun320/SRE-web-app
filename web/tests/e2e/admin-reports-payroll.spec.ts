@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
-import { provisionEmployee } from './setup';
+import { provisionEmployee, grantAdmin, signIn } from './setup';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -19,10 +19,8 @@ test('admin sees payroll preview row and downloads CSV with expected columns', a
   const password = 'CorrectHorse9!';
 
   const empId = await provisionEmployee(empEmail, password, empCode);
-  await provisionEmployee(adminEmail, password, `A${Math.floor(Math.random() * 9999)}`);
-  const { data: admin } = await sb.from('users').select('id').eq('email', adminEmail).single();
-  if (!admin) throw new Error('admin not provisioned');
-  await sb.from('user_roles').insert({ user_id: admin.id, role: 'admin' });
+  const adminId = await provisionEmployee(adminEmail, password, `A${Math.floor(Math.random() * 9999)}`);
+  await grantAdmin(adminId);
 
   // --- Seed one approved week via service-role.
   // INSERTs bypass the status guard (which only fires on UPDATEs of status).
@@ -46,7 +44,7 @@ test('admin sees payroll preview row and downloads CSV with expected columns', a
     status: 'approved',
     submitted_at: new Date().toISOString(),
     decided_at: new Date().toISOString(),
-    decided_by: admin.id,
+    decided_by: adminId,
     locked: true,
   }).select('id').single();
   if (tsRes.error) throw new Error('timesheet insert: ' + tsRes.error.message);
@@ -65,19 +63,15 @@ test('admin sees payroll preview row and downloads CSV with expected columns', a
 
   await sb.from('til_ledger').upsert({
     user_id: empId, week_start: PAYROLL_FROM,
-    opening_balance: 0, overtime_earned: 0, til_used: 0, frozen: true, approved_by: admin.id,
+    opening_balance: 0, overtime_earned: 0, til_used: 0, frozen: true, approved_by: adminId,
   });
   await sb.from('vacation_ledger').upsert({
     user_id: empId, week_start: PAYROLL_FROM,
-    opening_balance: 0, vacation_used: 0, frozen: true, approved_by: admin.id,
+    opening_balance: 0, vacation_used: 0, frozen: true, approved_by: adminId,
   });
 
   // --- Admin signs in ---
-  await page.goto('/login');
-  await page.locator('#email').fill(adminEmail);
-  await page.locator('#password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/week\/(current|\d{4}-\d{2}-\d{2})/);
+  await signIn(page, adminEmail, password);
 
   // --- Payroll preview shows one row matching our employee ---
   await page.goto(`/admin/reports/payroll?from=${PAYROLL_FROM}&to=${PAYROLL_TO}`, {

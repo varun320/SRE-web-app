@@ -31,15 +31,17 @@ export async function POST(req: Request) {
   const hash = sha256(bytes);
   const service = getSupabaseServiceRole();
 
-  // Reuse existing batch if this file was already analyzed (cheap idempotency).
+  // Reuse a pre-existing uncommitted batch (cheap idempotency for "show me
+  // the diff again"). If the batch was already committed, re-run the planner
+  // so the user sees the post-commit state ("skip" instead of stale "create").
   const { data: existing } = await service
     .from('import_batches')
-    .select('id, summary, plan_payload, source_filename, source_hash, mode')
+    .select('id, summary, plan_payload, source_filename, source_hash, mode, committed_at')
     .eq('source_hash', hash)
     .eq('mode', mode)
     .maybeSingle();
 
-  if (existing) {
+  if (existing && !existing.committed_at) {
     const items = (existing.plan_payload as { items?: unknown[] }).items ?? [];
     return NextResponse.json({
       batch_id: existing.id,
@@ -55,7 +57,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: (e as Error).message }, { status: 422 });
   }
 
-  // Persist a pending batch row so the commit step can replay the plan.
+  // Re-plan branch: an already-committed batch exists for this hash. Show the
+  // user the fresh diff (it'll be all "skip" rows) but reuse the existing
+  // committed batch_id so the Commit button is a safe no-op (RPC early-returns).
+  if (existing && existing.committed_at) {
+    return NextResponse.json({
+      batch_id: existing.id,
+      items: plan.items,
+      summary: plan.summary,
+    });
+  }
+
+  // Persist a fresh pending batch row so commit can replay the plan.
   const {
     data: { user },
   } = await userSb.auth.getUser();
