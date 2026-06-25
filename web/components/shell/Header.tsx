@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CalendarDays, Clock, Palmtree, Shield, Menu, X, LogOut, Bell } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
+import { SnakeGame } from '@/components/fun/SnakeGame';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,8 +60,20 @@ interface HeaderProps {
 export function Header({ email, isAdmin }: HeaderProps) {
   const pathname = usePathname() ?? '';
   const [open, setOpen] = useState(false);
+  const [snakeOpen, setSnakeOpen] = useState(false);
+  const tapStreak = useRef<number[]>([]);
   const items = isAdmin ? [...BASE_NAV, ADMIN_ITEM] : BASE_NAV;
   const initial = (email?.[0] ?? '?').toUpperCase();
+
+  // Easter egg: tap the SRE glyph 5 times within 2s to launch Snake.
+  const onBrandTap = () => {
+    const now = Date.now();
+    tapStreak.current = [...tapStreak.current.filter((t) => now - t < 2000), now];
+    if (tapStreak.current.length >= 5) {
+      tapStreak.current = [];
+      setSnakeOpen(true);
+    }
+  };
 
   // Close drawer on route change
   useEffect(() => {
@@ -80,15 +93,17 @@ export function Header({ email, isAdmin }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-surface)_82%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-[color-mix(in_oklab,var(--color-surface)_72%,transparent)]">
       <div className="mx-auto max-w-7xl px-4 md:px-6 h-14 flex items-center gap-3">
-        {/* Brand */}
+        {/* Brand — tap the glyph 5× quickly to summon Snake */}
         <Link
           href="/week/current"
           className="flex items-center gap-2 font-semibold tracking-tight"
         >
           <span
             aria-hidden
-            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white"
+            onClick={(e) => { e.preventDefault(); onBrandTap(); }}
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white cursor-pointer select-none active:scale-95 transition-transform"
             style={{ background: 'var(--color-accent)' }}
+            title="psst — tap me 5×"
           >
             SRE
           </span>
@@ -126,6 +141,9 @@ export function Header({ email, isAdmin }: HeaderProps) {
           </button>
         </div>
       </div>
+
+      {/* Easter egg: hidden Snake game */}
+      {snakeOpen ? <SnakeGame onClose={() => setSnakeOpen(false)} /> : null}
 
       {/* Mobile drawer */}
       <MobileDrawer
