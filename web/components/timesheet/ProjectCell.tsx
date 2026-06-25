@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Project } from '@/lib/types';
 
@@ -14,6 +15,19 @@ export function ProjectCell({ projectId, required, projects, onChange, disabled 
   if (!required) {
     return <span className="text-[var(--color-text-muted)] text-sm">—</span>;
   }
+
+  if (projects.length === 0) {
+    return (
+      <Link
+        href="/admin/projects"
+        title="No active projects — click to add one"
+        className="inline-flex items-center h-9 px-2.5 rounded-md border border-dashed border-[var(--color-status-declined-fg)] text-[var(--color-status-declined-fg)] text-xs hover:bg-[var(--color-status-declined-bg)] transition-colors"
+      >
+        No projects — add one →
+      </Link>
+    );
+  }
+
   return (
     <Select
       value={projectId ?? undefined}
