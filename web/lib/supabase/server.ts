@@ -8,13 +8,21 @@ export async function getSupabaseServer() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll(); },
+        getAll() {
+          return cookieStore.getAll();
+        },
         setAll(toSet) {
-          for (const { name, value, options } of toSet) {
-            cookieStore.set(name, value, options);
+          // In Server Components (RSC) cookies are read-only — set() throws.
+          // Swallow that case; middleware refreshes the session every request.
+          try {
+            for (const { name, value, options } of toSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // ignore — running inside a Server Component
           }
         },
       },
-    }
+    },
   );
 }
