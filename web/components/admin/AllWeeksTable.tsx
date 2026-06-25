@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, X } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 export type WeekStatus = 'draft' | 'submitted' | 'approved' | 'declined';
@@ -22,6 +23,26 @@ export interface WeekRow {
   overtime_earned: number;
 }
 
+export interface EmployeeOption {
+  id: string;
+  employee_code: string;
+  full_name: string;
+}
+
+export interface AllWeeksFilters {
+  status: WeekStatus | 'all';
+  userId: string | 'all';
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+interface Props {
+  rows: WeekRow[];
+  employees: EmployeeOption[];
+  filters: AllWeeksFilters;
+}
+
 const ORDER: WeekStatus[] = ['draft', 'submitted', 'approved', 'declined'];
 
 const STATUS_TONE: Record<WeekStatus, 'muted' | 'info' | 'success' | 'danger'> = {
@@ -38,80 +59,119 @@ const STATUS_LABEL: Record<WeekStatus, string> = {
   declined: 'Declined',
 };
 
-export function AllWeeksTable({ rows }: { rows: WeekRow[] }) {
-  const [enabled, setEnabled] = useState<Set<WeekStatus>>(new Set(ORDER));
+export function AllWeeksTable({ rows, employees, filters }: Props) {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const [pending, start] = useTransition();
   const [query, setQuery] = useState('');
 
-  const counts = useMemo(() => {
-    const c: Record<WeekStatus, number> = { draft: 0, submitted: 0, approved: 0, declined: 0 };
-    for (const r of rows) c[r.status] = (c[r.status] ?? 0) + 1;
-    return c;
-  }, [rows]);
-
-  const filtered = useMemo(() => {
+  // Search box only filters the current server-paged slice.
+  const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rows.filter((r) => {
-      if (!enabled.has(r.status)) return false;
-      if (!q) return true;
-      return (
+    if (!q) return rows;
+    return rows.filter(
+      (r) =>
         r.full_name.toLowerCase().includes(q) ||
         r.employee_code.toLowerCase().includes(q) ||
         r.week_start.includes(q) ||
-        (r.decline_reason ?? '').toLowerCase().includes(q)
-      );
-    });
-  }, [rows, enabled, query]);
+        (r.decline_reason ?? '').toLowerCase().includes(q),
+    );
+  }, [rows, query]);
 
-  const toggle = (s: WeekStatus) => {
-    setEnabled((prev) => {
-      const next = new Set(prev);
-      if (next.has(s)) next.delete(s);
-      else next.add(s);
-      return next;
-    });
+  const updateParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(sp.toString());
+    if (value === null || value === '') next.delete(key);
+    else next.set(key, value);
+    // Any filter change resets to page 1
+    if (key !== 'page') next.delete('page');
+    start(() => router.push(`?${next.toString()}`));
   };
+
+  const totalPages = Math.max(1, Math.ceil(filters.total / filters.pageSize));
+  const hasPrev = filters.page > 1;
+  const hasNext = filters.page < totalPages;
+  const firstOnPage = (filters.page - 1) * filters.pageSize + 1;
+  const lastOnPage = Math.min(filters.page * filters.pageSize, filters.total);
+
+  const hasAnyFilter = filters.status !== 'all' || filters.userId !== 'all';
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+      {/* Filter row */}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+        {/* Status filter chips (URL-bound) */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {ORDER.map((s) => {
-            const tone = STATUS_TONE[s];
-            const dim = !enabled.has(s);
-            return (
-              <button
-                key={s}
-                type="button"
-                onClick={() => toggle(s)}
-                aria-pressed={!dim}
-                className="transition-opacity"
-                style={{ opacity: dim ? 0.45 : 1 }}
-              >
-                <StatusBadge tone={tone}>
-                  {STATUS_LABEL[s]} <span className="ml-1 opacity-70">({counts[s]})</span>
-                </StatusBadge>
-              </button>
-            );
-          })}
+          <FilterChip
+            label="All statuses"
+            active={filters.status === 'all'}
+            onClick={() => updateParam('status', null)}
+          />
+          {ORDER.map((s) => (
+            <FilterChip
+              key={s}
+              label={STATUS_LABEL[s]}
+              tone={STATUS_TONE[s]}
+              active={filters.status === s}
+              onClick={() => updateParam('status', filters.status === s ? null : s)}
+            />
+          ))}
         </div>
+
         <div className="flex-1" />
+
+        {/* Employee dropdown */}
+        <select
+          aria-label="Filter by employee"
+          value={filters.userId}
+          disabled={pending}
+          onChange={(e) => updateParam('user_id', e.currentTarget.value === 'all' ? null : e.currentTarget.value)}
+          className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm"
+        >
+          <option value="all">All employees</option>
+          {employees.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.employee_code} — {e.full_name}
+            </option>
+          ))}
+        </select>
+
+        {/* Search */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
           <input
             type="search"
-            placeholder="Search employee, week, reason…"
+            placeholder="Search on this page…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full md:w-72 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-3 py-1.5 text-sm placeholder:text-[var(--color-text-muted)]"
+            className="w-full md:w-56 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-3 py-1.5 text-sm placeholder:text-[var(--color-text-muted)]"
           />
         </div>
+
+        {hasAnyFilter ? (
+          <button
+            type="button"
+            onClick={() => {
+              const next = new URLSearchParams(sp.toString());
+              next.delete('status');
+              next.delete('user_id');
+              next.delete('page');
+              start(() => router.push(`?${next.toString()}`));
+            }}
+            className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] shrink-0"
+          >
+            <X className="h-3 w-3" />
+            Clear filters
+          </button>
+        ) : null}
       </div>
 
       <p className="text-xs text-[var(--color-text-muted)]">
-        Showing <span className="font-medium text-[var(--color-text)]">{filtered.length}</span> of {rows.length} weeks
+        {filters.total === 0
+          ? 'No weeks match.'
+          : <>Showing <span className="font-medium text-[var(--color-text)]">{firstOnPage}–{lastOnPage}</span> of <span className="font-medium text-[var(--color-text)]">{filters.total}</span>{query ? <> · {visible.length} match the search</> : null}</>}
       </p>
 
-      {filtered.length === 0 ? (
+      {visible.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-6 text-sm text-center text-[var(--color-text-muted)]">
           No weeks match the current filters.
         </div>
@@ -131,7 +191,7 @@ export function AllWeeksTable({ rows }: { rows: WeekRow[] }) {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {visible.map((r) => (
                   <tr key={r.id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40">
                     <td className="px-4 py-2.5">
                       <Link href={`/admin/employees/${r.user_id}/week/${r.week_start}`} className="hover:underline">
@@ -175,7 +235,56 @@ export function AllWeeksTable({ rows }: { rows: WeekRow[] }) {
           </div>
         </div>
       )}
+
+      {/* Pagination */}
+      {totalPages > 1 ? (
+        <nav className="flex items-center justify-between pt-2" aria-label="Pagination">
+          <button
+            type="button"
+            onClick={() => updateParam('page', String(filters.page - 1))}
+            disabled={!hasPrev || pending}
+            className="inline-flex items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Previous
+          </button>
+          <span className="text-xs text-[var(--color-text-muted)] tabular-nums">
+            Page {filters.page} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => updateParam('page', String(filters.page + 1))}
+            disabled={!hasNext || pending}
+            className="inline-flex items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </nav>
+      ) : null}
     </section>
+  );
+}
+
+function FilterChip({
+  label,
+  tone,
+  active,
+  onClick,
+}: {
+  label: string;
+  tone?: 'muted' | 'info' | 'success' | 'danger';
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className="transition-opacity"
+      style={{ opacity: active ? 1 : 0.45 }}
+    >
+      <StatusBadge tone={tone ?? 'neutral'}>{label}</StatusBadge>
+    </button>
   );
 }
 

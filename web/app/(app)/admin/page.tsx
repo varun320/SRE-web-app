@@ -1,10 +1,35 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchSubmittedQueue } from '@/lib/admin/queries';
 import { ApprovalQueue } from '@/components/admin/ApprovalQueue';
-import { AllWeeksTable, type WeekRow, type WeekStatus } from '@/components/admin/AllWeeksTable';
+import {
+  AllWeeksTable,
+  type WeekRow,
+  type WeekStatus,
+  type EmployeeOption,
+} from '@/components/admin/AllWeeksTable';
 import { Clock4, CheckCircle2, XCircle, FileDown } from 'lucide-react';
 
-export default async function AdminHome() {
+const PAGE_SIZE = 50;
+const VALID_STATUSES: WeekStatus[] = ['draft', 'submitted', 'approved', 'declined'];
+
+interface SearchParams {
+  page?: string;
+  status?: string;
+  user_id?: string;
+}
+
+export default async function AdminHome({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
+  const status = (VALID_STATUSES as string[]).includes(sp.status ?? '')
+    ? (sp.status as WeekStatus)
+    : 'all';
+  const userId = sp.user_id && sp.user_id.length > 0 ? sp.user_id : 'all';
+
   const sb = await getSupabaseServer();
 
   const queue = await fetchSubmittedQueue(sb);
@@ -17,25 +42,33 @@ export default async function AdminHome() {
       sb.from('approval_log').select('id', { count: 'exact', head: true }).eq('action', 'imported').gte('at', since),
     ]);
 
-  const { data: tsRows } = await sb
+  // --- Server-paged, server-filtered history ---
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  let tsQ = sb
     .from('timesheets')
-    .select('id, user_id, week_start, status, locked, submitted_at, decided_at, decline_reason')
+    .select('id, user_id, week_start, status, locked, submitted_at, decided_at, decline_reason', { count: 'exact' })
     .order('week_start', { ascending: false })
-    .limit(200);
+    .range(from, to);
+  if (status !== 'all') tsQ = tsQ.eq('status', status);
+  if (userId !== 'all') tsQ = tsQ.eq('user_id', userId);
+  const { data: tsRows, count: totalCount } = await tsQ;
   const ts = tsRows ?? [];
 
+  // Join users + totals for the current page only.
   const userIds = Array.from(new Set(ts.map((r) => r.user_id as string)));
   const tsIds = ts.map((r) => r.id as string);
 
-  const [usersRes, totalsRes] = await Promise.all([
+  const [pageUsersRes, totalsRes, employeesRes] = await Promise.all([
     userIds.length
       ? sb.from('users').select('id, full_name, employee_code').in('id', userIds)
       : Promise.resolve({ data: [] as Array<{ id: string; full_name: string; employee_code: string }> }),
     tsIds.length
       ? sb.from('v_timesheet_totals').select('timesheet_id, total_hrs, overtime_earned').in('timesheet_id', tsIds)
       : Promise.resolve({ data: [] as Array<{ timesheet_id: string; total_hrs: number; overtime_earned: number }> }),
+    sb.from('users').select('id, employee_code, full_name').eq('is_active', true).order('employee_code'),
   ]);
-  const userById = new Map((usersRes.data ?? []).map((u) => [u.id, u]));
+  const userById = new Map((pageUsersRes.data ?? []).map((u) => [u.id, u]));
   const totalsById = new Map((totalsRes.data ?? []).map((t) => [t.timesheet_id, t]));
 
   const allWeeks: WeekRow[] = ts.map((t) => {
@@ -56,6 +89,8 @@ export default async function AdminHome() {
       overtime_earned: Number(tot?.overtime_earned ?? 0),
     };
   });
+
+  const employees: EmployeeOption[] = (employeesRes.data ?? []) as EmployeeOption[];
 
   return (
     <div className="px-4 md:px-6 py-6 space-y-6">
@@ -79,10 +114,20 @@ export default async function AdminHome() {
         <header>
           <h3 className="text-base font-medium tracking-tight">All weeks</h3>
           <p className="text-sm text-[var(--color-text-muted)]">
-            Every timesheet across the org, newest first. Filter by status; latest 200 shown.
+            Every timesheet across the org. Filter by status + employee; paginated {PAGE_SIZE} per page.
           </p>
         </header>
-        <AllWeeksTable rows={allWeeks} />
+        <AllWeeksTable
+          rows={allWeeks}
+          employees={employees}
+          filters={{
+            status,
+            userId,
+            page,
+            pageSize: PAGE_SIZE,
+            total: totalCount ?? 0,
+          }}
+        />
       </section>
     </div>
   );
