@@ -1,7 +1,13 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { ImportClient } from './ImportClient';
+import { flags } from '@/lib/flags';
+import { notFound } from 'next/navigation';
 
 export default async function AdminImportPage() {
+  // Importer depends on a Python worker (Vercel can't run Python). Hidden
+  // unless NEXT_PUBLIC_IMPORTER_ENABLED=true.
+  if (!flags.importerEnabled) notFound();
+
   const sb = await getSupabaseServer();
   const { data } = await sb
     .from('users')

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { flags } from '@/lib/flags';
 
 interface SubnavItem {
   href: string;
@@ -9,15 +10,18 @@ interface SubnavItem {
   match: (pathname: string) => boolean;
 }
 
-const ITEMS: SubnavItem[] = [
+const BASE_ITEMS: SubnavItem[] = [
   { href: '/admin', label: 'Approvals', match: (p) => p === '/admin' },
   { href: '/admin/employees', label: 'Employees', match: (p) => p.startsWith('/admin/employees') },
   { href: '/admin/projects', label: 'Projects', match: (p) => p.startsWith('/admin/projects') },
   { href: '/admin/positions', label: 'Positions', match: (p) => p.startsWith('/admin/positions') },
   { href: '/admin/approvals', label: 'Audit log', match: (p) => p.startsWith('/admin/approvals') },
   { href: '/admin/reports', label: 'Reports', match: (p) => p.startsWith('/admin/reports') },
-  { href: '/admin/import', label: 'Import', match: (p) => p.startsWith('/admin/import') },
 ];
+
+const ITEMS: SubnavItem[] = flags.importerEnabled
+  ? [...BASE_ITEMS, { href: '/admin/import', label: 'Import', match: (p) => p.startsWith('/admin/import') }]
+  : BASE_ITEMS;
 
 export function AdminSubnav() {
   const pathname = usePathname() ?? '';
