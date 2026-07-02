@@ -1,0 +1,28 @@
+{
+  "name": "sre-expense-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing the SRE expense tracker RPCs so Claude can read and submit expense reports on behalf of the signed-in user.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "sre-expense-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@supabase/supabase-js": "^2.45.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

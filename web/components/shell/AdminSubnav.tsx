@@ -13,6 +13,7 @@ interface SubnavItem {
 const BASE_ITEMS: SubnavItem[] = [
   { href: '/admin', label: 'Approvals', match: (p) => p === '/admin' },
   { href: '/admin/locked', label: 'Locked weeks', match: (p) => p.startsWith('/admin/locked') },
+  { href: '/admin/expenses', label: 'Expenses', match: (p) => p.startsWith('/admin/expenses') },
   { href: '/admin/employees', label: 'Employees', match: (p) => p.startsWith('/admin/employees') },
   { href: '/admin/projects', label: 'Projects', match: (p) => p.startsWith('/admin/projects') },
   { href: '/admin/positions', label: 'Positions', match: (p) => p.startsWith('/admin/positions') },

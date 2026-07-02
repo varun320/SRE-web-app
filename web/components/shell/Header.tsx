@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { CalendarDays, Clock, Palmtree, Shield, Menu, X, LogOut, Bell } from 'lucide-react';
+import { CalendarDays, Clock, Palmtree, Receipt, Shield, Menu, X, LogOut, Bell } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
 import { SnakeGame } from '@/components/fun/SnakeGame';
@@ -43,6 +43,12 @@ const BASE_NAV: NavItem[] = [
     label: 'Vacation',
     icon: Palmtree,
     match: (p) => p.startsWith('/me/vacation'),
+  },
+  {
+    href: '/expenses',
+    label: 'Expenses',
+    icon: Receipt,
+    match: (p) => p.startsWith('/expenses'),
   },
 ];
 
