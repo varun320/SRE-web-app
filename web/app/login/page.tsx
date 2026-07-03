@@ -12,6 +12,8 @@ import { Clock4, FileSpreadsheet, Lock } from 'lucide-react';
 export default function LoginPage() {
   const [pending, start] = useTransition();
   const [magicSent, setMagicSent] = useState(false);
+  const nextParam =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('next') ?? '' : '';
 
   return (
     <main className="min-h-dvh grid md:grid-cols-2 bg-[var(--color-surface)]">
@@ -104,6 +106,7 @@ export default function LoginPage() {
                 }
                 className="space-y-3 mt-4"
               >
+                <input type="hidden" name="next" value={nextParam} />
                 <div className="space-y-1.5">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" required autoComplete="email" placeholder="you@sulfurrecovery.com" />

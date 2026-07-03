@@ -56,16 +56,29 @@ function json(body: unknown, init: ResponseInit = {}): Response {
   });
 }
 
-function unauthorized(reason: string): Response {
+function unauthorized(reason: string, req?: Request): Response {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '');
+  let origin = configured;
+  if (!origin && req) {
+    try {
+      origin = new URL(req.url).origin;
+    } catch {
+      origin = undefined;
+    }
+  }
+  const resourceMetadata = origin
+    ? `${origin}/.well-known/oauth-protected-resource`
+    : '/.well-known/oauth-protected-resource';
   return json(
     { error: 'unauthorized', reason },
     {
       status: 401,
       headers: {
+        // RFC 9728 §5.1: point clients at our protected-resource metadata so
+        // Claude can auto-discover the OAuth authorization server.
         'WWW-Authenticate':
-          'Bearer realm="sre-expense-mcp", error="invalid_token", error_description="' +
-          reason +
-          '"',
+          `Bearer realm="sre-expense-mcp", error="invalid_token", ` +
+          `error_description="${reason}", resource_metadata="${resourceMetadata}"`,
       },
     },
   );
@@ -88,15 +101,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const bearer = extractBearer(req.headers.get('authorization'));
-  if (!bearer) return unauthorized('missing bearer token');
+  if (!bearer) return unauthorized('missing bearer token', req);
 
   let session;
   try {
     session = await sessionFromBearer(bearer);
   } catch (err) {
-    return unauthorized(err instanceof Error ? err.message : 'auth failed');
+    return unauthorized(err instanceof Error ? err.message : 'auth failed', req);
   }
-  if (!session) return unauthorized('invalid bearer token');
+  if (!session) return unauthorized('invalid bearer token', req);
 
   let body: JsonRpcRequest;
   try {

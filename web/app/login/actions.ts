@@ -6,10 +6,18 @@ import { headers } from 'next/headers';
 export async function signInWithPassword(formData: FormData) {
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
+  const rawNext = String(formData.get('next') ?? '');
   const supabase = await getSupabaseServer();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: error.message };
-  redirect('/');
+  redirect(safeNext(rawNext));
+}
+
+function safeNext(next: string): string {
+  // Only allow same-origin relative paths so we can't be turned into an
+  // open redirector by an attacker crafting ?next=https://evil.example.com.
+  if (!next.startsWith('/') || next.startsWith('//')) return '/';
+  return next;
 }
 
 export async function sendPasswordReset(formData: FormData) {

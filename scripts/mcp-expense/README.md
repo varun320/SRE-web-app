@@ -140,9 +140,36 @@ Admin users get 10 tools and can also say:
 - *"approve UC2026005 for user \<uuid\>"*
 - *"record a payout of $5,000 CAD on 2026-05-10 against UC2026001"*
 
-## Web (claude.ai) support
+## Web + mobile (claude.ai, Claude iOS/Android)
 
-Not yet — claude.ai only accepts **remote** MCP connectors (HTTP+SSE with
-OAuth), not local stdio processes. If we want claude.ai support later, the
-same `src/tools.ts` handlers can be re-hosted behind an SSE transport with
-Supabase-Google OAuth in front. Ask before starting; it's ~a day of work.
+Shipped — use the **remote** connector hosted at
+`https://sre-web-app.vercel.app/mcp`. Same tool handlers as this stdio
+server; only the transport differs. See
+[../../docs/plans/2026-07-03-remote-mcp-design.md](../../docs/plans/2026-07-03-remote-mcp-design.md).
+
+**Setup:**
+1. Sign in at https://sre-web-app.vercel.app.
+2. Open the account menu → **Claude connector** (or navigate to
+   `/mcp-setup`) — this page shows the exact URL to paste.
+3. In Claude → Settings → Connectors → **Add custom connector**:
+   - Name: `SRE-expense`
+   - Server URL: `https://sre-web-app.vercel.app/mcp`
+   - Leave OAuth Client ID / Secret blank (the server registers Claude
+     dynamically per RFC 7591).
+   - Individual sign-in: **on**.
+4. First tool call opens a Supabase login in the browser. After that,
+   Claude holds your Supabase JWT and refreshes it automatically.
+
+The remote server uses the same RLS + admin gating as the stdio version —
+`auth.uid()` binds per-request from your JWT, so you only ever see your own
+data.
+
+**Server-side env vars** (set in Vercel Project Settings → Environment
+Variables):
+
+| Var                            | Purpose |
+| ------------------------------ | ------- |
+| `NEXT_PUBLIC_SUPABASE_URL`     | Already set (used everywhere). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`| Already set. |
+| `NEXT_PUBLIC_APP_URL`          | Public origin, e.g. `https://sre-web-app.vercel.app`. Used to build OAuth issuer URLs. |
+| `MCP_OAUTH_SECRET`             | ≥32-char random string. Signs the short-lived (10 min) OAuth authorization codes. Rotate → all in-flight logins fail once, then recover. |
