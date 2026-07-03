@@ -4,7 +4,6 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchBalanceForUser, fetchSummary } from '@/lib/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { BalanceHero } from '@/components/expenses/BalanceHero';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
@@ -24,20 +23,7 @@ export default async function BalancePage() {
     fetchBalanceForUser(supabase, userId),
     fetchSummary(supabase, userId),
   ]);
-
-  const totalOwing = Number(summary?.total_owing ?? 0);
-  const totalSubmitted = Number(summary?.total_submitted ?? 0);
-  const totalReceived = Number(summary?.total_received ?? 0);
-  const totalOutstanding = Number(summary?.outstanding_principal ?? 0);
-  const totalInterest = Number(summary?.interest_accrued ?? 0);
-
-  const invoices = rows.map((r) => ({
-    invoice_no: r.invoice_no,
-    outstanding: Number(r.outstanding),
-    interest_owing: Number(r.interest_owing),
-    status: r.balance_status,
-    days_overdue: Number(r.days_overdue),
-  }));
+  const owing = Number(summary?.total_owing ?? 0);
 
   return (
     <main className="mx-auto max-w-6xl px-4 md:px-6 py-6 space-y-6">
@@ -50,14 +36,23 @@ export default async function BalancePage() {
         </Link>
       </div>
 
-      <BalanceHero
-        totalOwing={totalOwing}
-        totalSubmitted={totalSubmitted}
-        totalReceived={totalReceived}
-        totalOutstanding={totalOutstanding}
-        totalInterest={totalInterest}
-        invoices={invoices}
-      />
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
+        <h1 className="text-2xl font-semibold tracking-tight">Balance & Interest</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          Interest = <code>unpaid × (days_overdue / 365) × APR</code>. Payments made before the 30-day due
+          date reduce the balance and stop the interest clock.
+        </p>
+        <div className="mt-4 flex items-baseline gap-3">
+          <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Total owing</div>
+          <div
+            className={`font-mono tabular-nums text-3xl font-semibold ${
+              owing > 0 ? 'text-[var(--color-status-declined-fg)]' : 'text-[var(--color-status-approved-fg)]'
+            }`}
+          >
+            {money(owing)}
+          </div>
+        </div>
+      </section>
 
       {rows.length === 0 ? (
         <EmptyState

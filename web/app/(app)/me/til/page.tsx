@@ -1,9 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { Clock4 } from 'lucide-react';
+import { Clock4, TrendingUp, TrendingDown, Snowflake } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { LedgerHero } from '@/components/ledger/LedgerHero';
-import { format, parseISO } from 'date-fns';
 
 export default async function TilPage() {
   const supabase = await getSupabaseServer();
@@ -19,62 +17,42 @@ export default async function TilPage() {
   const earnedYtd = live.reduce((sum, r) => sum + Number(r.overtime_earned ?? 0), 0);
   const usedYtd = live.reduce((sum, r) => sum + Number(r.til_used ?? 0), 0);
 
-  // Last 12 weeks of movement — oldest → newest for the chart.
-  const last12 = live.slice(0, 12).reverse();
-  const bars = last12.map((r) => Number(r.overtime_earned ?? 0) - Number(r.til_used ?? 0));
-  const line = last12.map((r) => Number(r.closing_balance ?? 0));
-  const labels = last12.map((r) => format(parseISO(r.week_start), 'MMM d'));
-
-  // "This month" ≈ last 4 rows (weekly cadence).
-  const monthRows = last12.slice(-4);
-  const monthDelta = monthRows.reduce(
-    (sum, r) => sum + Number(r.overtime_earned ?? 0) - Number(r.til_used ?? 0),
-    0,
-  );
-
-  const eyebrow =
-    current
-      ? `LEDGER · TIME IN LIEU · UPDATED ${format(parseISO(current.week_start), 'MMM d').toUpperCase()}`
-      : 'LEDGER · TIME IN LIEU';
-
-  const emphasize = last12.length ? last12.length - 1 : undefined;
-
   return (
     <main className="mx-auto max-w-5xl px-4 md:px-6 py-6 space-y-6">
-      {live.length ? (
-        <LedgerHero
-          eyebrow={eyebrow}
-          title="Overtime saved for later"
-          balance={balance}
-          unit="h"
-          balanceLabel={
-            current
-              ? `Closing balance for the week of ${format(parseISO(current.week_start), 'MMM d, yyyy')}`
-              : undefined
-          }
-          tone="cyan"
-          bars={bars}
-          line={line}
-          labels={labels}
-          emphasize={emphasize}
-          delta={{ value: monthDelta, unit: 'h', label: 'this month' }}
-          stats={[
-            { label: 'OT earned', value: earnedYtd, unit: 'h', decimals: 1, hint: 'lifetime' },
-            { label: 'TIL used', value: usedYtd, unit: 'h', decimals: 1, hint: 'lifetime' },
-            { label: 'Approved weeks', value: live.length, decimals: 0, hint: 'contributing to this balance' },
-          ]}
-          ribbon={{
-            tone: 'info',
-            text: 'Log “Overtime Taken” or “TIL Payout” under Admin on a timesheet to spend TIL.',
-          }}
-        />
-      ) : (
-        <EmptyState
-          icon={Clock4}
-          title="No TIL history yet"
-          description="Once your first week is approved, your balance and trend will show up here."
-        />
-      )}
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-gradient-to-br from-[var(--color-status-approved-bg)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-5 md:p-7 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+              <Clock4 className="h-3.5 w-3.5" />
+              Time-In-Lieu (TIL) bank
+            </div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Your overtime savings account</h1>
+            <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
+              Every hour you work above 8 in a day gets added here automatically when your week is approved.
+              Spend it later by logging <strong>Overtime Taken</strong> or <strong>TIL Payout</strong> under
+              the Admin category.
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Current balance</div>
+            <div className="font-mono tabular-nums text-4xl md:text-5xl font-semibold text-[var(--color-status-approved-fg)]">
+              {balance.toFixed(2)}
+              <span className="text-base font-normal text-[var(--color-text-muted)] ml-1">hrs</span>
+            </div>
+            {current ? (
+              <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                as of week of {current.week_start}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Stat icon={TrendingUp}  label="OT earned (lifetime)" value={earnedYtd} tone="success" />
+        <Stat icon={TrendingDown} label="TIL used (lifetime)" value={usedYtd} tone="warning" />
+        <Stat icon={Snowflake} label="Closing balance" value={balance} tone="info" />
+      </div>
 
       <section className="space-y-2">
         <div className="flex items-baseline justify-between">
@@ -83,7 +61,13 @@ export default async function TilPage() {
             Newest first. <em>Superseded</em> rows were replaced by a cascade recompute.
           </span>
         </div>
-        {(rows ?? []).length === 0 ? null : (
+        {(rows ?? []).length === 0 ? (
+          <EmptyState
+            icon={Clock4}
+            title="No TIL history yet"
+            description="Once your first week is approved, a ledger row will appear here."
+          />
+        ) : (
           <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
@@ -145,3 +129,34 @@ export default async function TilPage() {
   );
 }
 
+const TONE = {
+  success: { ring: 'ring-emerald-500/20', icon: 'text-emerald-600 dark:text-emerald-300' },
+  warning: { ring: 'ring-amber-500/20',   icon: 'text-amber-600 dark:text-amber-300' },
+  info:    { ring: 'ring-blue-500/20',    icon: 'text-blue-600 dark:text-blue-300' },
+} as const;
+
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  tone: keyof typeof TONE;
+}) {
+  const s = TONE[tone];
+  return (
+    <div className={`rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4 ring-1 ring-inset ${s.ring}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{label}</span>
+        <Icon className={`h-4 w-4 ${s.icon}`} />
+      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+        {value.toFixed(2)}
+        <span className="text-sm text-[var(--color-text-muted)] font-normal ml-1">hrs</span>
+      </div>
+    </div>
+  );
+}
