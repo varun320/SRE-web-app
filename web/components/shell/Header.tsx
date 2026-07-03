@@ -3,7 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { CalendarDays, Clock, Palmtree, Receipt, Shield, Menu, X, LogOut, Bell } from 'lucide-react';
+import {
+  CalendarDays,
+  Clock,
+  Palmtree,
+  Receipt,
+  Shield,
+  Menu,
+  X,
+  LogOut,
+  Bell,
+  Plug,
+} from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
 import { SnakeGame } from '@/components/fun/SnakeGame';
@@ -211,6 +222,15 @@ function UserMenu({ email, initial }: { email: string; initial: string }) {
               </span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              window.location.href = '/mcp-setup';
+            }}
+          >
+            <Plug className="h-3.5 w-3.5" />
+            Claude connector
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => formRef.current?.submit()}>
             <LogOut className="h-3.5 w-3.5" />
