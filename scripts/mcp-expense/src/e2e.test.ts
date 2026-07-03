@@ -19,7 +19,7 @@ const PASSWORD   = process.env.SRE_E2E_PASSWORD;
 const runE2e = Boolean(URL_ && ANON && EMAIL && PASSWORD);
 
 const here = dirname(fileURLToPath(import.meta.url));
-const serverEntry = resolve(here, '..', 'dist', 'index.js');
+const serverEntry = resolve(here, '..', 'dist', 'scripts', 'mcp-expense', 'src', 'index.js');
 
 interface RpcResponse {
   jsonrpc: '2.0';

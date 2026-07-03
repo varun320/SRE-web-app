@@ -2,6 +2,10 @@
 // MCP server that lets Claude read + submit SRE expense reports on behalf of
 // the signed-in user. All calls go through the same RLS-guarded RPCs the web
 // app uses; the MCP process has no elevated privilege beyond the user's token.
+//
+// Tool handlers live under web/lib/expenses/mcp/ — that's the single source of
+// truth shared with the remote (HTTP) MCP server. This file is just the stdio
+// transport binding.
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -9,38 +13,9 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
-import { zodToJsonSchema } from './zod-to-json.js';
 import { connect, currentUser, isAdmin, loadEnv } from './client.js';
-import {
-  approveExpense,
-  approveInput,
-  declineExpense,
-  declineInput,
-  getBalanceSummary,
-  getExpense,
-  getExpenseInput,
-  listExpenses,
-  listExpensesInput,
-  listPayouts,
-  listPayoutsInput,
-  recordPayout,
-  recordPayoutInput,
-  submitExpense,
-  submitInput,
-  unlockExpense,
-  unlockInput,
-  upsertDraft,
-  upsertDraftInput,
-} from './tools.js';
-
-interface ToolDef {
-  name: string;
-  description: string;
-  input: z.ZodTypeAny;
-  adminOnly?: boolean;
-  handler: (args: unknown) => Promise<unknown>;
-}
+import { buildToolRegistry } from '../../../web/lib/expenses/mcp/registry.js';
+import { zodToMcpJsonSchema } from '../../../web/lib/expenses/mcp/schema.js';
 
 async function main(): Promise<void> {
   const env = loadEnv();
@@ -48,77 +23,17 @@ async function main(): Promise<void> {
   const me = await currentUser(sb);
   const admin = await isAdmin(sb, me.id);
 
-  const tools: ToolDef[] = [
-    {
-      name: 'list_expenses',
-      description: 'List the signed-in user\'s expense reports, newest first. Optional status/date range filters.',
-      input: listExpensesInput,
-      handler: (a) => listExpenses(sb, listExpensesInput.parse(a)),
-    },
-    {
-      name: 'get_expense',
-      description: 'Get one expense report by invoice_no, including balance and any recorded payouts.',
-      input: getExpenseInput,
-      handler: (a) => getExpense(sb, me.id, getExpenseInput.parse(a)),
-    },
-    {
-      name: 'upsert_expense_draft',
-      description: 'Create-or-update a draft expense report (yellow cells only). Returns the row id.',
-      input: upsertDraftInput,
-      handler: (a) => upsertDraft(sb, upsertDraftInput.parse(a)),
-    },
-    {
-      name: 'submit_expense',
-      description: 'Submit a draft (or previously declined) expense report to the admin for approval.',
-      input: submitInput,
-      handler: (a) => submitExpense(sb, me.id, submitInput.parse(a)),
-    },
-    {
-      name: 'list_payouts',
-      description: 'List payouts. Filter by invoice_no when you care about a single report.',
-      input: listPayoutsInput,
-      handler: (a) => listPayouts(sb, listPayoutsInput.parse(a)),
-    },
-    {
-      name: 'get_balance_summary',
-      description: 'Get the Summary-sheet totals and the full per-invoice balance & interest table.',
-      input: z.object({}),
-      handler: () => getBalanceSummary(sb, me.id),
-    },
-    {
-      name: 'approve_expense',
-      description: 'Admin only. Approve a submitted expense report and lock it.',
-      input: approveInput,
-      adminOnly: true,
-      handler: (a) => approveExpense(sb, approveInput.parse(a)),
-    },
-    {
-      name: 'decline_expense',
-      description: 'Admin only. Decline a submitted expense report with a reason.',
-      input: declineInput,
-      adminOnly: true,
-      handler: (a) => declineExpense(sb, declineInput.parse(a)),
-    },
-    {
-      name: 'unlock_expense',
-      description: 'Admin only. Unlock an approved expense so the employee can amend and resubmit.',
-      input: unlockInput,
-      adminOnly: true,
-      handler: (a) => unlockExpense(sb, unlockInput.parse(a)),
-    },
-    {
-      name: 'record_payout',
-      description: 'Admin only. Record a payment received against a specific invoice.',
-      input: recordPayoutInput,
-      adminOnly: true,
-      handler: (a) => recordPayout(sb, recordPayoutInput.parse(a)),
-    },
-  ];
-
-  const activeTools = tools.filter((t) => admin || !t.adminOnly);
+  // Cast across the package boundary: stdio and web each bundle their own
+  // copy of @supabase/supabase-js, so TS sees the classes as distinct even
+  // though they're identical at runtime.
+  const activeTools = buildToolRegistry({
+    sb: sb as unknown as Parameters<typeof buildToolRegistry>[0]['sb'],
+    userId: me.id,
+    isAdmin: admin,
+  });
 
   const server = new Server(
-    { name: 'sre-expense-mcp', version: '0.1.0' },
+    { name: 'sre-expense-mcp', version: '0.2.0' },
     { capabilities: { tools: {} } },
   );
 
@@ -126,7 +41,7 @@ async function main(): Promise<void> {
     tools: activeTools.map((t) => ({
       name: t.name,
       description: t.description,
-      inputSchema: zodToJsonSchema(t.input),
+      inputSchema: zodToMcpJsonSchema(t.input),
     })),
   }));
 
@@ -154,6 +69,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  process.stderr.write(`sre-expense-mcp fatal: ${err instanceof Error ? err.stack ?? err.message : String(err)}\n`);
+  process.stderr.write(
+    `sre-expense-mcp fatal: ${err instanceof Error ? err.stack ?? err.message : String(err)}\n`,
+  );
   process.exit(1);
 });

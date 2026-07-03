@@ -1,3 +1,12 @@
+// Business logic layer for the expense-tracker MCP surface.
+//
+// This is the SINGLE source of truth for expense MCP tool handlers. Both the
+// stdio server (scripts/mcp-expense) and the remote HTTP server (web/app/mcp)
+// import from here.
+//
+// Every handler takes an already-authenticated SupabaseClient — the transport
+// layer is responsible for binding auth.uid() before calling in.
+
 import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -35,11 +44,18 @@ export const recordPayoutInput = z.object({
   notes: z.string().max(1000).optional(),
 });
 
-export const approveInput = z.object({ invoice_no: z.string().min(3), user_id: z.string().uuid() });
+export const approveInput = z.object({
+  invoice_no: z.string().min(3),
+  user_id: z.string().uuid(),
+});
 export const declineInput = approveInput.extend({ reason: z.string().min(3).max(500) });
 export const unlockInput = declineInput;
 
-async function findByInvoice(sb: SupabaseClient, userId: string, invoiceNo: string): Promise<{ id: string } | null> {
+async function findByInvoice(
+  sb: SupabaseClient,
+  userId: string,
+  invoiceNo: string,
+): Promise<{ id: string } | null> {
   const { data, error } = await sb
     .from('expense_reports')
     .select('id')
@@ -119,7 +135,11 @@ export async function listPayouts(
 export async function getBalanceSummary(sb: SupabaseClient, userId: string) {
   const [{ data: summary }, { data: rows }] = await Promise.all([
     sb.from('v_expense_summary').select('*').eq('user_id', userId).maybeSingle(),
-    sb.from('v_expense_balance_full').select('*').eq('user_id', userId).order('submission_date', { ascending: false }),
+    sb
+      .from('v_expense_balance_full')
+      .select('*')
+      .eq('user_id', userId)
+      .order('submission_date', { ascending: false }),
   ]);
   return { summary, invoices: rows ?? [] };
 }
@@ -137,7 +157,10 @@ export async function approveExpense(sb: SupabaseClient, input: z.infer<typeof a
 export async function declineExpense(sb: SupabaseClient, input: z.infer<typeof declineInput>) {
   const row = await findByInvoice(sb, input.user_id, input.invoice_no);
   if (!row) throw new Error('expense not found');
-  const { error } = await sb.rpc('expense_decline', { p_expense_id: row.id, p_reason: input.reason });
+  const { error } = await sb.rpc('expense_decline', {
+    p_expense_id: row.id,
+    p_reason: input.reason,
+  });
   if (error) throw new Error(error.message);
   return { id: row.id, status: 'declined' };
 }
@@ -145,7 +168,10 @@ export async function declineExpense(sb: SupabaseClient, input: z.infer<typeof d
 export async function unlockExpense(sb: SupabaseClient, input: z.infer<typeof unlockInput>) {
   const row = await findByInvoice(sb, input.user_id, input.invoice_no);
   if (!row) throw new Error('expense not found');
-  const { error } = await sb.rpc('expense_unlock', { p_expense_id: row.id, p_reason: input.reason });
+  const { error } = await sb.rpc('expense_unlock', {
+    p_expense_id: row.id,
+    p_reason: input.reason,
+  });
   if (error) throw new Error(error.message);
   return { id: row.id, status: 'unlocked' };
 }

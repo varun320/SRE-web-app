@@ -5,19 +5,19 @@
   "private": true,
   "type": "module",
   "bin": {
-    "sre-expense-mcp": "dist/index.js"
+    "sre-expense-mcp": "dist/scripts/mcp-expense/src/index.js"
   },
-  "main": "dist/index.js",
+  "main": "dist/scripts/mcp-expense/src/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "node dist/scripts/mcp-expense/src/index.js",
     "dev": "tsx src/index.ts",
     "test": "vitest run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@supabase/supabase-js": "^2.45.0",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",
