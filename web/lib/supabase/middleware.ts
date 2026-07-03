@@ -1,9 +1,23 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PREFIXES = ['/login', '/auth'];
+// Public prefixes:
+// - /login and /auth are the sign-in surface.
+// - /.well-known/* serves OAuth 2.1 discovery metadata that clients read
+//   before any authentication.
+// - /oauth/* is the OAuth authorization server itself — /register + /token
+//   are unauthenticated by design, and /authorize handles the login
+//   redirect internally.
+// /mcp is handled separately below (exact prefix match, not startsWith,
+// so /mcp-setup stays protected).
+const PUBLIC_PREFIXES = ['/login', '/auth', '/.well-known', '/oauth'];
+
+function isPublicMcp(pathname: string): boolean {
+  return pathname === '/mcp' || pathname.startsWith('/mcp/');
+}
 
 function isPublic(pathname: string): boolean {
+  if (isPublicMcp(pathname)) return true;
   return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
