@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SRE-app User Guide</title>
+<style>
+  :root {
+    --ink: #16181d;
+    --ink-soft: #4d5566;
+    --muted: #7c8496;
+    --line: #e3e6ee;
+    --line-soft: #eef0f6;
+    --accent: #b74a2b;
+    --accent-soft: #f4e4dd;
+    --code-bg: #f6f7fb;
+    --page: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--page); color: var(--ink); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 0 32pt; }
+
+  .cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 48pt;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(183, 74, 43, 0.10), transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(63, 96, 168, 0.08), transparent 40%),
+      #ffffff;
+    page-break-after: always;
+  }
+  .cover .brand {
+    display: inline-flex; align-items: center; gap: 10pt;
+    font-weight: 600; letter-spacing: 0.02em;
+  }
+  .cover .brand .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26pt; height: 26pt;
+    background: var(--accent); color: white; border-radius: 6pt;
+    font-weight: 700; font-size: 9pt;
+  }
+  .cover h1 {
+    font-size: 40pt; line-height: 1.05; margin: 24pt 0 10pt; font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .cover h1 .accent { color: var(--accent); }
+  .cover .subtitle {
+    font-size: 15pt; color: var(--ink-soft); max-width: 460pt; line-height: 1.35;
+  }
+  .cover .meta {
+    margin-top: 40pt; padding-top: 18pt; border-top: 1pt solid var(--line);
+    color: var(--muted); font-size: 10pt; letter-spacing: 0.01em;
+  }
+
+  h1, h2, h3, h4 { color: var(--ink); }
+  h1 {
+    font-size: 22pt; margin: 24pt 0 12pt; font-weight: 700;
+    padding-bottom: 6pt; border-bottom: 2pt solid var(--accent);
+    letter-spacing: -0.005em;
+    page-break-before: always;
+  }
+  main > h1:first-of-type { page-break-before: auto; }
+  h2 {
+    font-size: 15pt; margin: 22pt 0 8pt; font-weight: 650;
+    color: var(--ink);
+  }
+  h3 {
+    font-size: 12pt; margin: 16pt 0 6pt; font-weight: 600;
+    color: var(--ink);
+  }
+  h4 {
+    font-size: 11pt; margin: 12pt 0 4pt; font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  p { margin: 6pt 0; }
+  ul, ol { margin: 6pt 0 6pt 16pt; padding: 0; }
+  li { margin: 3pt 0; }
+  li > p { margin: 3pt 0; }
+
+  strong { font-weight: 650; color: var(--ink); }
+  em { color: var(--ink-soft); }
+
+  a { color: var(--accent); text-decoration: none; }
+
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1pt 4pt;
+    border-radius: 3pt;
+    font-size: 9pt;
+    color: #4a3a2f;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 10pt 12pt;
+    border-radius: 5pt;
+    border: 1pt solid var(--line-soft);
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  pre code { background: transparent; padding: 0; font-size: inherit; color: var(--ink); }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 10pt 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    padding: 6pt 8pt; border-bottom: 1pt solid var(--line-soft);
+    text-align: left; vertical-align: top;
+  }
+  th { background: var(--line-soft); font-weight: 600; color: var(--ink); }
+  tr:nth-child(even) td { background: #fbfcff; }
+
+  hr { border: none; border-top: 1pt solid var(--line); margin: 20pt 0; }
+
+  blockquote {
+    margin: 8pt 0; padding: 6pt 12pt;
+    border-left: 3pt solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink-soft);
+  }
+
+  /* Give the first h1 (the "Welcome") page a bit of breathing room but
+     don't force a page break — it follows the cover cleanly. */
+  main > h1:first-of-type { padding-top: 0; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <div class="brand">
+      <span class="badge">SRE</span>
+      <span>Sulfur Recovery Engineering</span>
+    </div>
+    <h1><span class="accent">SRE-app User Guide</span><br/>User Guide</h1>
+    <div class="subtitle">Timesheets, TIL, vacation, and expenses — everything you need in one place</div>
+    <div class="meta">1.0 — July 2026</div>
+  </section>
+  <main>
+    <h1>Welcome</h1>
+<p>The SRE-app is Sulfur Recovery Engineering&#39;s in-house tool for the three
+things that used to live in spreadsheets:</p>
+<ol>
+<li><strong>Weekly timesheets</strong> — log your hours by day, category, and project.</li>
+<li><strong>Balances</strong> — your TIL (time-in-lieu) bank and vacation hours, updated
+automatically as your weeks get approved.</li>
+<li><strong>Expense reports</strong> — monthly claims, admin approval, payout tracking,
+and Net-30 interest if anything sits unpaid.</li>
+</ol>
+<p>Everything runs in your browser. You can also connect Claude AI to submit
+and query your expenses in plain English (covered near the end).</p>
+<p>This guide has two parts:</p>
+<ul>
+<li><strong>Part 1 — For everyone.</strong> How to sign in, fill out your week, watch your
+balances, and file expenses. Read this first.</li>
+<li><strong>Part 2 — For admins.</strong> Extra pages and buttons you&#39;ll only see if your
+account has the admin role.</li>
+</ul>
+<p>You can skim the table of contents and jump to whatever you need — nothing
+here is essential to memorize.</p>
+<hr>
+<h1>Part 1 — For everyone</h1>
+<h2>Signing in</h2>
+<p>Open <strong><a href="https://sre-web-app.vercel.app">https://sre-web-app.vercel.app</a></strong> in any modern browser. If you
+haven&#39;t signed in yet, you&#39;ll land on the login page.</p>
+<p>There are three ways to sign in:</p>
+<ul>
+<li><strong>Password</strong> — enter your work email and your password, click <strong>Sign in</strong>.</li>
+<li><strong>Magic link</strong> — enter your email on the <em>Magic link</em> tab, click <strong>Send
+link</strong>, then open the email we send you and click the link. No password
+needed. The link expires in one hour.</li>
+<li><strong>Forgot password?</strong> — the link under the password box opens a small
+dialog. Type your email and we&#39;ll send you a reset link (also good for
+one hour). Check your spam folder if it doesn&#39;t arrive within a minute or
+two.</li>
+</ul>
+<p>After sign-in you land on <strong>this week&#39;s timesheet</strong>. That&#39;s the home page.</p>
+<p>If you close the tab and come back later, you&#39;ll usually stay signed in for
+several days. If it forgets you, it just shows the login page again — no
+big deal.</p>
+<h2>The nav bar</h2>
+<p>The strip along the top of every page is your main navigation. From left to
+right:</p>
+<ul>
+<li><strong>SRE badge + &quot;Timesheet&quot;</strong> — click to jump back to this week&#39;s
+timesheet. (Tap the little <strong>SRE</strong> badge five times quickly for a
+surprise — see <em>Little touches</em> at the end.)</li>
+<li><strong>Week</strong> — this week&#39;s timesheet grid.</li>
+<li><strong>TIL bank</strong> — your overtime savings account.</li>
+<li><strong>Vacation</strong> — your remaining vacation hours.</li>
+<li><strong>Expenses</strong> — monthly expense reports.</li>
+<li><strong>Admin</strong> (only if you&#39;re an admin) — the approval queue and everything
+in Part 2.</li>
+<li><strong>Bell icon</strong> — notifications. A red dot means you have unread ones.</li>
+<li><strong>Question mark</strong> — small help popover.</li>
+<li><strong>Your initial in a circle</strong> — click to open a dropdown with:<ul>
+<li><strong>Claude connector</strong> — instructions to hook up Claude AI (see the
+Claude section below).</li>
+<li><strong>Sign out</strong>.</li>
+</ul>
+</li>
+</ul>
+<p>On phones the nav collapses behind a menu button on the right — same
+items, just stacked.</p>
+<h2>Notifications (the bell icon)</h2>
+<p>The bell shows you the last 50 events that matter to you. You&#39;ll get one
+whenever:</p>
+<ul>
+<li>You submit a week — a friendly confirmation.</li>
+<li>An admin <strong>approves</strong> your week.</li>
+<li>An admin <strong>declines</strong> your week — with the reason.</li>
+<li>An admin <strong>unlocks</strong> a week you thought was final so you can fix
+something.</li>
+<li>An admin <strong>force-submits</strong> a week for you (for example, if the deadline
+passed and you forgot).</li>
+</ul>
+<p>Click any row to jump straight to the week it&#39;s about. Unread rows are
+highlighted; clicking marks them read.</p>
+<p>At the top of the notifications page there&#39;s a checkbox to also get these
+events by <strong>email</strong>. Turn it off if you find them noisy.</p>
+<h2>Your weekly timesheet</h2>
+<p>The timesheet is the heart of the app. Everything about your balances and
+your paycheck flows from what you log here.</p>
+<h3>What the page looks like</h3>
+<p>At the top of the page:</p>
+<ul>
+<li>The <strong>week of</strong> date (Monday of that week).</li>
+<li>A <strong>View report</strong> link that opens a read-only summary of the week
+(handy for glancing before you submit).</li>
+<li>A <strong>status banner</strong> telling you where the week stands: <em>Draft</em>,
+<em>Submitted</em>, <em>Approved</em>, or <em>Declined</em>. If it was declined, the admin&#39;s
+reason shows here.</li>
+<li>A <strong>KPI strip</strong> with your current TIL balance, current vacation balance,
+and total hours logged so far this week.</li>
+</ul>
+<p>Then a big table — one row per activity, one column per day (Mon → Sun).</p>
+<h3>Filling out a row</h3>
+<p>Each row captures <strong>one kind of work you did that week</strong>. If you spent
+Monday and Tuesday on Project 2026001, that&#39;s one row with hours in Mon
+and Tue. If Wednesday and Thursday were general office work, that&#39;s a
+second row.</p>
+<p>For each row, pick:</p>
+<ul>
+<li><strong>Main category</strong> — the big bucket the hours belong to (Project work,
+Office, Admin, and so on).</li>
+<li><strong>Sub-category</strong> — the finer split under that main. Some main categories
+only have one sub, some have several.</li>
+<li><strong>Project #</strong> — only needed for project-work rows. Pick from the
+dropdown; only <em>active</em> projects appear.</li>
+<li><strong>Description</strong> — a short note about what you actually did. Think &quot;one
+line you&#39;d tell your PM.&quot;</li>
+</ul>
+<p>Then punch <strong>decimal hours</strong> into each day. Half an hour is <code>0.5</code>; a full
+day is usually <code>8</code>. The total for the row shows on the right.</p>
+<p>Below the table you&#39;ll see how many <em>validation issues</em> the sheet has.
+It&#39;s zero when everything is fine; it counts up when something needs
+attention (missing category, unknown project, and so on). You can&#39;t
+submit until it&#39;s zero.</p>
+<h3>Buttons</h3>
+<ul>
+<li><strong>Add row (+)</strong> — appears at the end of the table. Click to add a blank
+row for another activity.</li>
+<li><strong>Save draft</strong> — writes everything to the server without submitting.
+Only you can see it. Save as often as you like; it just overwrites.</li>
+<li><strong>Submit for approval</strong> — locks the week and sends it to the admin
+queue. You&#39;ll see a burst of confetti and a random cheerful message.
+Once submitted, you can&#39;t edit the week further unless an admin
+declines or unlocks it.</li>
+</ul>
+<h3>What happens after you submit</h3>
+<p>An admin reviews the week and either:</p>
+<ul>
+<li><strong>Approves it.</strong> The week becomes final. Your TIL bank picks up any
+overtime from that week; your vacation goes down by whatever you logged
+as <em>Vacation Hours</em>. You&#39;ll get a notification.</li>
+<li><strong>Declines it with a reason.</strong> The week goes back to draft; you can
+edit and resubmit. The reason shows in the status banner and in the
+notification.</li>
+</ul>
+<h3>What if a week you thought was final needs fixing</h3>
+<p>An admin can <em>unlock</em> an approved week. That means the week goes back to
+&quot;declined&quot; for you (with the admin&#39;s reason), so you can fix and
+re-submit. When they unlock, the app also marks all your <strong>later weeks&#39;
+balances</strong> as <em>superseded</em> — because unlocking one week means the numbers
+downstream might change once the fixed version is re-approved. You&#39;ll see
+those balances re-compute automatically when the next week gets
+re-approved.</p>
+<h3>The week report</h3>
+<p>The <strong>View report</strong> link (top of the timesheet page, and also
+<code>/week/&lt;date&gt;/report</code>) shows the same hours four ways:</p>
+<ul>
+<li>Daily breakdown (Mon → Sun grid).</li>
+<li>By main category.</li>
+<li>By sub-category.</li>
+<li>By project.</li>
+</ul>
+<p>Each table has a <strong>Download CSV</strong> button, useful if you want the numbers
+outside the app.</p>
+<h2>Your TIL bank</h2>
+<p>Every hour you work over 8 in a single day gets added to your TIL bank
+automatically when the week gets approved. Think of it as an overtime
+savings account you can spend later.</p>
+<p>Open the <strong>TIL bank</strong> page (from the top nav) to see:</p>
+<ul>
+<li>Your <strong>current balance</strong> in big numbers at the top.</li>
+<li><strong>OT earned (lifetime)</strong> — total overtime you&#39;ve ever accumulated.</li>
+<li><strong>TIL used (lifetime)</strong> — total hours you&#39;ve spent.</li>
+<li>A <strong>ledger table</strong> — one row per week, showing opening balance,
+overtime earned that week, TIL used that week, and closing balance.</li>
+</ul>
+<h3>How to spend TIL</h3>
+<p>On your timesheet, log the hours you took off under the <strong>Admin</strong> main
+category, using one of these sub-categories:</p>
+<ul>
+<li><strong>Overtime taken</strong> — you took a day (or hours) off in exchange for
+overtime you&#39;d banked.</li>
+<li><strong>TIL payout</strong> — you were paid out cash for banked TIL instead of
+taking the time off.</li>
+</ul>
+<p>Either one deducts from your balance when the week is approved.</p>
+<h3>About the &quot;superseded&quot; badge</h3>
+<p>If an admin unlocks an older week, ledger rows for later weeks may show
+a <em>superseded</em> badge. That just means the numbers you see for those
+weeks are the old numbers — they&#39;ll be re-computed and updated as later
+weeks get re-approved. You don&#39;t need to do anything.</p>
+<h2>Your vacation balance</h2>
+<p>Very similar to TIL. Open the <strong>Vacation</strong> page to see:</p>
+<ul>
+<li>Your <strong>remaining vacation hours</strong> at the top (turns red if under 8,
+which is a soft &quot;getting low&quot; warning — you can still use it).</li>
+<li><strong>Opening (annual)</strong> — your annual entitlement, set by your position.</li>
+<li><strong>Used (lifetime)</strong>.</li>
+<li><strong>Closing balance</strong> — same as the number at the top.</li>
+<li>A <strong>ledger</strong> — opening/used/closing per week.</li>
+</ul>
+<h3>How to book vacation</h3>
+<p>Log the hours on your timesheet under <strong>Admin → Vacation hours</strong>. They
+deduct from your balance when the week is approved.</p>
+<p>If you go negative, the balance shows in red on the header. Talk to an
+admin if that&#39;s unexpected.</p>
+<h2>Expense reports</h2>
+<p>Anything you paid out of pocket that Sulfur Recovery owes you back goes
+here — one report per invoice, submitted monthly.</p>
+<p>Open the <strong>Expenses</strong> page (top nav). Three stat blocks at the top:</p>
+<ul>
+<li><strong>Submitted</strong> — total you&#39;ve claimed.</li>
+<li><strong>Received</strong> — what you&#39;ve been paid.</li>
+<li><strong>Outstanding</strong> — the difference.</li>
+<li><strong>Interest</strong> — interest you&#39;re owed on anything past its Net-30 due
+date.</li>
+<li><strong>Total owing</strong> — outstanding plus interest.</li>
+</ul>
+<p>Below that, a table of every report you&#39;ve ever filed.</p>
+<h3>Filing a new report</h3>
+<p>Click <strong>New report</strong>. You&#39;ll get a form with:</p>
+<ul>
+<li><strong>Invoice #</strong> — a unique identifier for your report, e.g. <code>UC2026007</code>.
+Use whatever naming convention your team follows.</li>
+<li><strong>Period from</strong> and <strong>Period to</strong> — the dates the expenses cover.</li>
+<li><strong>Submission date</strong> — defaults to today.</li>
+<li><strong>Amount CAD</strong> — the base claim (before tax).</li>
+<li><strong>GST CAD</strong> — any GST you&#39;re claiming back.</li>
+<li><strong>Notes</strong> — anything the admin needs to know.</li>
+</ul>
+<p><strong>Total</strong> below the fields is <code>amount + gst</code>, updated live.</p>
+<p>Then either:</p>
+<ul>
+<li><strong>Save draft</strong> — stores it so only you can see it. You can come back
+and edit any time.</li>
+<li><strong>Save &amp; submit</strong> — sends it to the admin for approval. Once submitted
+the form goes read-only for you unless the admin declines it.</li>
+</ul>
+<h3>Viewing / editing an existing report</h3>
+<p>Click any invoice number on the list. You&#39;ll see the same form as
+<em>New report</em> (editable if the report is still a draft or was declined,
+read-only otherwise) plus:</p>
+<ul>
+<li>Any admin&#39;s <strong>decline reason</strong> at the top, if applicable.</li>
+<li>A <strong>Payments received</strong> table at the bottom, listing every payout the
+admin has recorded against this invoice. Each payout has a date, an
+amount, and a reference (e.g. a cheque number).</li>
+</ul>
+<h3>The states of an expense report</h3>
+<ul>
+<li><strong>Draft</strong> — you&#39;re still working on it.</li>
+<li><strong>Submitted</strong> — admin has it.</li>
+<li><strong>Approved</strong> — admin ok&#39;d it; you&#39;re waiting on payment.</li>
+<li><strong>Declined</strong> — admin sent it back with a reason.</li>
+<li><strong>Paid</strong> — all of it (or what admin marked as paid).</li>
+</ul>
+<h3>Balance &amp; interest</h3>
+<p>On the <em>Expenses</em> page, the <strong>Balance</strong> button (top right) opens a
+per-invoice breakdown of what&#39;s due, what&#39;s paid, what&#39;s overdue, and
+what interest is accruing.</p>
+<p>The rule: expenses are Net-30 from submission. After 30 days, any unpaid
+balance starts accruing interest at your APR (default 21.99% / year),
+calculated daily on the outstanding principal. Any payment stops the
+clock and shrinks the principal.</p>
+<p>Formula shown at the top:</p>
+<pre><code>interest = unpaid × (days_overdue / 365) × APR
+</code></pre>
+<p>The table has columns for invoice, submitted date, due date, claimed,
+paid, outstanding, interest, total owing, days overdue, and a status
+badge. Green = paid. Red = overdue. Amber = interest is running.</p>
+<h2>Using Claude with your expenses</h2>
+<p>The app can talk to Claude AI. You add it once, then you can ask Claude
+things like:</p>
+<ul>
+<li><em>&quot;What&#39;s my current expense balance?&quot;</em></li>
+<li><em>&quot;Draft an expense report UC2026008 for June 1 to 30, $1,234.56 CAD
+plus $61.73 GST, and submit it.&quot;</em></li>
+<li><em>&quot;List my declined reports.&quot;</em></li>
+</ul>
+<p>Claude only sees <strong>your</strong> data — the connector is bound to your login,
+so RLS in the database keeps everyone&#39;s data separate.</p>
+<p>To set it up, open the user menu (your initial, top-right) → <strong>Claude
+connector</strong>. You&#39;ll see the exact URL to paste into Claude and the four
+or five clicks to add the connector. It only takes a minute, and after
+the first tool call Claude keeps you signed in.</p>
+<p>The Claude connector works on:</p>
+<ul>
+<li>Claude on the web (claude.ai).</li>
+<li>Claude on iOS and Android.</li>
+<li>Claude Desktop and Claude Code (via a slightly different flow — the
+admin will help set up if you want it).</li>
+</ul>
+<h2>Little touches</h2>
+<ul>
+<li><strong>Confetti.</strong> When you submit your timesheet, the app throws confetti
+and shows a random cheerful message (&quot;🎉 Submitted — your future self
+thanks you&quot;). It&#39;s not a bug. If you have <em>reduced motion</em> enabled in
+your OS, the confetti stays off.</li>
+<li><strong>Snake game.</strong> Tap the little <strong>SRE</strong> badge in the top-left five
+times within two seconds to launch a snake game. Arrow keys or WASD
+to move; Space or Enter to restart; Escape to close. Your high score
+is saved on your device. If you leave the app open and don&#39;t touch it
+for a while, the badge will wiggle gently — that&#39;s the hint.</li>
+<li><strong>Dark mode.</strong> The app respects your operating system&#39;s light/dark
+preference. Change it there and refresh.</li>
+</ul>
+<h2>Common questions</h2>
+<p><strong>I submitted a week by accident. Can I fix it?</strong> Yes — ask an admin to
+decline it (with a note like &quot;submitted early, please fix&quot;). It&#39;ll come
+back to you as a draft.</p>
+<p><strong>My TIL balance seems off.</strong> Check your ledger on the TIL bank page.
+The most common cause is that an admin unlocked an older week; you&#39;ll
+see <em>superseded</em> badges until later weeks get re-approved.</p>
+<p><strong>I forgot my password.</strong> Use the <em>Forgot password?</em> link on the sign-in
+page. If the reset email doesn&#39;t arrive, ask an admin to send you a
+magic link.</p>
+<p><strong>I can&#39;t see the admin section.</strong> That&#39;s by design — you&#39;ll only see it
+if your account has the admin role. Ask an admin to add you if you need
+access.</p>
+<p><strong>My expense is showing interest — what do I do?</strong> Nothing on your end.
+Interest just means it&#39;s past due; the amount is what Sulfur Recovery
+owes you extra for the delay. Once payment is recorded, the interest
+freezes at whatever it was.</p>
+<hr>
+<h1>Part 2 — For admins</h1>
+<p>Admins can do everything an employee can, plus review other people&#39;s
+work, unlock finalised weeks, record payouts, manage employees, and
+generate reports.</p>
+<h2>The admin nav</h2>
+<p>When you&#39;re on any <code>/admin/*</code> page you&#39;ll see a second nav strip
+underneath the top nav. It has:</p>
+<ul>
+<li><strong>Approvals</strong> — the admin landing page. Approval queue + all weeks.</li>
+<li><strong>Locked weeks</strong> — approved timesheets you can unlock.</li>
+<li><strong>Expenses</strong> — everyone&#39;s expense reports.</li>
+<li><strong>Employees</strong> — the staff directory.</li>
+<li><strong>Projects</strong> — project master list.</li>
+<li><strong>Positions</strong> — position definitions (and their annual vacation
+entitlement).</li>
+<li><strong>Audit log</strong> — every approve/decline/unlock/import action, immutable.</li>
+<li><strong>Reports</strong> — payroll, balances, hours-by-project, per-employee period.</li>
+<li><strong>Import</strong> — historical import wizard (only if the feature is enabled
+on this deployment).</li>
+</ul>
+<h2>The admin home page</h2>
+<p>At <strong>/admin</strong> you see:</p>
+<ul>
+<li>A <strong>quick queue</strong> at the top of the newest submitted timesheets. Click
+a card to open that week in the review view.</li>
+<li>Four <strong>stat cards</strong>: pending review, approved (last 7 days), declined
+(last 7 days), imported (last 7 days).</li>
+<li>The <strong>All weeks</strong> table — every week ever, paginated 50 at a time,
+with filters at the top (status + employee dropdowns).</li>
+</ul>
+<p>Each row of the <em>all weeks</em> table has the employee, week, status,
+submitted date, approved date, total hours, OT earned, and an action
+link that takes you into the detailed review view.</p>
+<h2>Reviewing a week</h2>
+<p>Click into any week (from the queue or from the all-weeks table) and
+you&#39;re on <code>/admin/employees/&lt;id&gt;/week/&lt;week&gt;</code>. Header shows employee
+info + week + current status + the last decline reason if any.</p>
+<p>Below the header, the same four report tables an employee sees on their
+own report page — daily, by category, by sub-category, by project.</p>
+<p>At the bottom is a <strong>sticky decision bar</strong> with buttons that depend on
+the current state:</p>
+<ul>
+<li><strong>Approve</strong> — locks the week, freezes the ledgers as of that week,
+logs the action. Standard case.</li>
+<li><strong>Approve (override)</strong> — if the week is still a draft or was declined,
+you can approve it directly. Use if the employee is out.</li>
+<li><strong>Decline</strong> — opens a dialog for a reason (required). The week goes
+back to draft with your reason visible to the employee.</li>
+<li><strong>Unlock</strong> — if the week is already approved, unlocks it back to
+declined. Requires a reason. <strong>See the cascade note below.</strong></li>
+<li><strong>Force-submit</strong> — if the week is still draft/declined and the
+deadline has passed, submits it on the employee&#39;s behalf so you can
+then approve it.</li>
+</ul>
+<h3>The unlock cascade</h3>
+<p>Unlocking an already-approved week is destructive to downstream numbers:
+any TIL / vacation ledger rows for <strong>later</strong> weeks are marked as
+<em>stale</em>. They&#39;ll auto-recompute the next time each of those weeks is
+re-approved. That&#39;s why the unlock dialog asks for a reason and gives
+you a stern reminder.</p>
+<p>Tell the employee what you did and why. They&#39;ll get a notification, but
+a Slack message is usually kinder.</p>
+<h2>Locked weeks</h2>
+<p><strong>Admin → Locked weeks</strong> lists every approved, currently-locked week
+with an <em>Unlock</em> button per row. Same behaviour as unlocking from the
+per-week review view; useful when you know you need to unlock but don&#39;t
+have the week open yet.</p>
+<h2>Expenses</h2>
+<p><strong>Admin → Expenses</strong> shows every expense report in the system with
+filters (status + name/invoice search) at the top. Click any invoice to
+open its detail page, where you can:</p>
+<ul>
+<li><strong>Approve</strong> — approves the report. Locks the form for the employee
+and enables payout recording.</li>
+<li><strong>Decline</strong> — opens a reason dialog; sends it back to the employee.</li>
+<li><strong>+ Payout</strong> — opens a dialog with date, amount, reference (cheque
+number / ACH ref), and optional notes. Each payout reduces the
+outstanding balance and, if it clears the full amount, stops interest
+accrual.</li>
+<li><strong>Unlock</strong> — if you approved something in error and need the employee
+to change it, unlock puts it back into declined with a reason.</li>
+</ul>
+<p>The <strong>Payout log</strong> button (top-right of the expenses list) opens
+<code>/admin/expenses/payouts</code>, an immutable table of every payout ever
+recorded — date, employee, invoice, amount, reference, notes. Useful
+for reconciling with accounting.</p>
+<h2>Employees</h2>
+<p><strong>Admin → Employees</strong> lists everyone. Columns: name, email, code,
+department, active flag. Click a name for the detail page.</p>
+<p>The detail page shows:</p>
+<ul>
+<li>Employee code, name, email, position, department, active status.</li>
+<li>Two <strong>balance cards</strong> — current TIL, current vacation.</li>
+<li>The <strong>20 most recent weeks</strong> with status; click any to open the
+review view.</li>
+</ul>
+<p><strong>Add employee</strong> (top of the list) opens a form: full name, email,
+employee code, department, position (dropdown — the annual vacation
+entitlement comes from here), active. On save the account gets created
+in Supabase Auth and the initial balances get seeded.</p>
+<h2>Projects</h2>
+<p><strong>Admin → Projects</strong> is the project master list. Numbering convention
+is <code>YYYYNNN</code> (e.g. <code>2026007</code>). Fields:</p>
+<ul>
+<li><strong>Project number</strong> (unique).</li>
+<li><strong>Project name</strong>.</li>
+<li><strong>Status</strong> — Active or Closed.</li>
+</ul>
+<p>Only <em>active</em> projects appear in the timesheet dropdowns employees see.
+Closing a project hides it from new timesheets but keeps historical
+hours intact.</p>
+<p>Add a project with the form above the table; edit or delete inline.</p>
+<h2>Positions</h2>
+<p><strong>Admin → Positions</strong> defines each role in the company and the
+<strong>annual vacation hours</strong> for that role. When you create a new
+employee, the position dropdown seeds their annual vacation from here.</p>
+<p>Editing the number here does <strong>not</strong> retroactively adjust anyone&#39;s
+existing balance. Only new employees inherit the new value; existing
+balances stay as they were unless you adjust them by hand.</p>
+<h2>Audit log</h2>
+<p><strong>Admin → Approvals → Audit log</strong> (or wherever the subnav links it)
+shows the 500 most recent immutable actions: approve, decline, unlock,
+force-submit, import. Each entry has the actor, the employee affected,
+the week, the before-state, the total hours + OT on that week, and any
+comment the actor entered (required for decline / unlock).</p>
+<p>You can&#39;t edit or delete anything here — that&#39;s the point.</p>
+<h2>Reports</h2>
+<p>Four reports live under <strong>Admin → Reports</strong>:</p>
+<ul>
+<li><strong>Payroll.</strong> Pick a bi-weekly period; get a table of regular hours,
+OT hours, TIL used, vacation used, current TIL balance, and current
+vacation balance per employee. Download as CSV to feed into payroll.</li>
+<li><strong>Balances.</strong> A point-in-time snapshot of everyone&#39;s current TIL and
+vacation balances. Vacation &lt; 8 hours is flagged red. CSV download.</li>
+<li><strong>Hours by project.</strong> Filter by project + date range. Two views:
+summary (total hours per project) and detail (which employee logged
+how many hours on which project). CSV download.</li>
+<li><strong>Per-employee period.</strong> A printable, signature-ready summary sheet
+for one employee and one period. Landscape print layout with two
+signature lines at the bottom. Save as PDF from your browser&#39;s print
+dialog if you need a file.</li>
+</ul>
+<h2>Historical import (if enabled)</h2>
+<p><strong>Admin → Import</strong> is a two-step wizard for bringing legacy timesheet
+data into the app:</p>
+<ol>
+<li>Pick an employee, paste or upload a CSV of weekly totals.</li>
+<li>Click <strong>Dry run</strong> to see exactly what would be imported and any
+conflicts (duplicate weeks, balance mismatches, etc.). Fix the CSV
+until dry run is clean.</li>
+<li>Click <strong>Commit</strong> to actually create the entries.</li>
+</ol>
+<p>Every import ends up in the audit log as an <code>imported</code> action.</p>
+<p>The wizard is behind a feature flag (<code>NEXT_PUBLIC_IMPORTER_ENABLED</code>) —
+if it&#39;s off on this deployment, the page will 404 and you&#39;ll need
+someone with server access to turn it on.</p>
+<h2>Claude for admins</h2>
+<p>When you set up the Claude connector as an admin, you get the same six
+tools employees get <strong>plus</strong> four admin-only tools:</p>
+<ul>
+<li><code>approve_expense</code> — approve someone&#39;s report.</li>
+<li><code>decline_expense</code> — decline with a reason.</li>
+<li><code>unlock_expense</code> — unlock a previously approved report.</li>
+<li><code>record_payout</code> — log a payout against a specific invoice.</li>
+</ul>
+<p>The admin tools only show up in Claude&#39;s tool list if your account has
+the admin role — so a non-admin using Claude with the same connector
+URL simply can&#39;t see or call them.</p>
+<p>Handy admin prompts:</p>
+<ul>
+<li><em>&quot;Approve UC2026005 for user &lt;uuid&gt;.&quot;</em></li>
+<li><em>&quot;Record a payout of $5,000 CAD on 2026-05-10 against UC2026001,
+reference chq-4471.&quot;</em></li>
+<li><em>&quot;Show me all submitted expenses in the last week.&quot;</em></li>
+</ul>
+<hr>
+<h1>Appendix A — Every keyboard shortcut</h1>
+<p>Not many, but worth knowing:</p>
+<ul>
+<li><strong>Snake game (once open):</strong> arrow keys / WASD to move, Space or Enter
+to restart after game over, Escape to close.</li>
+<li>Otherwise the app is standard tab / enter / esc — no custom
+shortcuts.</li>
+</ul>
+<h1>Appendix B — When something goes wrong</h1>
+<ul>
+<li><strong>Page shows only &quot;Loading…&quot;</strong> — try a hard refresh
+(Ctrl+Shift+R / Cmd+Shift+R). If it keeps happening on the same
+page, tell an admin the URL.</li>
+<li><strong>&quot;Not authorised&quot; / redirected to login unexpectedly</strong> — your session
+expired. Sign in again.</li>
+<li><strong>Claude connector shows &quot;Couldn&#39;t connect to the server&quot;</strong> — the
+deployment may be down or the OAuth environment vars are missing on
+the server. Contact the admin.</li>
+<li><strong>The Excel workbook doesn&#39;t match what&#39;s here</strong> — the app is now the
+source of truth. If you find a real discrepancy in the maths (interest,
+totals, balances), open a bug with a screenshot and the invoice
+number.</li>
+</ul>
+<h1>Appendix C — What lives where</h1>
+<p>Rough map from feature to URL (all under
+<code>https://sre-web-app.vercel.app</code>):</p>
+<table>
+<thead>
+<tr>
+<th>I want to…</th>
+<th>Go to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fill in this week</td>
+<td><code>/week/current</code></td>
+</tr>
+<tr>
+<td>Look at an old week</td>
+<td><code>/week/&lt;YYYY-MM-DD&gt;</code></td>
+</tr>
+<tr>
+<td>See the summary of a week</td>
+<td><code>/week/&lt;YYYY-MM-DD&gt;/report</code></td>
+</tr>
+<tr>
+<td>Check TIL balance</td>
+<td><code>/me/til</code></td>
+</tr>
+<tr>
+<td>Check vacation</td>
+<td><code>/me/vacation</code></td>
+</tr>
+<tr>
+<td>See my notifications</td>
+<td><code>/me/notifications</code></td>
+</tr>
+<tr>
+<td>Look at my expenses</td>
+<td><code>/expenses</code></td>
+</tr>
+<tr>
+<td>Start a new expense report</td>
+<td><code>/expenses/new</code></td>
+</tr>
+<tr>
+<td>Open one expense report</td>
+<td><code>/expenses/&lt;invoice_no&gt;</code></td>
+</tr>
+<tr>
+<td>See my expense balance &amp; interest</td>
+<td><code>/expenses/balance</code></td>
+</tr>
+<tr>
+<td>Connect Claude</td>
+<td><code>/mcp-setup</code></td>
+</tr>
+<tr>
+<td><strong>Admin only</strong> — approval queue</td>
+<td><code>/admin</code></td>
+</tr>
+<tr>
+<td>Approve one week</td>
+<td><code>/admin/employees/&lt;id&gt;/week/&lt;date&gt;</code></td>
+</tr>
+<tr>
+<td>Unlock a locked week</td>
+<td><code>/admin/locked</code></td>
+</tr>
+<tr>
+<td>Everyone&#39;s expenses</td>
+<td><code>/admin/expenses</code></td>
+</tr>
+<tr>
+<td>Payout log</td>
+<td><code>/admin/expenses/payouts</code></td>
+</tr>
+<tr>
+<td>Staff directory</td>
+<td><code>/admin/employees</code></td>
+</tr>
+<tr>
+<td>Add an employee</td>
+<td><code>/admin/employees/new</code></td>
+</tr>
+<tr>
+<td>Manage projects</td>
+<td><code>/admin/projects</code></td>
+</tr>
+<tr>
+<td>Manage positions</td>
+<td><code>/admin/positions</code></td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td><code>/admin/approvals</code></td>
+</tr>
+<tr>
+<td>Payroll export</td>
+<td><code>/admin/reports/payroll</code></td>
+</tr>
+<tr>
+<td>Balances snapshot</td>
+<td><code>/admin/reports/balances</code></td>
+</tr>
+<tr>
+<td>Hours by project</td>
+<td><code>/admin/reports/projects</code></td>
+</tr>
+<tr>
+<td>Signable per-employee period sheet</td>
+<td><code>/admin/reports/period</code></td>
+</tr>
+<tr>
+<td>Historical import wizard</td>
+<td><code>/admin/import</code></td>
+</tr>
+</tbody></table>
+
+  </main>
+</body>
+</html>
