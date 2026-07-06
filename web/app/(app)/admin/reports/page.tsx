@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Wallet, FolderKanban, FileText, Snowflake, Download, Eye } from 'lucide-react';
+import { Wallet, FolderKanban, FileText, Snowflake, Download, Eye, Layers } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 
 interface ReportCard {
@@ -9,7 +9,7 @@ interface ReportCard {
   description: string;
   audience: string;
   outputs: string[];
-  tone: 'blue' | 'amber' | 'emerald' | 'violet';
+  tone: 'blue' | 'amber' | 'emerald' | 'violet' | 'rose';
 }
 
 const REPORTS: ReportCard[] = [
@@ -21,6 +21,15 @@ const REPORTS: ReportCard[] = [
     audience: 'For payroll & finance',
     outputs: ['On-screen preview', 'CSV download'],
     tone: 'blue',
+  },
+  {
+    href: '/admin/reports/categories',
+    icon: Layers,
+    title: 'Hours by category',
+    description: 'Approved hours grouped by main category (Project, Admin, Office & Sales) and sub-category. Shows where the team spent time.',
+    audience: 'For managers & PMO',
+    outputs: ['On-screen breakdown', 'CSV download'],
+    tone: 'rose',
   },
   {
     href: '/admin/reports/projects',
@@ -56,6 +65,7 @@ const TONE: Record<ReportCard['tone'], { bg: string; ring: string; icon: string 
   emerald: { bg: 'bg-emerald-500/10', ring: 'ring-emerald-500/30', icon: 'text-emerald-600 dark:text-emerald-300' },
   amber:   { bg: 'bg-amber-500/10',   ring: 'ring-amber-500/30',   icon: 'text-amber-600 dark:text-amber-300' },
   violet:  { bg: 'bg-violet-500/10',  ring: 'ring-violet-500/30',  icon: 'text-violet-600 dark:text-violet-300' },
+  rose:    { bg: 'bg-rose-500/10',    ring: 'ring-rose-500/30',    icon: 'text-rose-600 dark:text-rose-300' },
 };
 
 export default async function ReportsHome() {

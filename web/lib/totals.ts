@@ -8,6 +8,12 @@ export interface TimesheetTotals {
   vacation_used: number;
 }
 
+// Overtime rule (per Utsav / 2026-07-06 comments):
+//   * Standard workweek is 40 hours (Mon–Fri, 8h/day).
+//   * Overtime accrues only after the employee has logged 40 base hours across
+//     Mon–Sun combined. Weekend hours are NOT automatically overtime — they
+//     only become overtime once the 40h threshold is crossed.
+//   * TIL Payout rows never contribute to the base — they only move balances.
 export function computeTotals(
   rows: readonly TimesheetEntryDraft[],
   subCategories: readonly SubCategory[],
@@ -16,9 +22,7 @@ export function computeTotals(
   let total_hrs = 0;
   let til_used = 0;
   let vacation_used = 0;
-  const dayBaseTotals: Record<typeof DAY_KEYS[number], number> = {
-    mon_hrs: 0, tue_hrs: 0, wed_hrs: 0, thu_hrs: 0, fri_hrs: 0, sat_hrs: 0, sun_hrs: 0,
-  };
+  let base_hrs = 0;
 
   for (const row of rows) {
     const sub = row.sub_category_id ? subById.get(row.sub_category_id) : undefined;
@@ -26,12 +30,9 @@ export function computeTotals(
     total_hrs += rowTotal;
     if (sub?.consumes_til) til_used += rowTotal;
     if (sub?.consumes_vacation) vacation_used += rowTotal;
-
-    if (sub?.name !== 'TIL Payout') {
-      for (const k of DAY_KEYS) dayBaseTotals[k] += row[k] || 0;
-    }
+    if (sub?.name !== 'TIL Payout') base_hrs += rowTotal;
   }
 
-  const overtime_earned = DAY_KEYS.reduce((acc, k) => acc + Math.max(0, dayBaseTotals[k] - 8), 0);
+  const overtime_earned = Math.max(0, base_hrs - 40);
   return { total_hrs, overtime_earned, til_used, vacation_used };
 }

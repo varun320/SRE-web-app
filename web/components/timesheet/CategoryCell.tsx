@@ -44,9 +44,15 @@ export function CategoryCell({ mainCategory, subCategoryId, subCategories, onCha
         onValueChange={(v) => onChange({ mainCategory, subCategoryId: v })}
         disabled={disabled || !mainCategory}
       >
-        <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Sub…" /></SelectTrigger>
-        <SelectContent>
-          {filtered.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+        <SelectTrigger className="h-8 w-52 [&>span]:truncate [&>span]:block [&>span]:text-left">
+          <SelectValue placeholder="Sub…" />
+        </SelectTrigger>
+        <SelectContent className="max-w-xs">
+          {filtered.map((s) => (
+            <SelectItem key={s.id} value={s.id} className="whitespace-nowrap">
+              {s.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
