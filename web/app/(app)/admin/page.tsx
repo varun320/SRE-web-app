@@ -1,6 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchSubmittedQueue } from '@/lib/admin/queries';
-import { ApprovalQueue } from '@/components/admin/ApprovalQueue';
+import { ApprovalsInbox, type PanelPayload, type PanelLine } from '@/components/admin/ApprovalsInbox';
 import {
   AllWeeksTable,
   type WeekRow,
@@ -16,6 +16,7 @@ interface SearchParams {
   page?: string;
   status?: string;
   user_id?: string;
+  panel?: string;   // ?panel=<timesheet_id> — selected week in the inbox side panel
 }
 
 export default async function AdminHome({
@@ -33,6 +34,35 @@ export default async function AdminHome({
   const sb = await getSupabaseServer();
 
   const queue = await fetchSubmittedQueue(sb);
+
+  // Pre-fetch the side-panel payload for the currently selected week, if any.
+  const panelId = sp.panel;
+  let panel: PanelPayload | null = null;
+  if (panelId && queue.some((q) => q.timesheet_id === panelId)) {
+    const queueEntry = queue.find((q) => q.timesheet_id === panelId)!;
+    const [tsRes, totalsRes, linesRes, userRes] = await Promise.all([
+      sb.from('timesheets').select('id, user_id, week_start, submitted_at, decline_reason').eq('id', panelId).single(),
+      sb.from('v_timesheet_totals').select('total_hrs, overtime_earned, til_used, vacation_used').eq('timesheet_id', panelId).maybeSingle(),
+      sb.from('v_weekly_report').select('main_category, sub_category, project_number, description, mon_hrs, tue_hrs, wed_hrs, thu_hrs, fri_hrs, sat_hrs, sun_hrs, row_total').eq('timesheet_id', panelId),
+      sb.from('users').select('id, full_name, employee_code').eq('id', queueEntry.user_id).single(),
+    ]);
+    if (tsRes.data && userRes.data) {
+      panel = {
+        timesheet_id: tsRes.data.id as string,
+        user_id: tsRes.data.user_id as string,
+        full_name: userRes.data.full_name as string,
+        employee_code: userRes.data.employee_code as string,
+        week_start: tsRes.data.week_start as string,
+        submitted_at: (tsRes.data.submitted_at as string | null) ?? null,
+        decline_reason: (tsRes.data.decline_reason as string | null) ?? null,
+        total_hrs: Number(totalsRes.data?.total_hrs ?? 0),
+        overtime_earned: Number(totalsRes.data?.overtime_earned ?? 0),
+        til_used: Number(totalsRes.data?.til_used ?? 0),
+        vacation_used: Number(totalsRes.data?.vacation_used ?? 0),
+        lines: (linesRes.data ?? []) as PanelLine[],
+      };
+    }
+  }
 
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const [{ count: approvedThisWeek }, { count: declinedThisWeek }, { count: importedThisWeek }] =
@@ -108,7 +138,7 @@ export default async function AdminHome({
         <StatCard icon={FileDown}      label="Imported (7d)"  value={importedThisWeek ?? 0}    tone="muted" />
       </div>
 
-      <ApprovalQueue rows={queue} />
+      <ApprovalsInbox queue={queue} panel={panel} />
 
       <section className="space-y-3 pt-4 border-t border-[var(--color-border-soft)]">
         <header>
