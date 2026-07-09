@@ -262,15 +262,108 @@ body {
   animation: kpi-bump var(--duration-normal) var(--ease-out);
 }
 
+/* -----------------------------------------------------------------------
+ * Print stylesheet — Track E. Print is a real deliverable: audit binder,
+ * payroll accountant, controller review. Output should look intentional:
+ * letterhead, tabular numerals throughout, thin baseline rules, no chrome.
+ * ----------------------------------------------------------------------- */
+@page {
+  size: A4;
+  margin: 18mm 16mm 22mm 16mm;
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #444;
+  }
+  @bottom-left {
+    content: 'Sulfur Recovery Engineering Inc.';
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #444;
+  }
+}
+
 @media print {
-  /* Strip chrome for clean PDF exports. */
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    -webkit-print-color-adjust: economy;
+    print-color-adjust: economy;
+  }
+
+  /* Strip chrome. */
   header[class*="sticky"],
   nav[aria-label],
   [class*="AdminSubnav"],
-  [class*="ReportsSubnav"] {
+  [class*="ReportsSubnav"],
+  [role="alert"],
+  [class*="brand-wiggle"] {
     display: none !important;
   }
-  body { background: white !important; }
+
+  /* Kill animation + hover motion. */
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  [class*="shadow-"] { box-shadow: none !important; }
+
+  /* Letterhead — a masthead at the top of every route's main content. */
+  main::before {
+    content: 'Sulfur Recovery Engineering  ·  Timesheet';
+    display: block;
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid black;
+    padding-bottom: 6mm;
+    margin-bottom: 8mm;
+  }
+
+  /* Tables — clean baseline rules, no fills, tabular figures. */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+  table th,
+  table td {
+    background: transparent !important;
+    color: black !important;
+    border: none !important;
+    border-bottom: 0.5pt solid #888 !important;
+    padding: 6pt 8pt !important;
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
+  }
+  table thead th {
+    border-bottom: 1pt solid black !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 8.5pt !important;
+  }
+  table tbody tr { page-break-inside: avoid; }
+
+  /* Status pills → outline-only for zero ink cost + full contrast. */
+  span[class*="rounded-full"] {
+    background: transparent !important;
+    color: black !important;
+    border: 0.5pt solid black !important;
+    padding: 1pt 5pt !important;
+  }
+
+  /* Headings. */
+  h1, h2, h3 { color: black !important; page-break-after: avoid; }
+  h1 { font-size: 18pt !important; margin: 0 0 4mm !important; letter-spacing: -0.01em; }
+  h2 { font-size: 12pt !important; margin: 8mm 0 3mm !important; border-bottom: 0.5pt solid #444; padding-bottom: 2mm; }
+  h3 { font-size: 10pt !important; margin: 6mm 0 2mm !important; }
+
+  /* Kill card lifts on print. */
   .period-summary { box-shadow: none !important; }
 }
 
