@@ -2,10 +2,11 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2 } from 'lucide-react';
+import { Paperclip, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
+import { uploadReceipt } from '@/lib/expenses/receipts';
 import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
 
 interface Props {
@@ -22,6 +23,7 @@ interface LineDraft {
   amount_cad: string;
   gst_cad: string;
   credit_card_id: string | null;
+  receipt_url: string | null;
 }
 
 function today(): string {
@@ -36,6 +38,7 @@ function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft
     amount_cad: '',
     gst_cad: '',
     credit_card_id: defaultCardId,
+    receipt_url: null,
   };
 }
 
@@ -65,12 +68,32 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
         amount_cad: String(l.amount_cad),
         gst_cad: String(l.gst_cad ?? 0),
         credit_card_id: l.credit_card_id,
+        receipt_url: l.receipt_url,
       }));
     }
     return [emptyLine(initialPeriodFrom || today(), defaultCardId)];
   });
 
   const readOnly = !isNew && initial ? initial.locked || (initial.status !== 'draft' && initial.status !== 'declined') : false;
+  const canAttach = !readOnly && !!initial?.id;
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+
+  async function attachReceipt(i: number, file: File) {
+    if (!initial?.id) {
+      setErr('Save the draft first, then attach receipts.');
+      return;
+    }
+    setErr(null);
+    setUploadingIdx(i);
+    try {
+      const key = await uploadReceipt(getSupabaseBrowser(), initial.id, file);
+      updateLine(i, { receipt_url: key });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Upload failed');
+    } finally {
+      setUploadingIdx(null);
+    }
+  }
 
   const totals = useMemo(() => {
     let amount = 0;
@@ -124,6 +147,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
         amount_cad: Number(l.amount_cad || 0),
         gst_cad: Number(l.gst_cad || 0),
         credit_card_id: l.credit_card_id ?? null,
+        receipt_url: l.receipt_url ?? null,
       });
       if (!p.success) {
         setErr(`Line ${i + 1}: ${p.error.issues[0]?.message ?? 'invalid'}`);
@@ -206,6 +230,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
                 <th className="text-right px-2 py-2 font-normal w-[120px]">Amount</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">Line total</th>
+                <th className="text-left px-2 py-2 font-normal w-[120px]">Receipt</th>
                 <th className="w-[36px]"></th>
               </tr>
             </thead>
@@ -283,6 +308,41 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
                     <td className="px-2 py-2 text-right font-mono tabular-nums">
                       {lineTotal.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
                     </td>
+                    <td className="px-2 py-2">
+                      {l.receipt_url ? (
+                        <div className="flex items-center gap-1 text-xs">
+                          <Paperclip className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+                          <span className="truncate max-w-[70px]" title={l.receipt_url}>attached</span>
+                          {!readOnly ? (
+                            <button
+                              type="button"
+                              onClick={() => updateLine(i, { receipt_url: null })}
+                              className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)]"
+                              aria-label="Detach receipt"
+                            >
+                              ×
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : canAttach ? (
+                        <label className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer">
+                          <Paperclip className="h-3.5 w-3.5" />
+                          {uploadingIdx === i ? 'Uploading…' : 'Attach'}
+                          <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) attachReceipt(i, f);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      ) : (
+                        <span className="text-[10px] text-[var(--color-text-muted)]">save draft first</span>
+                      )}
+                    </td>
                     <td className="px-2 py-2 align-middle">
                       {!readOnly && lines.length > 1 ? (
                         <button
@@ -321,6 +381,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
                 <td className="px-2 py-2 text-right font-mono tabular-nums font-semibold">
                   {totals.total.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
                 </td>
+                <td></td>
                 <td></td>
               </tr>
             </tfoot>

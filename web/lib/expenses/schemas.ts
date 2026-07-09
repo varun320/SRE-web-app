@@ -19,6 +19,7 @@ export const expenseLineSchema = z.object({
   amount_cad: z.number().nonnegative(),
   gst_cad: z.number().nonnegative().default(0),
   credit_card_id: z.string().uuid().nullable().optional(),
+  receipt_url: z.string().max(400).nullable().optional(),
 });
 
 export const creditCardSchema = z.object({
