@@ -44,7 +44,7 @@ export function DeclineDialog({ timesheetId, disabled }: { timesheetId: string; 
           <Input id="reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. project number on row 3 is wrong" />
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Keep reviewing</Button>
           <Button onClick={() => m.mutate()} disabled={m.isPending || reason.trim().length === 0}>
             {m.isPending ? 'Declining…' : 'Decline'}
           </Button>

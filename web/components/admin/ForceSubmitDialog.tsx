@@ -49,7 +49,7 @@ export function ForceSubmitDialog({ timesheetId }: { timesheetId: string }) {
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Never mind</Button>
           <Button onClick={() => m.mutate()} disabled={m.isPending || reason.trim().length === 0}>
             {m.isPending ? 'Submitting…' : 'Submit on their behalf'}
           </Button>

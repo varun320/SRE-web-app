@@ -205,7 +205,7 @@ function ForgotPasswordDialog() {
               <Input id="reset-email" name="email" type="email" required autoComplete="email" placeholder="you@sulfurrecovery.com" />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Never mind</Button>
               <Button type="submit" disabled={pending}>
                 {pending ? 'Sending…' : 'Send reset link'}
               </Button>

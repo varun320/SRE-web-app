@@ -57,7 +57,7 @@ export function UnlockDialog({ timesheetId, variant = 'default' }: Props) {
           <Input id="unlock-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. payroll noticed wrong project on row 2" />
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Keep as-is</Button>
           <Button onClick={() => m.mutate()} disabled={m.isPending || reason.trim().length === 0}>
             {m.isPending ? 'Unlocking…' : 'Unlock'}
           </Button>
