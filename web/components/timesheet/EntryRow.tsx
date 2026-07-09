@@ -4,7 +4,7 @@ import { DAY_KEYS } from '@/lib/dates';
 import { CategoryCell } from './CategoryCell';
 import { ProjectCell } from './ProjectCell';
 import { HourCell } from './HourCell';
-import { Input } from '@/components/ui/input';
+import { subCategoryHint } from '@/lib/categoryDescriptions';
 import { Trash2 } from 'lucide-react';
 
 interface Props {
@@ -73,30 +73,36 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
           <HourCell value={row[k]} onChange={(n) => onChange({ ...row, [k]: n })} disabled={disabled} ariaLabel={`${DAY_LABELS[i]} hours row ${index+1}`} />
         </td>
       ))}
-      <td className="px-2 py-2.5 min-w-[180px]">
+      <td className="px-2 py-2.5 min-w-[320px] w-[40%]">
         <div className="relative">
-          <Input
+          <textarea
             value={row.description}
             onChange={(e) => onChange({ ...row, description: e.target.value })}
             disabled={disabled}
-            placeholder={missingDescription ? 'Description required' : 'What you worked on'}
-            className={`pr-8 ${missingDescription ? 'border-[var(--color-status-declined-fg)]' : ''}`}
+            placeholder={missingDescription ? 'Description required — what you worked on, in detail' : 'What you worked on, in detail'}
+            rows={2}
             aria-invalid={missingDescription}
+            className={`w-full min-h-[3.5rem] rounded-lg border bg-transparent px-2.5 py-1.5 pr-8 text-sm leading-snug resize-y transition-colors outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 ${missingDescription ? 'border-[var(--color-status-declined-fg)]' : 'border-input'}`}
           />
           {!disabled ? (
             <button
               type="button"
               onClick={onRemove}
               aria-label={`Remove row ${index+1}`}
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] transition-colors p-1 rounded"
+              className="absolute right-1 top-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] transition-colors p-1 rounded"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           ) : null}
         </div>
+        {sub && subCategoryHint(sub.name) ? (
+          <span className="block text-[10px] text-[var(--color-text-muted)] leading-snug mt-1">
+            {subCategoryHint(sub.name)}
+          </span>
+        ) : null}
         {showOtHint ? (
           <span className="block text-[10px] text-[var(--color-status-submitted-fg)] mt-1">
-            → hours above 8/day count as overtime (added to TIL bank on approval)
+            → long day. Anything above 40 base hours this week is banked as TIL on approval.
           </span>
         ) : null}
       </td>
