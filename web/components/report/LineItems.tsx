@@ -29,43 +29,43 @@ const DAYS: Array<{ key: keyof Row; label: string }> = [
 export function LineItems({ rows }: { rows: Row[] }) {
   if (rows.length === 0) return null;
   return (
-    <table className="w-full text-sm">
-      <thead className="text-[var(--color-text-muted)]">
+    <table className="data-table">
+      <thead>
         <tr>
-          <th className="text-left p-2 font-normal">Category / project</th>
-          <th className="text-left p-2 font-normal">Description</th>
+          <th>Category / project</th>
+          <th>Description</th>
           {DAYS.map((d) => (
-            <th key={d.label} className="p-2 font-normal">{d.label}</th>
+            <th key={d.label} className="num">{d.label}</th>
           ))}
-          <th className="text-right p-2 font-normal">Total</th>
+          <th className="num">Total</th>
         </tr>
       </thead>
-      <tbody className="font-mono tabular-nums">
+      <tbody>
         {rows.map((r, i) => (
-          <tr key={i} className="border-t border-[var(--color-border)] align-top">
-            <td className="p-2 font-sans">
-              <div className="text-xs text-[var(--color-text-muted)]">{r.main_category}</div>
+          <tr key={i} className="align-top">
+            <td>
+              <div className="text-xs col-muted">{r.main_category}</div>
               <div>{subCategoryLabel(r.sub_category)}</div>
               {r.project_number != null ? (
-                <div className="text-xs text-[var(--color-text-muted)]">#{r.project_number}</div>
+                <div className="text-xs col-muted">#{r.project_number}</div>
               ) : null}
             </td>
-            <td className="p-2 font-sans max-w-[420px]">
-              <div className="whitespace-pre-wrap break-words text-[var(--color-text)]">
+            <td className="max-w-[420px]">
+              <div className="whitespace-pre-wrap break-words">
                 {r.description?.trim() ? r.description : (
-                  <span className="text-[var(--color-text-muted)] italic">no description</span>
+                  <span className="col-muted italic">no description</span>
                 )}
               </div>
             </td>
             {DAYS.map((d) => {
               const v = Number(r[d.key] ?? 0);
               return (
-                <td key={d.label} className="text-center p-2">
-                  {v > 0 ? v.toFixed(2) : <span className="text-[var(--color-text-muted)]">—</span>}
+                <td key={d.label} className="num">
+                  {v > 0 ? v.toFixed(2) : <span className="col-muted">—</span>}
                 </td>
               );
             })}
-            <td className="text-right p-2 font-semibold">{Number(r.row_total).toFixed(2)}</td>
+            <td className="num font-semibold">{Number(r.row_total).toFixed(2)}</td>
           </tr>
         ))}
       </tbody>

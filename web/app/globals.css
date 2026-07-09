@@ -114,6 +114,65 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .font-mono { font-family: var(--font-mono); }
+
+/* -----------------------------------------------------------------------
+ * .data-table — shared read-only table recipe per DESIGN.md § 3.3.
+ *
+ * Usage: <table className="data-table"> ... </table>
+ *   - 44 px min-row-height (40 px on .data-table.dense)
+ *   - 40 px header row, surface-2 bg, muted 11 px sentence-case labels
+ *   - 12 px cell padding horizontal, 10 px vertical; 20 px on first/last
+ *   - 1 px border-soft row dividers, no zebra
+ *   - Hover row background
+ *   - .num column: right-aligned tabular numerals, no wrap
+ *   - .actions column: right-aligned, no wrap
+ * ----------------------------------------------------------------------- */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+.data-table thead th {
+  height: 40px;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  background: color-mix(in oklab, var(--color-surface-2) 60%, transparent);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.data-table thead th:first-child { padding-left: 20px; }
+.data-table thead th:last-child  { padding-right: 20px; }
+.data-table tbody td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  border-top: 1px solid var(--color-border-soft);
+  color: var(--color-text);
+}
+.data-table tbody tr { min-height: 44px; }
+.data-table tbody tr:hover td { background: color-mix(in oklab, var(--color-surface-2) 40%, transparent); }
+.data-table tbody td:first-child { padding-left: 20px; }
+.data-table tbody td:last-child  { padding-right: 20px; }
+.data-table.dense tbody td { padding: 6px 12px; }
+.data-table.dense tbody tr { min-height: 40px; }
+
+.data-table .num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.data-table .actions {
+  text-align: right;
+  white-space: nowrap;
+}
+.data-table .col-muted {
+  color: var(--color-text-muted);
+}
 /* KPI number scale-bump on change */
 @keyframes kpi-bump {
   0%   { transform: scale(1); }

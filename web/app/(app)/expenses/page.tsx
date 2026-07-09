@@ -91,36 +91,34 @@ export default async function ExpensesPage() {
           description="Create your first monthly report to start tracking submissions and payouts."
         />
       ) : (
-        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="text-left px-4 py-2.5 font-normal">Invoice #</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Period</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Submitted</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Amount</th>
-                  <th className="text-right px-4 py-2.5 font-normal">GST</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Total</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Status</th>
+                  <th>Invoice #</th>
+                  <th>Period</th>
+                  <th>Submitted</th>
+                  <th className="num">Amount</th>
+                  <th className="num">GST</th>
+                  <th className="num">Total</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40">
-                    <td className="px-4 py-2.5">
+                  <tr key={r.id}>
+                    <td>
                       <Link href={`/expenses/${encodeURIComponent(r.invoice_no)}`} className="font-medium hover:underline">
                         {r.invoice_no}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-[var(--color-text-muted)]">
-                      {r.period_from} → {r.period_to}
-                    </td>
-                    <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.submission_date}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.amount_cad))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.gst_cad))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums font-medium">{money(Number(r.total_cad))}</td>
-                    <td className="px-4 py-2.5"><StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge></td>
+                    <td className="col-muted">{r.period_from} → {r.period_to}</td>
+                    <td className="col-muted">{r.submission_date}</td>
+                    <td className="num">{money(Number(r.amount_cad))}</td>
+                    <td className="num">{money(Number(r.gst_cad))}</td>
+                    <td className="num font-medium">{money(Number(r.total_cad))}</td>
+                    <td><StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge></td>
                   </tr>
                 ))}
               </tbody>

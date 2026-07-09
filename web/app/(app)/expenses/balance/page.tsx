@@ -61,44 +61,40 @@ export default async function BalancePage() {
           description="Once you submit an expense report it will appear here with its balance and interest tracking."
         />
       ) : (
-        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="text-left px-4 py-2.5 font-normal">Invoice #</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Submitted</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Due (Net 30)</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Claimed</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Paid</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Outstanding</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Interest</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Total owing</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Days od</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Status</th>
+                  <th>Invoice #</th>
+                  <th>Submitted</th>
+                  <th>Due (Net 30)</th>
+                  <th className="num">Claimed</th>
+                  <th className="num">Paid</th>
+                  <th className="num">Outstanding</th>
+                  <th className="num">Interest</th>
+                  <th className="num">Total owing</th>
+                  <th className="num">Days od</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-[var(--color-border-soft)]">
-                    <td className="px-4 py-2.5 font-medium">
+                  <tr key={r.id}>
+                    <td className="font-medium">
                       <Link href={`/expenses/${encodeURIComponent(r.invoice_no)}`} className="hover:underline">
                         {r.invoice_no}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.submission_date}</td>
-                    <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.due_date}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.claimed))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.paid))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.outstanding))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{money(Number(r.interest_owing))}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums font-semibold">
-                      {money(Number(r.total_owing))}
-                    </td>
-                    <td className="px-4 py-2.5 text-right">{r.days_overdue}</td>
-                    <td className="px-4 py-2.5">
-                      <StatusBadge tone={bTone(r.balance_status)}>{r.balance_status.replace('_', ' ')}</StatusBadge>
-                    </td>
+                    <td className="col-muted">{r.submission_date}</td>
+                    <td className="col-muted">{r.due_date}</td>
+                    <td className="num">{money(Number(r.claimed))}</td>
+                    <td className="num">{money(Number(r.paid))}</td>
+                    <td className="num">{money(Number(r.outstanding))}</td>
+                    <td className="num">{money(Number(r.interest_owing))}</td>
+                    <td className="num font-semibold">{money(Number(r.total_owing))}</td>
+                    <td className="num">{r.days_overdue}</td>
+                    <td><StatusBadge tone={bTone(r.balance_status)}>{r.balance_status.replace('_', ' ')}</StatusBadge></td>
                   </tr>
                 ))}
               </tbody>

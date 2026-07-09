@@ -23,36 +23,30 @@ export function EmployeeTable({ rows }: { rows: Row[] }) {
     );
   }
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+        <table className="data-table">
+          <thead>
             <tr>
-              <th className="text-left px-4 py-3 font-normal">Code</th>
-              <th className="text-left px-4 py-3 font-normal">Name</th>
-              <th className="text-left px-4 py-3 font-normal">Email</th>
-              <th className="text-left px-4 py-3 font-normal">Department</th>
-              <th className="text-left px-4 py-3 font-normal">Status</th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr
-                key={r.id}
-                className={[
-                  'border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40 transition-colors',
-                  r.is_active ? '' : 'opacity-60',
-                ].join(' ')}
-              >
-                <td className="px-4 py-3 font-mono">{r.employee_code}</td>
-                <td className="px-4 py-3">
+              <tr key={r.id} className={r.is_active ? '' : 'opacity-60'}>
+                <td className="font-mono">{r.employee_code}</td>
+                <td>
                   <Link className="text-[var(--color-accent)] hover:underline font-medium" href={`/admin/employees/${r.id}`}>
                     {r.full_name}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-[var(--color-text-muted)]">{r.email}</td>
-                <td className="px-4 py-3">{r.department ?? '—'}</td>
-                <td className="px-4 py-3">
+                <td className="col-muted">{r.email}</td>
+                <td>{r.department ?? '—'}</td>
+                <td>
                   <StatusBadge tone={r.is_active ? 'success' : 'muted'}>
                     {r.is_active ? 'Active' : 'Inactive'}
                   </StatusBadge>
