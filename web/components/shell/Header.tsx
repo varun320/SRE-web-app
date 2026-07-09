@@ -112,7 +112,7 @@ export function Header({ email, isAdmin }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-surface)_82%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-[color-mix(in_oklab,var(--color-surface)_72%,transparent)]">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 h-14 flex items-center gap-3">
+      <div className="w-full px-3 md:px-4 h-14 flex items-center gap-3">
         {/* Brand — tap the glyph 5× quickly to summon Snake */}
         <Link
           href="/week/current"

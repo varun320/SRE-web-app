@@ -26,7 +26,7 @@ export default async function BalancePage() {
   const owing = Number(summary?.total_owing ?? 0);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 md:px-6 py-6 space-y-6">
+    <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <div className="flex items-center gap-3">
         <Link
           href="/expenses"

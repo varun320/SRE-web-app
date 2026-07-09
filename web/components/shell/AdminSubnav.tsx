@@ -31,7 +31,7 @@ export function AdminSubnav() {
     <div className="border-b border-[var(--color-border)] -mt-1">
       <nav
         aria-label="Admin sections"
-        className="px-4 md:px-6 flex items-center gap-1 overflow-x-auto scrollbar-thin -mb-px"
+        className="px-3 md:px-4 flex items-center gap-1 overflow-x-auto scrollbar-thin -mb-px"
       >
         {ITEMS.map((it) => {
           const active = it.match(pathname);

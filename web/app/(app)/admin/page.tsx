@@ -93,7 +93,7 @@ export default async function AdminHome({
   const employees: EmployeeOption[] = (employeesRes.data ?? []) as EmployeeOption[];
 
   return (
-    <div className="px-4 md:px-6 py-6 space-y-6">
+    <div className="px-3 md:px-4 py-5 space-y-6">
       <header>
         <h2 className="text-lg font-medium tracking-tight">Approval queue</h2>
         <p className="text-sm text-[var(--color-text-muted)]">

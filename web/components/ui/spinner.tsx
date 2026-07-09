@@ -23,7 +23,7 @@ export function Spinner({ label, className }: SpinnerProps) {
 
 export function PageLoader({ label = 'Loading…' }: { label?: string }) {
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-6 py-16 flex items-center justify-center">
+    <div className="w-full px-3 md:px-4 py-12 flex items-center justify-center">
       <Spinner label={label} />
     </div>
   );

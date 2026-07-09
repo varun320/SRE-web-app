@@ -24,7 +24,7 @@ export default async function McpSetupPage() {
   const mcpUrl = `${origin}/mcp`;
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10 space-y-8">
+    <div className="w-full px-3 md:px-4 py-5 space-y-8">
       <header>
         <h1 className="text-2xl font-semibold">Claude MCP setup</h1>
         <p className="mt-2 text-sm text-muted-foreground">

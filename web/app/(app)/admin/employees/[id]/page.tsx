@@ -15,7 +15,7 @@ export default async function EmployeeDetail({ params }: Props) {
   const { data: vac } = await sb.from('v_vacation_balance').select('closing_balance').eq('user_id', id).maybeSingle();
 
   return (
-    <div className="px-4 md:px-6 py-6 space-y-6">
+    <div className="px-3 md:px-4 py-5 space-y-6">
       <div>
         <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{u.employee_code}</div>
         <h2 className="text-xl font-semibold">{u.full_name}</h2>

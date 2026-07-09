@@ -19,7 +19,7 @@ export default async function VacationPage() {
   const lowBalance = balance < 8;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 md:px-6 py-6 space-y-6">
+    <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-gradient-to-br from-[var(--color-status-approved-bg)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-5 md:p-7 relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="max-w-xl">

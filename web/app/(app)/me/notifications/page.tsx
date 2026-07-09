@@ -48,7 +48,7 @@ export default async function NotificationsPage() {
   }));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 md:px-6 py-6 space-y-5">
+    <main className="w-full px-3 md:px-4 py-5 space-y-5">
       <header className="flex items-baseline justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Notifications</h1>

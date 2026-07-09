@@ -62,7 +62,7 @@ export default async function LockedWeeksPage() {
   });
 
   return (
-    <div className="px-4 md:px-6 py-6 space-y-5">
+    <div className="px-3 md:px-4 py-5 space-y-5">
       <header>
         <h2 className="text-lg font-medium tracking-tight">Locked weeks</h2>
         <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">

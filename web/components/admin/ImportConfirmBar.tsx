@@ -13,7 +13,7 @@ export function ImportConfirmBar({ summary, onCommit, onCancel, isCommitting }: 
   const blocked = conflict > 0 || create === 0;
 
   return (
-    <div className="sticky bottom-0 -mx-4 md:-mx-6 px-4 md:px-6 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur flex flex-wrap items-center justify-between gap-3">
+    <div className="sticky bottom-0 -mx-3 md:-mx-4 px-3 md:px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur flex flex-wrap items-center justify-between gap-3">
       <div className="text-sm text-[var(--color-text-muted)]">
         {conflict > 0 ? (
           <span className="text-red-700 dark:text-red-300 font-medium">

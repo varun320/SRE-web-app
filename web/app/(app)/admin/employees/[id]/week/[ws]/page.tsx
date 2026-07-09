@@ -47,7 +47,7 @@ export default async function AdminWeekReview({ params }: Props) {
   const r = (rows ?? []) as ReportRow[];
   return (
     <div className="space-y-6">
-      <div className="mx-6 mt-6 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface-2)] px-5 py-4">
+      <div className="mx-3 md:mx-4 mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface-2)] px-5 py-4">
         <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{user?.employee_code}</div>
         <div className="text-lg font-semibold">{user?.full_name}</div>
         <div className="text-sm text-[var(--color-text-muted)]">
@@ -57,16 +57,16 @@ export default async function AdminWeekReview({ params }: Props) {
       </div>
 
       {r.length === 0 ? (
-        <div className="mx-6 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 px-5 py-6 text-sm text-[var(--color-text-muted)]">
+        <div className="mx-3 md:mx-4 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 px-5 py-6 text-sm text-[var(--color-text-muted)]">
           This week has no entries yet.
         </div>
       ) : (
         <>
-          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Line items</h2><LineItems rows={r} /></section>
-          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
-          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
-          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>
-          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by project</h2><ProjectTable rows={r} /></section>
+          <section className="px-3 md:px-4"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Line items</h2><LineItems rows={r} /></section>
+          <section className="px-3 md:px-4"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
+          <section className="px-3 md:px-4"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
+          <section className="px-3 md:px-4"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>
+          <section className="px-3 md:px-4"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by project</h2><ProjectTable rows={r} /></section>
         </>
       )}
 

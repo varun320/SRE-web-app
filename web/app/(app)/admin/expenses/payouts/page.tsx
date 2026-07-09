@@ -22,7 +22,7 @@ export default async function AdminPayoutsPage() {
   const userMap = new Map((usersRes.data ?? []).map((u) => [u.id, u]));
 
   return (
-    <main className="mx-auto max-w-7xl px-4 md:px-6 py-6 space-y-4">
+    <main className="w-full px-3 md:px-4 py-5 space-y-4">
       <h1 className="text-xl font-semibold">Payout log</h1>
       <p className="text-sm text-[var(--color-text-muted)]">
         All payments received against employee expense reports. Add payouts from the Expenses tab
