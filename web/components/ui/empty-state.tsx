@@ -7,15 +7,16 @@ interface Props {
   action?: React.ReactNode;
 }
 
+// Per DESIGN.md § 3.8: no illustration, no card wrap. Single 24 px monochrome
+// icon in text-subtle, then title (h3 scale), description (body muted), one
+// CTA. 48 px vertical padding, centered.
 export function EmptyState({ icon: Icon, title, description, action }: Props) {
   return (
-    <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-8 text-center">
-      <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-text-muted)] ring-1 ring-[var(--color-border)]">
-        <Icon className="h-5 w-5" />
-      </div>
-      <h3 className="mt-3 text-sm font-medium text-[var(--color-text)]">{title}</h3>
+    <div className="py-12 px-4 text-center">
+      <Icon className="mx-auto h-6 w-6 text-[var(--color-text-subtle)]" aria-hidden />
+      <h3 className="mt-2 text-[18px] font-semibold text-[var(--color-text)]">{title}</h3>
       {description ? (
-        <p className="mt-1 text-sm text-[var(--color-text-muted)] max-w-md mx-auto">
+        <p className="mt-1.5 text-sm text-[var(--color-text-muted)] max-w-md mx-auto leading-snug">
           {description}
         </p>
       ) : null}

@@ -2,13 +2,15 @@ import * as React from 'react';
 
 type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
 
+// Pills use SRE status tokens (see tokens.css). Tinted bg + hue-matched fg,
+// height 20 px, rounded-full. Per DESIGN.md § 3.3 status column.
 const TONE: Record<Tone, string> = {
-  neutral: 'bg-[var(--color-surface-2)] text-[var(--color-text)] ring-[var(--color-border)]',
-  success: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30',
-  warning: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-500/30',
-  danger:  'bg-red-500/10 text-red-700 dark:text-red-300 ring-red-500/30',
-  info:    'bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-blue-500/30',
-  muted:   'bg-transparent text-[var(--color-text-muted)] ring-[var(--color-border-soft)]',
+  neutral: 'bg-[var(--color-status-draft-bg)] text-[var(--color-status-draft-fg)]',
+  info:    'bg-[var(--color-status-submitted-bg)] text-[var(--color-status-submitted-fg)]',
+  success: 'bg-[var(--color-status-approved-bg)] text-[var(--color-status-approved-fg)]',
+  warning: 'bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]',
+  danger:  'bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]',
+  muted:   'bg-transparent text-[var(--color-text-muted)] ring-1 ring-inset ring-[var(--color-border-soft)]',
 };
 
 interface Props extends React.HTMLAttributes<HTMLSpanElement> {
@@ -19,7 +21,7 @@ export function StatusBadge({ tone = 'neutral', className = '', ...rest }: Props
   return (
     <span
       className={[
-        'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset whitespace-nowrap',
+        'inline-flex items-center h-5 rounded-full px-2 text-[11px] font-medium leading-none whitespace-nowrap',
         TONE[tone],
         className,
       ].join(' ')}
