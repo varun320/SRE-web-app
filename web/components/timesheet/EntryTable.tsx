@@ -4,7 +4,6 @@ import type { Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib
 import { EntryRow } from './EntryRow';
 import { KpiStrip } from './KpiStrip';
 import { StatusBanner } from './StatusBanner';
-import { QuickStart } from './QuickStart';
 import { Button } from '@/components/ui/button';
 import { Check, CircleDashed, Plus } from 'lucide-react';
 import { computeTotals } from '@/lib/totals';
@@ -147,14 +146,8 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
   return (
     <div>
       <StatusBanner status={timesheet.status} declineReason={timesheet.decline_reason} />
-      {!locked ? <QuickStart /> : null}
       <KpiStrip totals={totals} openingTil={openingTil} openingVacation={openingVacation} />
-
-      {rows.length === 1 && !rows[0].main_category && !rows[0].description && !locked ? (
-        <div className="mx-3 md:mx-4 mb-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 px-5 py-4 text-sm text-[var(--color-text-muted)]">
-          Nothing logged yet — fill in the empty row below to get started. Each row is one activity: pick a category, log hours per day, add a short description.
-        </div>
-      ) : null}
+      <EmptyStateToast rows={rows} locked={locked} timesheetId={timesheet.id} />
 
       <div className="mx-3 md:mx-4 mb-6 rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] overflow-hidden">
         <div className="overflow-x-auto">
@@ -305,4 +298,27 @@ function agoShort(ts: number): string {
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   return `${h}h ago`;
+}
+
+// One-time toast when the user lands on an empty draft week. Uses
+// sessionStorage keyed by timesheet id so we don't nag on every reload
+// within the same session.
+function EmptyStateToast({ rows, locked, timesheetId }: { rows: TimesheetEntryDraft[]; locked: boolean; timesheetId: string }) {
+  useEffect(() => {
+    if (locked) return;
+    const isEmpty = rows.length === 1 && !rows[0].main_category && !rows[0].description;
+    if (!isEmpty) return;
+    const key = `sre.emptyHint.${timesheetId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch { /* ignore */ }
+    const t = setTimeout(() => {
+      toast('New week. Pick a category and start logging hours.', { duration: 6000 });
+    }, 350);
+    return () => clearTimeout(t);
+    // Only fire once per timesheet id per session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timesheetId]);
+  return null;
 }

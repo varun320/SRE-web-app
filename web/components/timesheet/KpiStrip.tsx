@@ -43,19 +43,21 @@ function Tile({ label, value, sub, tone = 'neutral', hint }: TileProps) {
   }, [value]);
 
   return (
-    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-5 py-4 flex flex-col gap-1">
-      <span className="text-[13px] font-medium text-[var(--color-text-muted)] flex items-center gap-1.5">
-        {label}
-        <InfoHint label={label}>{hint}</InfoHint>
-      </span>
+    <div className="rounded-[var(--radius-md)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-3.5 py-2.5 flex items-baseline justify-between gap-2">
+      <div className="min-w-0 flex-1">
+        <span className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider flex items-center gap-1">
+          {label}
+          <InfoHint label={label}>{hint}</InfoHint>
+        </span>
+        {sub ? <span className="block mt-0.5 text-[10px] text-[var(--color-text-subtle)]">{sub}</span> : null}
+      </div>
       <span
         key={animKey}
-        className="kpi-value text-[28px] font-medium font-mono tabular-nums leading-none"
+        className="kpi-value text-[18px] font-medium font-mono tabular-nums leading-none shrink-0"
         style={{ color: VALUE_COLOR[tone] }}
       >
         {value.toFixed(2)}
       </span>
-      {sub ? <span className="text-xs text-[var(--color-text-muted)]">{sub}</span> : null}
     </div>
   );
 }
@@ -65,8 +67,8 @@ export function KpiStrip({ totals, openingTil, openingVacation }: Props) {
   const vacRemaining = openingVacation - totals.vacation_used;
 
   return (
-    <div className="px-3 md:px-4 pb-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="px-3 md:px-4 pb-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <Tile
           label="Hours this week"
           value={totals.total_hrs}
