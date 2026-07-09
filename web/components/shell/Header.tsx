@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   CalendarDays,
   Clock,
+  Home,
   Palmtree,
   Receipt,
   Shield,
@@ -37,6 +38,12 @@ interface NavItem {
 }
 
 const BASE_NAV: NavItem[] = [
+  {
+    href: '/home',
+    label: 'Home',
+    icon: Home,
+    match: (p) => p === '/home' || p === '/',
+  },
   {
     href: '/week/current',
     label: 'Week',
