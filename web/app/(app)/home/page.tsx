@@ -197,7 +197,7 @@ export default async function HomePage() {
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
         <Link
           href={`/week/${weekStart}`}
-          className="group rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-6 md:p-8 flex flex-col gap-5 hover:border-[var(--color-border)] transition-colors"
+          className="lift-hover group rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-6 md:p-8 flex flex-col gap-5"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -225,7 +225,7 @@ export default async function HomePage() {
           </div>
         </Link>
 
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-soft)] flex flex-col">
+        <div className="lift-hover rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-soft)] flex flex-col">
           <BalanceRow href="/me/til" label="TIL bank" value={`${tilRemaining.toFixed(2)} h`} caption="Earned overtime, spend later" />
           <BalanceRow
             href="/me/vacation"
@@ -251,7 +251,7 @@ export default async function HomePage() {
             Nothing yet. Once you submit a timesheet or expense, it shows up here.
           </p>
         ) : (
-          <ul className="border-t border-[var(--color-border-soft)]">
+          <ul className="stagger-enter border-t border-[var(--color-border-soft)]">
             {recent.map((a) => (
               <li key={a.key}>
                 {a.href ? (

@@ -143,6 +143,57 @@ body {
 }
 
 /* -----------------------------------------------------------------------
+ * Micro-interactions per Track D. Small movement + feedback that rewards
+ * attention without violating the "no floating cards" rule from § 3.4.
+ * All motion respects prefers-reduced-motion via the global rule earlier
+ * in this file.
+ * ----------------------------------------------------------------------- */
+
+/* Card hover lift — 1 px translate + border darken. Use on card-like
+   surfaces (Home dashboard tiles, KPI strip, etc.). */
+.lift-hover {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lift-hover:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-border);
+}
+
+/* Staggered enter animation for lists. Add .stagger-enter to a container,
+   direct children animate in with a small per-index delay (capped at 12). */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stagger-enter > * {
+  animation: stagger-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-enter > *:nth-child(1)  { animation-delay:  20ms; }
+.stagger-enter > *:nth-child(2)  { animation-delay:  50ms; }
+.stagger-enter > *:nth-child(3)  { animation-delay:  80ms; }
+.stagger-enter > *:nth-child(4)  { animation-delay: 110ms; }
+.stagger-enter > *:nth-child(5)  { animation-delay: 140ms; }
+.stagger-enter > *:nth-child(6)  { animation-delay: 170ms; }
+.stagger-enter > *:nth-child(7)  { animation-delay: 200ms; }
+.stagger-enter > *:nth-child(8)  { animation-delay: 230ms; }
+.stagger-enter > *:nth-child(9)  { animation-delay: 260ms; }
+.stagger-enter > *:nth-child(10) { animation-delay: 290ms; }
+.stagger-enter > *:nth-child(11) { animation-delay: 320ms; }
+.stagger-enter > *:nth-child(12) { animation-delay: 350ms; }
+
+/* Nav underline that slides in on activation instead of hard-appearing.
+   Used by Header NavLink. */
+@keyframes underline-slide {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+.underline-slide {
+  animation: underline-slide 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* -----------------------------------------------------------------------
  * .data-table — shared read-only table recipe per DESIGN.md § 3.3.
  *
  * Usage: <table className="data-table"> ... </table>

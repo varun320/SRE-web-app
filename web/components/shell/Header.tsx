@@ -183,7 +183,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       {active ? (
         <span
           aria-hidden
-          className="absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
+          className="underline-slide absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
           style={{ background: 'var(--color-accent)' }}
         />
       ) : null}
@@ -208,7 +208,7 @@ function MeDropdown({ items, active, pathname }: { items: NavItem[]; active: boo
         {active ? (
           <span
             aria-hidden
-            className="absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
+            className="underline-slide absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
             style={{ background: 'var(--color-accent)' }}
           />
         ) : null}
