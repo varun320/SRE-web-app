@@ -12,6 +12,22 @@ export const metadata: Metadata = { title: 'SRE Timesheet', description: 'Weekly
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${mono.variable}`}>
+      <head>
+        <script
+          // Runs before hydration so there's no flash-of-wrong-theme.
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('theme');
+                  var wantDark = t === 'dark' || ((!t || t === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (wantDark) document.documentElement.classList.add('dark');
+                } catch (_) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Providers>{children}</Providers>
         <ConfettiHost />

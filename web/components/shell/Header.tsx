@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
+import { ThemeToggle } from './ThemeToggle';
 import { SnakeGame } from '@/components/fun/SnakeGame';
 import { useIdle } from '@/lib/hooks/useIdle';
 import {
@@ -94,7 +95,7 @@ export function Header({ email, isAdmin }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-surface)_88%,transparent)] backdrop-blur">
-      <div className="w-full px-3 md:px-4 h-12 flex items-center gap-2">
+      <div className="w-full px-3 md:px-4 h-12 grid grid-cols-[auto_1fr_auto] items-center gap-2">
         {/* Brand — 5× tap the glyph for Snake */}
         <Link
           href="/home"
@@ -115,26 +116,27 @@ export function Header({ email, isAdmin }: HeaderProps) {
           <span className="hidden sm:inline text-sm">SRE</span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-0.5 ml-3">
+        {/* Center — tabs */}
+        <nav className="hidden md:flex items-center justify-center gap-0.5">
           {topItems.map((it) => (
             <NavLink key={it.href} item={it} active={it.match(pathname)} />
           ))}
           <MeDropdown items={ME_NAV} active={meActive} pathname={pathname} />
         </nav>
+        <div className="md:hidden" />
 
-        <div className="flex-1" />
-
-        {/* Right cluster — desktop */}
-        <div className="hidden md:flex items-center gap-1">
+        {/* Right — chrome */}
+        <div className="hidden md:flex items-center gap-1 justify-self-end">
           <NotificationsBell />
           <HelpButton />
+          <ThemeToggle />
           <UserMenu email={email} initial={initial} isAdmin={isAdmin} />
         </div>
 
         {/* Mobile actions */}
-        <div className="flex md:hidden items-center gap-0.5">
+        <div className="flex md:hidden items-center gap-0.5 justify-self-end">
           <NotificationsBell />
+          <ThemeToggle />
           <HelpButton />
           <button
             type="button"
