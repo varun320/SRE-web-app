@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Receipt, Plus, ArrowUpRight } from 'lucide-react';
+import { Receipt, Plus, ArrowUpRight, Settings } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchMyExpenses, fetchSummary } from '@/lib/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -63,6 +63,14 @@ export default async function ExpensesPage() {
               className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)]"
             >
               Balance <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/expenses/settings"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)]"
+              title="Cards + interest rate"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="hidden md:inline">Settings</span>
             </Link>
           </div>
         </div>

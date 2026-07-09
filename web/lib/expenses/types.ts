@@ -101,4 +101,14 @@ export interface ExpenseLineDraft {
   description: string;
   amount_cad: number;
   gst_cad: number;
+  credit_card_id?: string | null;
+}
+
+export interface CreditCard {
+  id: string;
+  user_id: string;
+  label: string;
+  last_four: string | null;
+  is_default: boolean;
+  is_active: boolean;
 }

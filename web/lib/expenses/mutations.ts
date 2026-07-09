@@ -1,5 +1,46 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ExpenseDraftInput, ExpenseLineInput, PayoutInput } from './schemas';
+import type { CreditCardInput, ExpenseDraftInput, ExpenseLineInput, PayoutInput } from './schemas';
+
+export async function upsertCreditCard(sb: SupabaseClient, input: CreditCardInput): Promise<string> {
+  if (input.is_default) {
+    await sb.from('user_credit_cards').update({ is_default: false })
+      .neq('id', input.id ?? '00000000-0000-0000-0000-000000000000');
+  }
+  if (input.id) {
+    const { error } = await sb
+      .from('user_credit_cards')
+      .update({
+        label: input.label,
+        last_four: input.last_four ?? null,
+        is_default: input.is_default,
+        is_active: input.is_active,
+      })
+      .eq('id', input.id);
+    if (error) throw new Error(error.message);
+    return input.id;
+  }
+  const { data: userRow } = await sb.auth.getUser();
+  const uid = userRow.user?.id;
+  if (!uid) throw new Error('not authenticated');
+  const { data, error } = await sb
+    .from('user_credit_cards')
+    .insert({
+      user_id: uid,
+      label: input.label,
+      last_four: input.last_four ?? null,
+      is_default: input.is_default,
+      is_active: input.is_active,
+    })
+    .select('id')
+    .single();
+  if (error) throw new Error(error.message);
+  return data.id as string;
+}
+
+export async function deleteCreditCard(sb: SupabaseClient, id: string): Promise<void> {
+  const { error } = await sb.from('user_credit_cards').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
 
 export async function upsertExpenseDraft(sb: SupabaseClient, input: ExpenseDraftInput): Promise<string> {
   const { data, error } = await sb.rpc('expense_upsert_draft', { payload: input });

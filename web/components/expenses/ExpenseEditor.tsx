@@ -6,11 +6,12 @@ import { Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
-import { EXPENSE_CATEGORIES, type ExpenseCategory, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
+import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
 
 interface Props {
   initial?: ExpenseReport | null;
   initialLines?: ExpenseLineItem[];
+  creditCards?: CreditCard[];
   isNew: boolean;
 }
 
@@ -20,17 +21,25 @@ interface LineDraft {
   description: string;
   amount_cad: string;
   gst_cad: string;
+  credit_card_id: string | null;
 }
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function emptyLine(defaultDate: string): LineDraft {
-  return { line_date: defaultDate, category: 'Meals', description: '', amount_cad: '', gst_cad: '' };
+function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft {
+  return {
+    line_date: defaultDate,
+    category: 'Meals',
+    description: '',
+    amount_cad: '',
+    gst_cad: '',
+    credit_card_id: defaultCardId,
+  };
 }
 
-export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
+export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -45,6 +54,8 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
     notes: initial?.notes ?? '',
   });
 
+  const activeCards = creditCards.filter((c) => c.is_active);
+  const defaultCardId = activeCards.find((c) => c.is_default)?.id ?? null;
   const [lines, setLines] = useState<LineDraft[]>(() => {
     if (initialLines && initialLines.length > 0) {
       return initialLines.map((l) => ({
@@ -53,9 +64,10 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
         description: l.description,
         amount_cad: String(l.amount_cad),
         gst_cad: String(l.gst_cad ?? 0),
+        credit_card_id: l.credit_card_id,
       }));
     }
-    return [emptyLine(initialPeriodFrom || today())];
+    return [emptyLine(initialPeriodFrom || today(), defaultCardId)];
   });
 
   const readOnly = !isNew && initial ? initial.locked || (initial.status !== 'draft' && initial.status !== 'declined') : false;
@@ -79,7 +91,7 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
   }
 
   function addLine() {
-    setLines((ls) => [...ls, emptyLine(form.period_to || form.period_from || today())]);
+    setLines((ls) => [...ls, emptyLine(form.period_to || form.period_from || today(), defaultCardId)]);
   }
 
   function removeLine(i: number) {
@@ -111,6 +123,7 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
         description: l.description,
         amount_cad: Number(l.amount_cad || 0),
         gst_cad: Number(l.gst_cad || 0),
+        credit_card_id: l.credit_card_id ?? null,
       });
       if (!p.success) {
         setErr(`Line ${i + 1}: ${p.error.issues[0]?.message ?? 'invalid'}`);
@@ -189,6 +202,7 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Date</th>
                 <th className="text-left px-2 py-2 font-normal w-[160px]">Category</th>
                 <th className="text-left px-2 py-2 font-normal">Description</th>
+                <th className="text-left px-2 py-2 font-normal w-[150px]">Card</th>
                 <th className="text-right px-2 py-2 font-normal w-[120px]">Amount</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">Line total</th>
@@ -233,6 +247,21 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
                       />
                     </td>
                     <td className="px-2 py-2">
+                      <select
+                        className={inputCls}
+                        value={l.credit_card_id ?? ''}
+                        onChange={(e) => updateLine(i, { credit_card_id: e.target.value || null })}
+                        disabled={readOnly}
+                      >
+                        <option value="">— none —</option>
+                        {activeCards.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.label}{c.last_four ? ` ••${c.last_four}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-2 py-2">
                       <input
                         type="number" step="0.01" min="0"
                         className={`${inputCls} text-right font-mono`}
@@ -272,7 +301,7 @@ export function ExpenseEditor({ initial, initialLines, isNew }: Props) {
             </tbody>
             <tfoot>
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                <td colSpan={3} className="px-2 py-2">
+                <td colSpan={4} className="px-2 py-2">
                   {!readOnly ? (
                     <button
                       type="button"

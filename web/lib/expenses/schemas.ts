@@ -18,7 +18,18 @@ export const expenseLineSchema = z.object({
   description: z.string().trim().min(1, 'Description required').max(500),
   amount_cad: z.number().nonnegative(),
   gst_cad: z.number().nonnegative().default(0),
+  credit_card_id: z.string().uuid().nullable().optional(),
 });
+
+export const creditCardSchema = z.object({
+  id: z.string().uuid().optional(),
+  label: z.string().trim().min(1).max(60),
+  last_four: z.string().regex(/^\d{4}$/, 'Last four must be 4 digits').nullable().optional(),
+  is_default: z.boolean().default(false),
+  is_active: z.boolean().default(true),
+});
+
+export type CreditCardInput = z.infer<typeof creditCardSchema>;
 
 export const expenseLinesReplaceSchema = z.object({
   expense_id: z.string().uuid(),

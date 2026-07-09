@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
+import { getSupabaseServer } from '@/lib/supabase/server';
+import { fetchMyCreditCards } from '@/lib/expenses/queries';
 
-export default function NewExpensePage() {
+export default async function NewExpensePage() {
+  const sb = await getSupabaseServer();
+  const cards = await fetchMyCreditCards(sb);
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <Link
@@ -14,10 +18,15 @@ export default function NewExpensePage() {
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
         <h1 className="text-2xl font-semibold tracking-tight">New expense report</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Fill in the yellow cells — total auto-calculates. Save as draft or submit for approval.
+          One row per line item — date, category, description, card, amount. Save as draft or submit for approval.
         </p>
+        {cards.length === 0 ? (
+          <p className="mt-3 text-xs text-[var(--color-text-muted)]">
+            Tip: <Link href="/expenses/settings" className="underline">register your credit cards</Link> so you can pick which one paid each line.
+          </p>
+        ) : null}
         <div className="mt-5">
-          <ExpenseEditor initial={null} isNew />
+          <ExpenseEditor initial={null} creditCards={cards} isNew />
         </div>
       </section>
     </main>
