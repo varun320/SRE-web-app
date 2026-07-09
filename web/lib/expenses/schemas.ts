@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EXPENSE_CATEGORIES } from './types';
 
 export const expenseDraftSchema = z.object({
   id: z.string().uuid().optional(),
@@ -10,6 +11,21 @@ export const expenseDraftSchema = z.object({
   gst_cad: z.number().nonnegative().default(0),
   notes: z.string().max(2000).optional().nullable(),
 });
+
+export const expenseLineSchema = z.object({
+  line_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD'),
+  category: z.enum(EXPENSE_CATEGORIES),
+  description: z.string().trim().min(1, 'Description required').max(500),
+  amount_cad: z.number().nonnegative(),
+  gst_cad: z.number().nonnegative().default(0),
+});
+
+export const expenseLinesReplaceSchema = z.object({
+  expense_id: z.string().uuid(),
+  lines: z.array(expenseLineSchema),
+});
+
+export type ExpenseLineInput = z.infer<typeof expenseLineSchema>;
 
 export type ExpenseDraftInput = z.infer<typeof expenseDraftSchema>;
 

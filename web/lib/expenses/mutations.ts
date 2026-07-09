@@ -1,10 +1,22 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ExpenseDraftInput, PayoutInput } from './schemas';
+import type { ExpenseDraftInput, ExpenseLineInput, PayoutInput } from './schemas';
 
 export async function upsertExpenseDraft(sb: SupabaseClient, input: ExpenseDraftInput): Promise<string> {
   const { data, error } = await sb.rpc('expense_upsert_draft', { payload: input });
   if (error) throw new Error(error.message);
   return data as string;
+}
+
+export async function replaceExpenseLines(
+  sb: SupabaseClient,
+  expenseId: string,
+  lines: readonly ExpenseLineInput[],
+): Promise<void> {
+  const { error } = await sb.rpc('expense_lines_replace', {
+    p_expense_id: expenseId,
+    p_lines: lines,
+  });
+  if (error) throw new Error(error.message);
 }
 
 export async function submitExpense(sb: SupabaseClient, id: string): Promise<void> {

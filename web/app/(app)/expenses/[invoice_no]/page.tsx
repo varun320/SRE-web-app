@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchExpenseByInvoice, fetchPayouts } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchPayouts } from '@/lib/expenses/queries';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { StatusBadge } from '@/components/ui/status-badge';
 
@@ -20,7 +20,10 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
 
   const report = await fetchExpenseByInvoice(supabase, userId, invoice);
   if (!report) notFound();
-  const payouts = await fetchPayouts(supabase, invoice);
+  const [payouts, lines] = await Promise.all([
+    fetchPayouts(supabase, invoice),
+    fetchExpenseLines(supabase, report.id),
+  ]);
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
@@ -61,7 +64,7 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
           </div>
         ) : null}
         <div className="mt-5">
-          <ExpenseEditor initial={report} isNew={false} />
+          <ExpenseEditor initial={report} initialLines={lines} isNew={false} />
         </div>
       </section>
 

@@ -69,3 +69,36 @@ export interface ExpenseSettings {
   grace_days: number;
   currency: string;
 }
+
+export const EXPENSE_CATEGORIES = [
+  'Meals',
+  'Fuel',
+  'Transport',
+  'Hotel',
+  'Office Supplies',
+  'Communications',
+  'Client Entertainment',
+  'Other',
+] as const;
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export interface ExpenseLineItem {
+  id: string;
+  expense_id: string;
+  line_date: string;
+  category: ExpenseCategory;
+  description: string;
+  amount_cad: number;
+  gst_cad: number;
+  credit_card_id: string | null;
+  receipt_url: string | null;
+  position: number;
+}
+
+export interface ExpenseLineDraft {
+  line_date: string;
+  category: ExpenseCategory;
+  description: string;
+  amount_cad: number;
+  gst_cad: number;
+}

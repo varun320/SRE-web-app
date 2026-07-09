@@ -1,5 +1,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { ExpenseBalanceRow, ExpensePayout, ExpenseReport, ExpenseSummary } from './types';
+import type { ExpenseBalanceRow, ExpenseLineItem, ExpensePayout, ExpenseReport, ExpenseSummary } from './types';
+
+export async function fetchExpenseLines(sb: SupabaseClient, expenseId: string): Promise<ExpenseLineItem[]> {
+  const { data, error } = await sb
+    .from('expense_line_items')
+    .select('*')
+    .eq('expense_id', expenseId)
+    .order('position', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ExpenseLineItem[];
+}
 
 export async function fetchMyExpenses(sb: SupabaseClient): Promise<ExpenseReport[]> {
   const { data, error } = await sb
