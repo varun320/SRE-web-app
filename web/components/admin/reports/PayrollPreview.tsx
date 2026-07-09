@@ -134,12 +134,14 @@ function Th({ children, align = 'left', hint }: { children: React.ReactNode; ali
   );
 }
 
+// Metric tiles follow DESIGN.md § 3.5 KPI treatment — one accent, tone via
+// the icon and value color rather than a colored ring stripe. Kept simple.
 const METRIC_TONES = {
-  blue:    { ring: 'ring-blue-500/20',    icon: 'text-blue-600 dark:text-blue-300' },
-  violet:  { ring: 'ring-violet-500/20',  icon: 'text-violet-600 dark:text-violet-300' },
-  emerald: { ring: 'ring-emerald-500/20', icon: 'text-emerald-600 dark:text-emerald-300' },
-  amber:   { ring: 'ring-amber-500/20',   icon: 'text-amber-600 dark:text-amber-300' },
-  muted:   { ring: 'ring-[var(--color-border)]', icon: 'text-[var(--color-text-muted)]' },
+  blue:    { icon: 'text-[var(--color-status-submitted-fg)]' },
+  violet:  { icon: 'text-[var(--color-accent)]' },
+  emerald: { icon: 'text-[var(--color-status-approved-fg)]' },
+  amber:   { icon: 'text-[var(--color-status-declined-fg)]' },
+  muted:   { icon: 'text-[var(--color-text-muted)]' },
 } as const;
 
 function Metric({
@@ -157,12 +159,12 @@ function Metric({
 }) {
   const t = METRIC_TONES[tone];
   return (
-    <div className={`rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4 ring-1 ring-inset ${t.ring}`}>
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{label}</span>
+        <span className="text-caption text-[var(--color-text-muted)]">{label}</span>
         <Icon className={`h-4 w-4 ${t.icon}`} />
       </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+      <div className="mt-1 font-mono tabular text-[28px] font-medium leading-none">
         {typeof value === 'number' && suffix ? value.toFixed(2) : value}
         {suffix ? <span className="text-sm text-[var(--color-text-muted)] font-normal ml-0.5">{suffix}</span> : null}
       </div>
@@ -172,10 +174,12 @@ function Metric({
 
 function Delta({ earned, used }: { earned: number; used: number }) {
   const net = earned - used;
-  if (net === 0) return <span className="text-[var(--color-text-muted)]">0.00</span>;
+  if (net === 0) return <span className="col-muted">0.00</span>;
   const sign = net > 0 ? '+' : '−';
-  const tone = net > 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300';
-  return <span className={tone}>{sign}{Math.abs(net).toFixed(2)}</span>;
+  const color = net > 0
+    ? 'text-[var(--color-status-approved-fg)]'
+    : 'text-[var(--color-status-declined-fg)]';
+  return <span className={color}>{sign}{Math.abs(net).toFixed(2)}</span>;
 }
 
 function nullable(v: number | null): string {

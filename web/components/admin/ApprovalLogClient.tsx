@@ -132,18 +132,18 @@ export function ApprovalLogClient({ rows }: { rows: ApprovalLogRow[] }) {
       {filtered.length === 0 ? (
         <Empty />
       ) : (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="text-left px-3 py-2.5 font-normal">When</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Action</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Employee</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Week</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Totals</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Actor</th>
-                  <th className="text-left px-3 py-2.5 font-normal">Note</th>
+                  <th>When</th>
+                  <th>Action</th>
+                  <th>Employee</th>
+                  <th>Week</th>
+                  <th>Totals</th>
+                  <th>Actor</th>
+                  <th>Note</th>
                 </tr>
               </thead>
               <tbody>

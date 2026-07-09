@@ -164,10 +164,10 @@ export default async function AdminHome({
 }
 
 const TONE_STYLES = {
-  info:    { ring: 'ring-blue-500/20',    icon: 'text-blue-600 dark:text-blue-300' },
-  success: { ring: 'ring-emerald-500/20', icon: 'text-emerald-600 dark:text-emerald-300' },
-  danger:  { ring: 'ring-red-500/20',     icon: 'text-red-600 dark:text-red-300' },
-  muted:   { ring: 'ring-[var(--color-border)]', icon: 'text-[var(--color-text-muted)]' },
+  info:    { icon: 'text-[var(--color-status-submitted-fg)]' },
+  success: { icon: 'text-[var(--color-status-approved-fg)]' },
+  danger:  { icon: 'text-[var(--color-status-declined-fg)]' },
+  muted:   { icon: 'text-[var(--color-text-muted)]' },
 } as const;
 
 function StatCard({
@@ -183,12 +183,12 @@ function StatCard({
 }) {
   const styles = TONE_STYLES[tone];
   return (
-    <div className={`rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4 ring-1 ring-inset ${styles.ring}`}>
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{label}</span>
+        <span className="text-caption text-[var(--color-text-muted)]">{label}</span>
         <Icon className={`h-4 w-4 ${styles.icon}`} />
       </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{value}</div>
+      <div className="mt-1 font-mono tabular text-[28px] font-medium leading-none">{value}</div>
     </div>
   );
 }
