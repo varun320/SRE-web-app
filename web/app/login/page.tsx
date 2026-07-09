@@ -48,12 +48,11 @@ export default function LoginPage() {
       {/* Editorial hero + form, stacked in one column */}
       <section className="relative z-10 w-full max-w-md flex flex-col items-center gap-8">
         <div className="text-center">
-          <h1 className="text-[44px] md:text-[56px] font-semibold tracking-tight leading-[1.03]">
-            Close the week
-            <br />
+          <h1 className="text-[28px] md:text-[32px] font-semibold tracking-tight leading-[1.2]">
+            Close the week{' '}
             <span className="text-[var(--color-accent)]">without the spreadsheet.</span>
           </h1>
-          <p className="mt-4 text-body-lg text-[var(--color-text-muted)] leading-relaxed max-w-[38ch] mx-auto">
+          <p className="mt-3 text-body text-[var(--color-text-muted)] leading-relaxed max-w-[42ch] mx-auto">
             The in-house system for logging hours, tracking TIL, and approving weeks at Sulfur Recovery Engineering.
           </p>
         </div>

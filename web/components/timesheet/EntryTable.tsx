@@ -162,17 +162,17 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
             {/* Sticky header — stays just below the 48 px app header on scroll. */}
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
               <tr>
-                <Th sticky className="text-left px-2 py-2">Category</Th>
-                <Th sticky className="text-left px-2 py-2">Project #</Th>
-                <Th sticky className="px-0.5 py-2">Mon</Th>
-                <Th sticky className="px-0.5 py-2">Tue</Th>
-                <Th sticky className="px-0.5 py-2">Wed</Th>
-                <Th sticky className="px-0.5 py-2">Thu</Th>
-                <Th sticky className="px-0.5 py-2">Fri</Th>
-                <Th sticky className="px-0.5 py-2">Sat</Th>
-                <Th sticky className="px-0.5 py-2">Sun</Th>
-                <Th sticky className="text-left px-2 py-2">Description</Th>
-                <Th sticky className="text-right px-2 py-2">Total</Th>
+                <Th className="text-left px-2 py-2">Category</Th>
+                <Th className="text-left px-2 py-2">Project #</Th>
+                <Th className="px-0.5 py-2">Mon</Th>
+                <Th className="px-0.5 py-2">Tue</Th>
+                <Th className="px-0.5 py-2">Wed</Th>
+                <Th className="px-0.5 py-2">Thu</Th>
+                <Th className="px-0.5 py-2">Fri</Th>
+                <Th className="px-0.5 py-2">Sat</Th>
+                <Th className="px-0.5 py-2">Sun</Th>
+                <Th className="text-left px-2 py-2">Description</Th>
+                <Th className="text-right px-2 py-2">Total</Th>
               </tr>
             </thead>
             <tbody>
@@ -237,12 +237,11 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
   );
 }
 
-function Th({ sticky, className = '', children }: { sticky?: boolean; className?: string; children: React.ReactNode }) {
+function Th({ className = '', children }: { className?: string; children: React.ReactNode }) {
   return (
     <th
       className={[
-        'font-normal bg-[var(--color-surface-2)]/80 backdrop-blur-sm border-b border-[var(--color-border-soft)]',
-        sticky ? 'sticky top-12 z-10' : '',
+        'font-normal bg-[var(--color-surface-2)]/50 border-b border-[var(--color-border-soft)]',
         className,
       ].join(' ')}
     >
@@ -256,7 +255,7 @@ function TotalCell({ colSpan, className = '', children }: { colSpan?: number; cl
     <td
       colSpan={colSpan}
       className={[
-        'sticky bottom-0 z-10 bg-[var(--color-surface-2)]/95 backdrop-blur-sm border-t border-[var(--color-border)] px-2 py-2.5',
+        'bg-[var(--color-surface-2)]/40 border-t border-[var(--color-border)] px-2 py-2.5',
         className,
       ].join(' ')}
     >
