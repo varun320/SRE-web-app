@@ -127,7 +127,7 @@ export function SnakeGame({ onClose }: Props) {
       className="fixed inset-0 z-[200] grid place-items-center bg-black/40 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] border border-[var(--color-border-soft)] p-4 space-y-3 max-w-md w-full">
+      <div className="bg-[var(--color-surface)] rounded-[var(--radius-lg)] shadow-[var(--shadow-elevation)] border border-[var(--color-border-soft)] p-4 space-y-3 max-w-md w-full">
         <header className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2">

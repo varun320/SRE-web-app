@@ -24,7 +24,7 @@ export function InfoHint({ label, children }: InfoHintProps) {
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="start" className="z-50">
           <Popover.Popup
-            className="max-w-[240px] rounded-[var(--radius)] px-3 py-2 text-xs leading-snug shadow-[var(--shadow-card)] ring-1 ring-[var(--color-border)]"
+            className="max-w-[240px] rounded-[var(--radius)] px-3 py-2 text-xs leading-snug shadow-[var(--shadow-elevation)] ring-1 ring-[var(--color-border)]"
             style={{
               background: 'var(--color-surface)',
               color: 'var(--color-text)',

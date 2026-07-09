@@ -44,7 +44,12 @@
 
   --radius: 8px;
   --radius-lg: 12px;
-  --shadow-card: 0 1px 2px oklch(20% 0.02 80 / 0.04), 0 4px 12px oklch(20% 0.02 80 / 0.04);
+  /* Per DESIGN.md § 3.4: cards do not float — no shadow. Border alone
+     provides separation. --shadow-card kept only for legacy classNames
+     but resolves to none. Real floating chrome (popovers, dialogs,
+     sticky action bars) uses --shadow-elevation instead. */
+  --shadow-card: none;
+  --shadow-elevation: 0 1px 2px oklch(20% 0.02 80 / 0.06), 0 8px 24px oklch(20% 0.02 80 / 0.08);
 
   --duration-fast: 120ms;
   --duration-normal: 220ms;
@@ -90,5 +95,6 @@
   --color-cat-office-fg:     oklch(80% 0.10 150);
   --color-cat-office-border: oklch(55% 0.13 150);
 
-  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.3), 0 4px 12px oklch(0% 0 0 / 0.2);
+  --shadow-card: none;
+  --shadow-elevation: 0 2px 4px oklch(0% 0 0 / 0.35), 0 12px 32px oklch(0% 0 0 / 0.25);
 }

@@ -44,7 +44,7 @@ export function DecisionBar({ timesheetId, status }: Props) {
   });
 
   return (
-    <div className="sticky bottom-4 mx-3 md:mx-4 mb-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur shadow-[var(--shadow-card)] p-3 md:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div className="sticky bottom-4 mx-3 md:mx-4 mb-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur shadow-[var(--shadow-elevation)] p-3 md:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div className="flex items-center gap-2 text-sm">
         <span className="text-[var(--color-text-muted)]">Status:</span>
         <StatusBadge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</StatusBadge>
