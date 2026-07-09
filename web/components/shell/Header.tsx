@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import {
   CalendarDays,
+  ChevronDown,
   Clock,
   Home,
   Palmtree,
@@ -15,6 +16,7 @@ import {
   LogOut,
   Bell,
   Plug,
+  User,
 } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
@@ -37,44 +39,23 @@ interface NavItem {
   match: (pathname: string) => boolean;
 }
 
-const BASE_NAV: NavItem[] = [
-  {
-    href: '/home',
-    label: 'Home',
-    icon: Home,
-    match: (p) => p === '/home' || p === '/',
-  },
-  {
-    href: '/week/current',
-    label: 'Week',
-    icon: CalendarDays,
-    match: (p) => p.startsWith('/week'),
-  },
-  {
-    href: '/me/til',
-    label: 'TIL bank',
-    icon: Clock,
-    match: (p) => p.startsWith('/me/til'),
-  },
-  {
-    href: '/me/vacation',
-    label: 'Vacation',
-    icon: Palmtree,
-    match: (p) => p.startsWith('/me/vacation'),
-  },
-  {
-    href: '/expenses',
-    label: 'Expenses',
-    icon: Receipt,
-    match: (p) => p.startsWith('/expenses'),
-  },
+// Top-level tabs. TIL bank + Vacation intentionally live under the Me dropdown
+// (they're already surfaced as cards on /home) to keep the top bar to four
+// primary tabs: Home, Week, Expenses, Admin.
+const TOP_NAV: NavItem[] = [
+  { href: '/home',          label: 'Home',     icon: Home,         match: (p) => p === '/home' || p === '/' },
+  { href: '/week/current',  label: 'Week',     icon: CalendarDays, match: (p) => p.startsWith('/week') },
+  { href: '/expenses',      label: 'Expenses', icon: Receipt,      match: (p) => p.startsWith('/expenses') },
+];
+
+const ME_NAV: NavItem[] = [
+  { href: '/me/til',           label: 'TIL bank',      icon: Clock,    match: (p) => p.startsWith('/me/til') },
+  { href: '/me/vacation',      label: 'Vacation',      icon: Palmtree, match: (p) => p.startsWith('/me/vacation') },
+  { href: '/me/notifications', label: 'Notifications', icon: Bell,     match: (p) => p.startsWith('/me/notifications') },
 ];
 
 const ADMIN_ITEM: NavItem = {
-  href: '/admin',
-  label: 'Admin',
-  icon: Shield,
-  match: (p) => p.startsWith('/admin'),
+  href: '/admin', label: 'Admin', icon: Shield, match: (p) => p.startsWith('/admin'),
 };
 
 interface HeaderProps {
@@ -89,10 +70,11 @@ export function Header({ email, isAdmin }: HeaderProps) {
   const idle = useIdle(30_000);
   const wiggle = idle && !snakeOpen;
   const tapStreak = useRef<number[]>([]);
-  const items = isAdmin ? [...BASE_NAV, ADMIN_ITEM] : BASE_NAV;
+
+  const topItems: NavItem[] = isAdmin ? [...TOP_NAV, ADMIN_ITEM] : TOP_NAV;
+  const meActive = ME_NAV.some((it) => it.match(pathname));
   const initial = (email?.[0] ?? '?').toUpperCase();
 
-  // Easter egg: tap the SRE glyph 5 times within 2s to launch Snake.
   const onBrandTap = () => {
     const now = Date.now();
     tapStreak.current = [...tapStreak.current.filter((t) => now - t < 2000), now];
@@ -102,28 +84,21 @@ export function Header({ email, isAdmin }: HeaderProps) {
     }
   };
 
-  // Close drawer on route change
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  // Lock body scroll when drawer is open
+  useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-surface)_82%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-[color-mix(in_oklab,var(--color-surface)_72%,transparent)]">
-      <div className="w-full px-3 md:px-4 h-14 flex items-center gap-3">
-        {/* Brand — tap the glyph 5× quickly to summon Snake */}
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-surface)_88%,transparent)] backdrop-blur">
+      <div className="w-full px-3 md:px-4 h-12 flex items-center gap-2">
+        {/* Brand — 5× tap the glyph for Snake */}
         <Link
-          href="/week/current"
-          className="flex items-center gap-2 font-semibold tracking-tight"
+          href="/home"
+          className="flex items-center gap-2 font-semibold tracking-tight text-[var(--color-text)]"
         >
           <span
             aria-hidden
@@ -137,27 +112,28 @@ export function Header({ email, isAdmin }: HeaderProps) {
           >
             SRE
           </span>
-          <span className="hidden sm:inline">Timesheet</span>
+          <span className="hidden sm:inline text-sm">SRE</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 ml-4">
-          {items.map((it) => (
+        <nav className="hidden md:flex items-center gap-0.5 ml-3">
+          {topItems.map((it) => (
             <NavLink key={it.href} item={it} active={it.match(pathname)} />
           ))}
+          <MeDropdown items={ME_NAV} active={meActive} pathname={pathname} />
         </nav>
 
         <div className="flex-1" />
 
         {/* Right cluster — desktop */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1">
           <NotificationsBell />
           <HelpButton />
-          <UserMenu email={email} initial={initial} />
+          <UserMenu email={email} initial={initial} isAdmin={isAdmin} />
         </div>
 
         {/* Mobile actions */}
-        <div className="flex md:hidden items-center gap-1">
+        <div className="flex md:hidden items-center gap-0.5">
           <NotificationsBell />
           <HelpButton />
           <button
@@ -172,16 +148,16 @@ export function Header({ email, isAdmin }: HeaderProps) {
         </div>
       </div>
 
-      {/* Easter egg: hidden Snake game */}
       {snakeOpen ? <SnakeGame onClose={() => setSnakeOpen(false)} /> : null}
 
-      {/* Mobile drawer */}
       <MobileDrawer
         open={open}
         onClose={() => setOpen(false)}
-        items={items}
+        topItems={topItems}
+        meItems={ME_NAV}
         pathname={pathname}
         email={email}
+        isAdmin={isAdmin}
       />
     </header>
   );
@@ -194,19 +170,68 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? 'page' : undefined}
       className={[
-        'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors',
+        'relative inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
         active
-          ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-medium'
-          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
+          ? 'text-[var(--color-text)] font-medium'
+          : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
       ].join(' ')}
     >
       <Icon className="h-3.5 w-3.5" />
       {item.label}
+      {active ? (
+        <span
+          aria-hidden
+          className="absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
+          style={{ background: 'var(--color-accent)' }}
+        />
+      ) : null}
     </Link>
   );
 }
 
-function UserMenu({ email, initial }: { email: string; initial: string }) {
+function MeDropdown({ items, active, pathname }: { items: NavItem[]; active: boolean; pathname: string }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={[
+          'relative inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+          active
+            ? 'text-[var(--color-text)] font-medium'
+            : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
+        ].join(' ')}
+      >
+        <User className="h-3.5 w-3.5" />
+        Me
+        <ChevronDown className="h-3 w-3 opacity-60" />
+        {active ? (
+          <span
+            aria-hidden
+            className="absolute left-2 right-2 -bottom-[9px] h-[2px] rounded-t"
+            style={{ background: 'var(--color-accent)' }}
+          />
+        ) : null}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" sideOffset={8} className="min-w-44">
+        {items.map((it) => {
+          const Icon = it.icon;
+          const isActive = it.match(pathname);
+          return (
+            <DropdownMenuItem
+              key={it.href}
+              onClick={() => { window.location.href = it.href; }}
+              className={isActive ? 'font-medium text-[var(--color-accent)]' : ''}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {it.label}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function UserMenu({ email, initial, isAdmin }: { email: string; initial: string; isAdmin?: boolean }) {
   const formRef = useRef<HTMLFormElement>(null);
   return (
     <>
@@ -214,27 +239,30 @@ function UserMenu({ email, initial }: { email: string; initial: string }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label="Account menu"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-xs font-semibold text-[var(--color-text)] ring-1 ring-[var(--color-border)] hover:ring-[var(--color-accent)] transition-colors"
+          className="relative inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-xs font-semibold text-[var(--color-text)] ring-1 ring-[var(--color-border)] hover:ring-[var(--color-accent)] transition-colors"
         >
           {initial}
+          {isAdmin ? (
+            <span
+              aria-hidden
+              className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--color-surface)]"
+              style={{ background: 'var(--color-accent)' }}
+              title="Admin"
+            />
+          ) : null}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" sideOffset={8} className="min-w-56">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="text-xs text-[var(--color-text-muted)] font-normal">
-                Signed in as
-              </span>
-              <span className="truncate text-sm text-[var(--color-text)]">
-                {email}
+              <span className="text-xs text-[var(--color-text-muted)] font-normal">Signed in as</span>
+              <span className="truncate text-sm text-[var(--color-text)]">{email}</span>
+              <span className="mt-1 inline-flex w-fit rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+                {isAdmin ? 'Admin' : 'Employee'}
               </span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              window.location.href = '/mcp-setup';
-            }}
-          >
+          <DropdownMenuItem onClick={() => { window.location.href = '/mcp-setup'; }}>
             <Plug className="h-3.5 w-3.5" />
             Claude connector
           </DropdownMenuItem>
@@ -252,28 +280,28 @@ function UserMenu({ email, initial }: { email: string; initial: string }) {
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
-  items: NavItem[];
+  topItems: NavItem[];
+  meItems: NavItem[];
   pathname: string;
   email: string;
+  isAdmin?: boolean;
 }
 
-function MobileDrawer({ open, onClose, items, pathname, email }: MobileDrawerProps) {
+function MobileDrawer({ open, onClose, topItems, meItems, pathname, email, isAdmin }: MobileDrawerProps) {
   return (
     <div
       className={[
-        'md:hidden fixed inset-x-0 top-14 bottom-0 z-30 transition-opacity',
+        'md:hidden fixed inset-x-0 top-12 bottom-0 z-30 transition-opacity',
         open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
       ].join(' ')}
       aria-hidden={!open}
     >
-      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close menu"
         onClick={onClose}
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
       />
-      {/* Panel */}
       <div
         className={[
           'absolute inset-x-0 top-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] shadow-lg',
@@ -281,46 +309,21 @@ function MobileDrawer({ open, onClose, items, pathname, email }: MobileDrawerPro
           open ? 'translate-y-0' : '-translate-y-2',
         ].join(' ')}
       >
-        <nav className="flex flex-col p-3 gap-1">
-          {items.map((it) => {
-            const Icon = it.icon;
-            const active = it.match(pathname);
-            return (
-              <Link
-                key={it.href}
-                href={it.href}
-                aria-current={active ? 'page' : undefined}
-                className={[
-                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors',
-                  active
-                    ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-medium'
-                    : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
-                ].join(' ')}
-              >
-                <Icon className="h-4 w-4" />
-                {it.label}
-              </Link>
-            );
-          })}
-          <Link
-            href="/me/notifications"
-            aria-current={pathname.startsWith('/me/notifications') ? 'page' : undefined}
-            className={[
-              'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors',
-              pathname.startsWith('/me/notifications')
-                ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-medium'
-                : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
-            ].join(' ')}
-          >
-            <Bell className="h-4 w-4" />
-            Notifications
-          </Link>
+        <nav className="flex flex-col p-3 gap-0.5">
+          {topItems.map((it) => (
+            <DrawerLink key={it.href} item={it} pathname={pathname} />
+          ))}
+          <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Me</div>
+          {meItems.map((it) => (
+            <DrawerLink key={it.href} item={it} pathname={pathname} />
+          ))}
           <div className="my-2 h-px bg-[var(--color-border-soft)]" />
           <div className="px-3 pt-1 pb-2">
-            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
-              Signed in as
-            </div>
+            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Signed in as</div>
             <div className="truncate text-sm text-[var(--color-text)]">{email}</div>
+            <span className="mt-1 inline-flex w-fit rounded-full bg-[var(--color-surface-2)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+              {isAdmin ? 'Admin' : 'Employee'}
+            </span>
           </div>
           <form action="/auth/signout" method="post">
             <button
@@ -334,5 +337,25 @@ function MobileDrawer({ open, onClose, items, pathname, email }: MobileDrawerPro
         </nav>
       </div>
     </div>
+  );
+}
+
+function DrawerLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  const Icon = item.icon;
+  const active = item.match(pathname);
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? 'page' : undefined}
+      className={[
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+        active
+          ? 'bg-[var(--color-accent-tint)] text-[var(--color-accent)] font-medium'
+          : 'text-[var(--color-text)] hover:bg-[var(--color-surface-2)]',
+      ].join(' ')}
+    >
+      <Icon className="h-4 w-4" />
+      {item.label}
+    </Link>
   );
 }
