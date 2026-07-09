@@ -65,7 +65,7 @@ export function WeekPicker({ weekStart, currentMonday }: Props) {
             if (!v) return;
             go(mondayFromDate(v));
           }}
-          className="bg-transparent text-sm outline-none"
+          className="bg-transparent text-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/30 rounded"
           aria-label="Pick any date in the week"
         />
       </label>

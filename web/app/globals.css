@@ -242,6 +242,21 @@ body {
   @keyframes confetti-fall { 0%, 100% { opacity: 0; } }
 }
 
+/* Global reduced-motion fallback — respect user preference across every
+   transition and animation, not just the ones the per-component blocks
+   below cover. Uses 0.01 ms so layout doesn't thrash on 0-duration in
+   some engines. Scroll behaviour reset for anchor-jumps. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @keyframes brand-wiggle {
   0%, 70%, 100% { transform: rotate(0deg); }
   75%  { transform: rotate(-9deg) scale(1.05); }
