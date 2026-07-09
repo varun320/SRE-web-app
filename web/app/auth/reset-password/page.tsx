@@ -69,7 +69,7 @@ function ResetPasswordInner() {
               <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-accent-tint)] text-[var(--color-accent)]">
                 <Lock className="h-4 w-4" />
               </div>
-              <h1 className="mt-3 text-2xl font-semibold tracking-tight">Set a new password</h1>
+              <h1 className="mt-3 text-h1">Set a new password</h1>
               <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                 Pick something at least 8 characters long. You&apos;ll be signed in automatically once it&apos;s saved.
               </p>

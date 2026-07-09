@@ -36,7 +36,7 @@ export default async function WeekPage({ params }: PageProps) {
     <main className="w-full">
       <div className="px-3 md:px-4 pt-6 pb-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Week of {week_start}</h1>
+          <h1 className="text-h1">Week of {week_start}</h1>
           <WeekPicker weekStart={week_start} currentMonday={currentMonday()} />
         </div>
         <a href={`/week/${week_start}/report`} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-4 hover:underline">

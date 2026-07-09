@@ -170,7 +170,7 @@ function Stat({ action, count }: { action: string; count: number }) {
       >
         {ACTION_LABEL[action]}
       </div>
-      <div className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{count}</div>
+      <div className="mt-1 text-h1 tabular-nums">{count}</div>
     </div>
   );
 }

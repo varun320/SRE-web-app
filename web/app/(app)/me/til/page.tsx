@@ -26,7 +26,7 @@ export default async function TilPage() {
               <Clock4 className="h-3.5 w-3.5" />
               Time-In-Lieu (TIL) bank
             </div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Your overtime savings account</h1>
+            <h1 className="mt-1 text-h1">Your overtime savings account</h1>
             <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
               Every hour you work above 8 in a day gets added here automatically when your week is approved.
               Spend it later by logging <strong>Overtime Taken</strong> or <strong>TIL Payout</strong> under

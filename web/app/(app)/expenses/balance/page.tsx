@@ -37,7 +37,7 @@ export default async function BalancePage() {
       </div>
 
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
-        <h1 className="text-2xl font-semibold tracking-tight">Balance & Interest</h1>
+        <h1 className="text-h1">Balance & Interest</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Interest = <code>unpaid × (days_overdue / 365) × APR</code>. Payments made before the 30-day due
           date reduce the balance and stop the interest clock.

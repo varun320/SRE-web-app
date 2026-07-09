@@ -27,7 +27,7 @@ export default async function VacationPage() {
               <Palmtree className="h-3.5 w-3.5" />
               Vacation hours
             </div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Your time off this year</h1>
+            <h1 className="mt-1 text-h1">Your time off this year</h1>
             <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
               Your annual entitlement is set by your position. To use vacation, log{' '}
               <strong>Vacation Hours</strong> under the Admin category on a timesheet — the hours come

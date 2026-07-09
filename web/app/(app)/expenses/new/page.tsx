@@ -16,7 +16,7 @@ export default async function NewExpensePage() {
         <ArrowLeft className="h-4 w-4" /> Back to expenses
       </Link>
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
-        <h1 className="text-2xl font-semibold tracking-tight">New expense report</h1>
+        <h1 className="text-h1">New expense report</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           One row per line item — date, category, description, card, amount. Save as draft or submit for approval.
         </p>

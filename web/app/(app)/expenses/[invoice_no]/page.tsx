@@ -38,7 +38,7 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{report.invoice_no}</h1>
+            <h1 className="text-h1">{report.invoice_no}</h1>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               {report.period_from} → {report.period_to} • submitted {report.submission_date}
             </p>

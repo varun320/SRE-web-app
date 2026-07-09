@@ -45,7 +45,7 @@ export default async function ExpensesPage() {
               <Receipt className="h-3.5 w-3.5" />
               Expense reports
             </div>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Your monthly submissions</h1>
+            <h1 className="mt-1 text-h1">Your monthly submissions</h1>
             <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
               One row per monthly expense report. Submit by the 30th of each month; interest accrues
               on any unpaid balance after Net-30.

@@ -84,7 +84,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Welcome back</h2>
+            <h2 className="text-h1">Welcome back</h2>
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               Sign in with your work email to continue.
             </p>

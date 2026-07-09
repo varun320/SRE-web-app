@@ -26,7 +26,7 @@ export default async function ExpenseSettingsPage() {
       </Link>
 
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Expense settings</h1>
+        <h1 className="text-h1">Expense settings</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Register the credit cards you use for company purchases and set the interest rate that applies to any unpaid balance after Net-30.
         </p>

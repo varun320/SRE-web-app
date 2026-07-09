@@ -29,7 +29,7 @@ export function PeriodSummary({ employee, from, to, rows }: Props) {
           <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
             Sulfur Recovery Engineering Inc.
           </div>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Period summary</h1>
+          <h1 className="mt-1 text-h1">Period summary</h1>
           <div className="mt-2 text-sm text-[var(--color-text-muted)]">
             {from} → {to}
           </div>

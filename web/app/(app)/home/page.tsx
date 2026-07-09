@@ -57,7 +57,7 @@ export default async function HomePage() {
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Home</h1>
+        <h1 className="text-h1">Home</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Snapshot of your week — timesheet, balances, and expenses at a glance.
         </p>

@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <main className="w-full">
       <div className="px-3 md:px-4 pt-4 md:pt-6 pb-3 flex items-baseline justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
+        <h1 className="text-h1">Admin</h1>
       </div>
       <AdminSubnav />
       {children}
