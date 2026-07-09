@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { signInWithPassword, sendMagicLink, sendPasswordReset } from './actions';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Clock4, FileSpreadsheet, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const [pending, start] = useTransition();
@@ -16,79 +15,50 @@ export default function LoginPage() {
     typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('next') ?? '' : '';
 
   return (
-    <main className="min-h-dvh grid md:grid-cols-2 bg-[var(--color-surface)]">
-      {/* Brand panel */}
-      <aside className="hidden md:flex flex-col justify-between p-10 lg:p-14 bg-gradient-to-br from-[var(--color-accent-tint)] via-[var(--color-surface)] to-[var(--color-surface-2)] relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 font-semibold tracking-tight">
-            <span
-              aria-hidden
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white"
-              style={{ background: 'var(--color-accent)' }}
-            >
-              SRE
-            </span>
-            <span>Sulfur Recovery</span>
-          </div>
-        </div>
+    <main className="relative min-h-dvh flex flex-col items-center justify-between overflow-hidden bg-[var(--color-surface)] px-6 py-10">
+      {/* Soft radial glow — the identity moment. No hard divider anywhere. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] opacity-70"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 55% at 50% 20%, var(--color-accent-tint) 0%, transparent 70%)',
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 left-1/2 -translate-x-1/2 h-[420px] w-[820px] rounded-full opacity-20 blur-3xl"
+        style={{ background: 'var(--color-accent)' }}
+      />
 
-        <div className="relative z-10 max-w-md">
-          <h1 className="text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05]">
+      {/* Brand mark, small, top */}
+      <header className="relative z-10 w-full max-w-md flex justify-center">
+        <div className="flex items-center gap-2 font-semibold tracking-tight">
+          <span
+            aria-hidden
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white"
+            style={{ background: 'var(--color-accent)' }}
+          >
+            SRE
+          </span>
+          <span>Sulfur Recovery</span>
+        </div>
+      </header>
+
+      {/* Editorial hero + form, stacked in one column */}
+      <section className="relative z-10 w-full max-w-md flex flex-col items-center gap-8">
+        <div className="text-center">
+          <h1 className="text-[44px] md:text-[56px] font-semibold tracking-tight leading-[1.03]">
             Close the week
             <br />
             <span className="text-[var(--color-accent)]">without the spreadsheet.</span>
           </h1>
-          <p className="mt-5 text-body-lg text-[var(--color-text-muted)] leading-relaxed max-w-[36ch]">
-            The in-house system for logging hours, tracking TIL, and approving weeks at Sulfur
-            Recovery Engineering. One place. Print-ready when the audit binder needs it.
+          <p className="mt-4 text-body-lg text-[var(--color-text-muted)] leading-relaxed max-w-[38ch] mx-auto">
+            The in-house system for logging hours, tracking TIL, and approving weeks at Sulfur Recovery Engineering.
           </p>
-
-          <ul className="mt-6 space-y-2.5 text-sm">
-            <Feature icon={Clock4} label="Auto-computed TIL + vacation balances" />
-            <Feature icon={FileSpreadsheet} label="Excel-aware category palette & overtime rules" />
-            <Feature icon={Lock} label="Immutable approval audit trail" />
-          </ul>
         </div>
 
-        <p className="relative z-10 text-xs text-[var(--color-text-muted)]">
-          © {new Date().getFullYear()} Sulfur Recovery Engineering Inc.
-        </p>
-
-        {/* Decorative gradient orbs */}
-        <div
-          aria-hidden
-          className="absolute -top-32 -right-32 h-72 w-72 rounded-full opacity-40 blur-3xl"
-          style={{ background: 'var(--color-accent)' }}
-        />
-        <div
-          aria-hidden
-          className="absolute -bottom-24 -left-16 h-64 w-64 rounded-full opacity-25 blur-3xl"
-          style={{ background: 'var(--color-cat-office-border)' }}
-        />
-      </aside>
-
-      {/* Form panel */}
-      <section className="flex items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm space-y-6">
-          {/* Mobile brand */}
-          <div className="md:hidden flex items-center gap-2 font-semibold tracking-tight">
-            <span
-              aria-hidden
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white"
-              style={{ background: 'var(--color-accent)' }}
-            >
-              SRE
-            </span>
-            <span>Sulfur Recovery</span>
-          </div>
-
-          <div>
-            <h2 className="text-h1">Welcome back</h2>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-              Sign in with your work email to continue.
-            </p>
-          </div>
-
+        <div className="w-full rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur-sm p-5 md:p-6">
           <Tabs defaultValue="password">
             <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="password">Password</TabsTrigger>
@@ -114,7 +84,7 @@ export default function LoginPage() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required autoComplete="current-password" />
                 </div>
-                <Button type="submit" disabled={pending} className="w-full">
+                <Button type="submit" size="md" disabled={pending} className="w-full">
                   {pending ? 'Signing in…' : 'Sign in'}
                 </Button>
                 <div className="text-right pt-1">
@@ -141,7 +111,7 @@ export default function LoginPage() {
                   <Label htmlFor="magic-email">Email</Label>
                   <Input id="magic-email" name="email" type="email" required autoComplete="email" placeholder="you@sulfurrecovery.com" />
                 </div>
-                <Button type="submit" disabled={pending || magicSent} className="w-full">
+                <Button type="submit" size="md" disabled={pending || magicSent} className="w-full">
                   {magicSent ? 'Link sent' : pending ? 'Sending…' : 'Send magic link'}
                 </Button>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -150,12 +120,17 @@ export default function LoginPage() {
               </form>
             </TabsContent>
           </Tabs>
-
-          <p className="text-xs text-[var(--color-text-muted)] text-center">
-            Need access? Ask your admin to create your account.
-          </p>
         </div>
+
+        <p className="text-xs text-[var(--color-text-muted)] text-center">
+          Need access? Ask your admin to create your account.
+        </p>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 text-[11px] text-[var(--color-text-subtle)] pt-8">
+        © {new Date().getFullYear()} Sulfur Recovery Engineering Inc.
+      </footer>
     </main>
   );
 }
@@ -213,16 +188,5 @@ function ForgotPasswordDialog() {
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Feature({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
-  return (
-    <li className="flex items-center gap-2.5 text-[var(--color-text)]">
-      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-surface)] ring-1 ring-[var(--color-border)] text-[var(--color-accent)]">
-        <Icon className="h-3.5 w-3.5" />
-      </span>
-      {label}
-    </li>
   );
 }
