@@ -59,10 +59,10 @@ export function PayrollPreview({ rows, downloadHref }: Props) {
         </a>
       </div>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+          <table className="data-table">
+            <thead>
               <tr>
                 <Th>Employee</Th>
                 <Th>Pay period</Th>
@@ -75,50 +75,44 @@ export function PayrollPreview({ rows, downloadHref }: Props) {
                 <Th align="right" hint="Vacation bank balance at the end of the latest week in the period.">Vac closing</Th>
               </tr>
             </thead>
-            <tbody className="font-mono tabular-nums">
+            <tbody>
               {rows.map((r) => {
                 const showEmp = r.employee_code !== prevEmp;
                 prevEmp = r.employee_code;
                 return (
-                  <tr
-                    key={`${r.user_id}|${r.period_start}`}
-                    className={[
-                      'border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40',
-                      showEmp ? '' : 'border-t-transparent',
-                    ].join(' ')}
-                  >
-                    <td className="px-3 py-2.5 font-sans">
+                  <tr key={`${r.user_id}|${r.period_start}`}>
+                    <td>
                       {showEmp ? (
                         <>
                           <div className="font-medium">{r.full_name}</div>
-                          <div className="text-[10px] text-[var(--color-text-muted)]">{r.employee_code}</div>
+                          <div className="text-[10px] col-muted font-mono">{r.employee_code}</div>
                         </>
                       ) : (
-                        <div className="text-[10px] text-[var(--color-text-muted)] pl-3">↪</div>
+                        <div className="text-[10px] col-muted pl-3">↪</div>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 font-sans text-xs whitespace-nowrap">
-                      {r.period_start} <span className="text-[var(--color-text-muted)]">→</span> {r.period_end}
+                    <td className="text-xs whitespace-nowrap">
+                      {r.period_start} <span className="col-muted">→</span> {r.period_end}
                     </td>
-                    <td className="text-right px-3 py-2.5">{r.regular_hrs.toFixed(2)}</td>
-                    <td className="text-right px-3 py-2.5">
+                    <td className="num">{r.regular_hrs.toFixed(2)}</td>
+                    <td className="num">
                       {r.overtime_hrs > 0 ? (
-                        <span className="text-amber-700 dark:text-amber-300 font-medium">{r.overtime_hrs.toFixed(2)}</span>
+                        <span className="text-[var(--color-status-declined-fg)] font-medium">{r.overtime_hrs.toFixed(2)}</span>
                       ) : (
-                        <span className="text-[var(--color-text-muted)]">0.00</span>
+                        <span className="col-muted">0.00</span>
                       )}
                     </td>
-                    <td className="text-right px-3 py-2.5">
-                      {r.til_payout_hrs > 0 ? r.til_payout_hrs.toFixed(2) : <span className="text-[var(--color-text-muted)]">0.00</span>}
+                    <td className="num">
+                      {r.til_payout_hrs > 0 ? r.til_payout_hrs.toFixed(2) : <span className="col-muted">0.00</span>}
                     </td>
-                    <td className="text-right px-3 py-2.5">
+                    <td className="num">
                       <Delta earned={r.til_earned_delta} used={r.til_used_delta} />
                     </td>
-                    <td className="text-right px-3 py-2.5">{nullable(r.til_closing)}</td>
-                    <td className="text-right px-3 py-2.5">
-                      {r.vacation_used_delta > 0 ? r.vacation_used_delta.toFixed(2) : <span className="text-[var(--color-text-muted)]">0.00</span>}
+                    <td className="num">{nullable(r.til_closing)}</td>
+                    <td className="num">
+                      {r.vacation_used_delta > 0 ? r.vacation_used_delta.toFixed(2) : <span className="col-muted">0.00</span>}
                     </td>
-                    <td className="text-right px-3 py-2.5">{nullable(r.vacation_closing)}</td>
+                    <td className="num">{nullable(r.vacation_closing)}</td>
                   </tr>
                 );
               })}

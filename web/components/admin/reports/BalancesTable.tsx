@@ -63,33 +63,33 @@ export function BalancesTable({ rows, downloadHref }: Props) {
         </a>
       </div>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+          <table className="data-table">
+            <thead>
               <tr>
                 <Th label="Code"      sortKey="employee_code"    sort={sort} setSort={setSort} />
                 <Th label="Name"      sortKey="full_name"        sort={sort} setSort={setSort} />
-                <th className="text-left px-3 py-2.5 font-normal">Position</th>
+                <th>Position</th>
                 <Th label="TIL"       sortKey="til_closing"      sort={sort} setSort={setSort} align="right" />
                 <Th label="Vacation"  sortKey="vacation_closing" sort={sort} setSort={setSort} align="right" />
-                <th className="text-left px-3 py-2.5 font-normal">As of</th>
+                <th>As of</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((r) => (
-                <tr key={r.user_id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40">
-                  <td className="px-3 py-2.5 font-mono text-xs">{r.employee_code}</td>
-                  <td className="px-3 py-2.5">{r.full_name}</td>
-                  <td className="px-3 py-2.5 text-[var(--color-text-muted)]">{r.position ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-right font-mono tabular-nums">{r.til_closing.toFixed(2)}</td>
+                <tr key={r.user_id}>
+                  <td className="font-mono text-xs">{r.employee_code}</td>
+                  <td>{r.full_name}</td>
+                  <td className="col-muted">{r.position ?? '—'}</td>
+                  <td className="num">{r.til_closing.toFixed(2)}</td>
                   <td className={[
-                    'px-3 py-2.5 text-right font-mono tabular-nums',
-                    r.vacation_closing < 8 ? 'text-red-700 dark:text-red-300 font-medium' : '',
+                    'num',
+                    r.vacation_closing < 8 ? 'text-[var(--color-status-declined-fg)] font-medium' : '',
                   ].join(' ')}>
                     {r.vacation_closing.toFixed(2)}
                   </td>
-                  <td className="px-3 py-2.5 text-xs text-[var(--color-text-muted)] font-mono">
+                  <td className="text-xs col-muted font-mono">
                     {r.til_week ?? r.vacation_week ?? '—'}
                   </td>
                 </tr>

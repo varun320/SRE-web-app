@@ -176,51 +176,51 @@ export function AllWeeksTable({ rows, employees, filters }: Props) {
           No weeks match the current filters.
         </div>
       ) : (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="text-left px-4 py-2.5 font-normal">Employee</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Week</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Status</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Hours</th>
-                  <th className="text-right px-4 py-2.5 font-normal">Overtime</th>
-                  <th className="text-left px-4 py-2.5 font-normal">Last action</th>
-                  <th className="px-4 py-2.5"></th>
+                  <th>Employee</th>
+                  <th>Week</th>
+                  <th>Status</th>
+                  <th className="num">Hours</th>
+                  <th className="num">Overtime</th>
+                  <th>Last action</th>
+                  <th className="actions"></th>
                 </tr>
               </thead>
               <tbody>
                 {visible.map((r) => (
-                  <tr key={r.id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40">
-                    <td className="px-4 py-2.5">
+                  <tr key={r.id}>
+                    <td>
                       <Link href={`/admin/employees/${r.user_id}/week/${r.week_start}`} className="hover:underline">
                         <div className="font-medium">{r.full_name}</div>
-                        <div className="text-[10px] text-[var(--color-text-muted)] font-mono">{r.employee_code}</div>
+                        <div className="text-[10px] col-muted font-mono">{r.employee_code}</div>
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 font-mono text-xs">{r.week_start}</td>
-                    <td className="px-4 py-2.5">
+                    <td className="font-mono text-xs">{r.week_start}</td>
+                    <td>
                       <StatusBadge tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status]}</StatusBadge>
-                      {r.locked ? <span className="ml-1 text-[10px] text-[var(--color-text-muted)]">· locked</span> : null}
+                      {r.locked ? <span className="ml-1 text-[10px] col-muted">· locked</span> : null}
                       {r.status === 'declined' && r.decline_reason ? (
-                        <div className="mt-0.5 text-[10px] text-[var(--color-text-muted)] truncate max-w-[180px]" title={r.decline_reason}>
+                        <div className="mt-0.5 text-[10px] col-muted truncate max-w-[180px]" title={r.decline_reason}>
                           {r.decline_reason}
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">{r.total_hrs.toFixed(2)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono tabular-nums">
+                    <td className="num">{r.total_hrs.toFixed(2)}</td>
+                    <td className="num">
                       {r.overtime_earned > 0 ? (
-                        <span className="text-amber-700 dark:text-amber-300 font-medium">{r.overtime_earned.toFixed(2)}</span>
+                        <span className="text-[var(--color-status-declined-fg)] font-medium">{r.overtime_earned.toFixed(2)}</span>
                       ) : (
-                        <span className="text-[var(--color-text-muted)]">0.00</span>
+                        <span className="col-muted">0.00</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-xs text-[var(--color-text-muted)] font-mono whitespace-nowrap">
+                    <td className="text-xs col-muted font-mono whitespace-nowrap">
                       {relTime(r.decided_at ?? r.submitted_at)}
                     </td>
-                    <td className="px-4 py-2.5 text-right">
+                    <td className="actions">
                       <Link
                         href={`/admin/employees/${r.user_id}/week/${r.week_start}`}
                         className="text-xs font-medium text-[var(--color-accent)] hover:underline"
