@@ -16,7 +16,7 @@ export async function signInWithPassword(formData: FormData) {
 function safeNext(next: string): string {
   // Only allow same-origin relative paths so we can't be turned into an
   // open redirector by an attacker crafting ?next=https://evil.example.com.
-  if (!next.startsWith('/') || next.startsWith('//')) return '/';
+  if (!next.startsWith('/') || next.startsWith('//')) return '/home';
   return next;
 }
 

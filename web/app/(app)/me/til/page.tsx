@@ -1,5 +1,5 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { Clock4, TrendingUp, TrendingDown, Snowflake } from 'lucide-react';
+import { Clock4 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 
@@ -18,103 +18,87 @@ export default async function TilPage() {
   const usedYtd = live.reduce((sum, r) => sum + Number(r.til_used ?? 0), 0);
 
   return (
-    <main className="w-full px-3 md:px-4 py-5 space-y-6">
-      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-gradient-to-br from-[var(--color-status-approved-bg)] via-[var(--color-surface)] to-[var(--color-surface-2)] p-5 md:p-7 relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
-              <Clock4 className="h-3.5 w-3.5" />
-              Time-In-Lieu (TIL) bank
-            </div>
-            <h1 className="mt-1 text-h1">Your overtime savings account</h1>
-            <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
-              Every hour you work above 8 in a day gets added here automatically when your week is approved.
-              Spend it later by logging <strong>Overtime Taken</strong> or <strong>TIL Payout</strong> under
-              the Admin category.
-            </p>
+    <main className="w-full px-3 md:px-4 py-6 md:py-10 space-y-8">
+      <header className="max-w-3xl">
+        <h1 className="text-h1">TIL bank</h1>
+        <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
+          Every hour above 40 base hours in a week gets added here when the week is approved.
+          Spend it later by logging <strong className="text-[var(--color-text)]">Overtime Taken</strong> or{' '}
+          <strong className="text-[var(--color-text)]">TIL Payout</strong> under the Admin category.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
+        <div className="lift-hover rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-6 md:p-8 flex flex-col gap-3">
+          <div className="text-caption text-[var(--color-text-muted)]">
+            Current balance{current ? ` · as of ${current.week_start}` : ''}
           </div>
-          <div className="text-right">
-            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">Current balance</div>
-            <div className="font-mono tabular-nums text-4xl md:text-5xl font-semibold text-[var(--color-status-approved-fg)]">
+          <div className="flex items-baseline gap-3">
+            <span className="font-mono tabular text-[44px] font-medium leading-none text-[var(--color-status-approved-fg)]">
               {balance.toFixed(2)}
-              <span className="text-base font-normal text-[var(--color-text-muted)] ml-1">hrs</span>
-            </div>
-            {current ? (
-              <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
-                as of week of {current.week_start}
-              </div>
-            ) : null}
+            </span>
+            <span className="text-body-lg text-[var(--color-text-muted)]">hours</span>
           </div>
         </div>
-      </section>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <Stat icon={TrendingUp}  label="OT earned (lifetime)" value={earnedYtd} tone="success" />
-        <Stat icon={TrendingDown} label="TIL used (lifetime)" value={usedYtd} tone="warning" />
-        <Stat icon={Snowflake} label="Closing balance" value={balance} tone="info" />
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-soft)] flex flex-col">
+          <StatRow label="OT earned (lifetime)" value={`${earnedYtd.toFixed(2)} h`} tone="success" />
+          <StatRow label="TIL used (lifetime)"  value={`${usedYtd.toFixed(2)} h`} tone="warning" />
+        </div>
       </div>
 
-      <section className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-medium">Weekly movements</h2>
-          <span className="text-xs text-[var(--color-text-muted)]">
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-h3">Weekly movements</h2>
+          <p className="mt-1 text-body-sm text-[var(--color-text-muted)]">
             Newest first. <em>Superseded</em> rows were replaced by a cascade recompute.
-          </span>
+          </p>
         </div>
         {(rows ?? []).length === 0 ? (
           <EmptyState
             icon={Clock4}
             title="No TIL history yet"
-            description="Once your first week is approved, a ledger row will appear here."
+            description="Once your first week is approved, a ledger row appears here."
           />
         ) : (
-          <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
+              <table className="data-table">
+                <thead>
                   <tr>
-                    <th className="text-left px-4 py-2.5 font-normal">Week of</th>
-                    <th className="text-right px-4 py-2.5 font-normal">Opening</th>
-                    <th className="text-right px-4 py-2.5 font-normal">+ OT earned</th>
-                    <th className="text-right px-4 py-2.5 font-normal">− TIL used</th>
-                    <th className="text-right px-4 py-2.5 font-normal">Closing</th>
-                    <th className="text-left px-4 py-2.5 font-normal">Status</th>
+                    <th>Week of</th>
+                    <th className="num">Opening</th>
+                    <th className="num">+ OT earned</th>
+                    <th className="num">− TIL used</th>
+                    <th className="num">Closing</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
-                <tbody className="font-mono tabular-nums">
+                <tbody>
                   {(rows ?? []).map((r) => {
                     const earned = Number(r.overtime_earned);
                     const used = Number(r.til_used);
                     return (
-                      <tr
-                        key={r.week_start}
-                        className={`border-t border-[var(--color-border-soft)] ${r.stale ? 'opacity-50' : ''}`}
-                      >
-                        <td className="px-4 py-2.5 font-sans">{r.week_start}</td>
-                        <td className="text-right px-4 py-2.5">{Number(r.opening_balance).toFixed(2)}</td>
-                        <td className="text-right px-4 py-2.5">
-                          {earned > 0 ? (
-                            <span className="text-[var(--color-status-approved-fg)]">+{earned.toFixed(2)}</span>
-                          ) : (
-                            <span className="text-[var(--color-text-muted)]">0.00</span>
-                          )}
+                      <tr key={r.week_start} className={r.stale ? 'opacity-50' : ''}>
+                        <td className="font-mono text-xs">{r.week_start}</td>
+                        <td className="num">{Number(r.opening_balance).toFixed(2)}</td>
+                        <td className="num">
+                          {earned > 0
+                            ? <span className="text-[var(--color-status-approved-fg)]">+{earned.toFixed(2)}</span>
+                            : <span className="col-muted">0.00</span>}
                         </td>
-                        <td className="text-right px-4 py-2.5">
-                          {used > 0 ? (
-                            <span className="text-[var(--color-status-declined-fg)]">−{used.toFixed(2)}</span>
-                          ) : (
-                            <span className="text-[var(--color-text-muted)]">0.00</span>
-                          )}
+                        <td className="num">
+                          {used > 0
+                            ? <span className="text-[var(--color-status-declined-fg)]">−{used.toFixed(2)}</span>
+                            : <span className="col-muted">0.00</span>}
                         </td>
-                        <td className="text-right px-4 py-2.5 font-medium">{Number(r.closing_balance).toFixed(2)}</td>
-                        <td className="px-4 py-2.5 font-sans">
-                          {r.stale ? (
-                            <StatusBadge tone="muted">Superseded</StatusBadge>
-                          ) : r.frozen ? (
-                            <StatusBadge tone="info">Frozen</StatusBadge>
-                          ) : (
-                            <StatusBadge tone="neutral">Live</StatusBadge>
-                          )}
+                        <td className="num font-medium">{Number(r.closing_balance).toFixed(2)}</td>
+                        <td>
+                          {r.stale
+                            ? <StatusBadge tone="muted">Superseded</StatusBadge>
+                            : r.frozen
+                              ? <StatusBadge tone="info">Frozen</StatusBadge>
+                              : <StatusBadge tone="neutral">Live</StatusBadge>}
                         </td>
                       </tr>
                     );
@@ -129,33 +113,24 @@ export default async function TilPage() {
   );
 }
 
-const TONE = {
-  success: { ring: '', icon: 'text-[var(--color-status-approved-fg)]' },
-  warning: { ring: '',   icon: 'text-[var(--color-status-declined-fg)]' },
-  info:    { ring: '',    icon: 'text-[var(--color-status-submitted-fg)]' },
-} as const;
-
-function Stat({
-  icon: Icon,
+function StatRow({
   label,
   value,
-  tone,
+  tone = 'neutral',
 }: {
-  icon: React.ComponentType<{ className?: string }>;
   label: string;
-  value: number;
-  tone: keyof typeof TONE;
+  value: string;
+  tone?: 'neutral' | 'success' | 'warning';
 }) {
-  const s = TONE[tone];
+  const color =
+    tone === 'success' ? 'var(--color-status-approved-fg)'
+    : tone === 'warning' ? 'var(--color-status-declined-fg)'
+    : 'var(--color-text)';
   return (
-    <div className={`rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4 ring-1 ring-inset ${s.ring}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{label}</span>
-        <Icon className={`h-4 w-4 ${s.icon}`} />
-      </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
-        {value.toFixed(2)}
-        <span className="text-sm text-[var(--color-text-muted)] font-normal ml-1">hrs</span>
+    <div className="px-5 py-4 flex items-baseline justify-between gap-3">
+      <div className="text-caption text-[var(--color-text-muted)]">{label}</div>
+      <div className="font-mono tabular text-[18px] font-medium leading-none" style={{ color }}>
+        {value}
       </div>
     </div>
   );

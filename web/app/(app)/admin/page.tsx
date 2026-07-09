@@ -123,10 +123,10 @@ export default async function AdminHome({
   const employees: EmployeeOption[] = (employeesRes.data ?? []) as EmployeeOption[];
 
   return (
-    <div className="px-3 md:px-4 py-5 space-y-6">
-      <header>
-        <h2 className="text-lg font-medium tracking-tight">Approval queue</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
+    <div className="px-3 md:px-4 py-6 md:py-8 space-y-8">
+      <header className="max-w-3xl">
+        <h2 className="text-h2">Approval queue</h2>
+        <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
           Submitted timesheets waiting for review, oldest first. Full history below.
         </p>
       </header>
@@ -140,10 +140,10 @@ export default async function AdminHome({
 
       <ApprovalsInbox queue={queue} panel={panel} />
 
-      <section className="space-y-3 pt-4 border-t border-[var(--color-border-soft)]">
+      <section className="space-y-3 pt-6 border-t border-[var(--color-border-soft)]">
         <header>
-          <h3 className="text-base font-medium tracking-tight">All weeks</h3>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <h3 className="text-h3">All weeks</h3>
+          <p className="mt-1 text-body-sm text-[var(--color-text-muted)]">
             Every timesheet across the org. Filter by status + employee; paginated {PAGE_SIZE} per page.
           </p>
         </header>
