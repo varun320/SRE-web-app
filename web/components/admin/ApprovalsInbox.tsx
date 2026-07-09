@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Inbox, X, Check, ArrowLeftCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -65,15 +65,27 @@ export function ApprovalsInbox({ queue, panel }: Props) {
   const [sendBackOpen, setSendBackOpen] = useState(false);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [bulkSendBackOpen, setBulkSendBackOpen] = useState(false);
+  // Keyboard cursor — the row the shortcuts operate on. Independent from the
+  // side-panel selection so you can j/k through the list without loading each
+  // week; then Enter to open. Falls back to panel selection when a panel is open.
+  const [cursor, setCursor] = useState<number>(0);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
   const selectedId = panel?.timesheet_id ?? null;
 
-  const setPanel = (id: string | null) => {
+  // Keep cursor pinned to the panel-selected row when possible.
+  useEffect(() => {
+    if (!selectedId) return;
+    const idx = queue.findIndex((q) => q.timesheet_id === selectedId);
+    if (idx >= 0) setCursor(idx);
+  }, [selectedId, queue]);
+
+  const setPanel = useCallback((id: string | null) => {
     const next = new URLSearchParams(sp.toString());
     if (id) next.set('panel', id);
     else next.delete('panel');
     startTransition(() => router.push(`?${next.toString()}`, { scroll: false }));
-  };
+  }, [router, sp]);
 
   const toggleCheck = (id: string) => {
     setChecked((prev) => {
@@ -116,6 +128,96 @@ export function ApprovalsInbox({ queue, panel }: Props) {
     });
   };
 
+  // Keyboard-first shortcuts. Rules:
+  //   j / ↓  — cursor down
+  //   k / ↑  — cursor up
+  //   Enter  — toggle panel for cursor row
+  //   Space  — toggle checkbox on cursor row
+  //   a      — approve current selection (bulk if any checked, else the panel)
+  //   d      — send back (bulk if any checked, else panel row)
+  //   Esc    — close panel + clear checks
+  // Ignored when focus is inside input/textarea/select/contenteditable, so
+  // typing inside the send-back modal or the "send back" reason field works
+  // normally.
+  useEffect(() => {
+    if (queue.length === 0) return;
+    const isTypingElement = (el: EventTarget | null): boolean => {
+      if (!el || !(el instanceof HTMLElement)) return false;
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+      if (el.isContentEditable) return true;
+      return false;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (isTypingElement(e.target)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const key = e.key;
+      if (key === 'j' || key === 'ArrowDown') {
+        e.preventDefault();
+        setCursor((c) => Math.min(queue.length - 1, c + 1));
+        return;
+      }
+      if (key === 'k' || key === 'ArrowUp') {
+        e.preventDefault();
+        setCursor((c) => Math.max(0, c - 1));
+        return;
+      }
+      if (key === 'Enter') {
+        e.preventDefault();
+        const row = queue[cursor];
+        if (!row) return;
+        setPanel(row.timesheet_id === selectedId ? null : row.timesheet_id);
+        return;
+      }
+      if (key === ' ') {
+        e.preventDefault();
+        const row = queue[cursor];
+        if (!row) return;
+        toggleCheck(row.timesheet_id);
+        return;
+      }
+      if (key === 'a' || key === 'A') {
+        e.preventDefault();
+        if (checked.size > 0) {
+          bulkApprove();
+        } else if (panel) {
+          startTransition(async () => {
+            try {
+              await approveTimesheet(getSupabaseBrowser(), panel.timesheet_id, null);
+              toast.success(`Approved ${panel.full_name}'s week of ${panel.week_start}.`);
+              setPanel(null);
+              router.refresh();
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : 'Approval failed');
+            }
+          });
+        }
+        return;
+      }
+      if (key === 'd' || key === 'D') {
+        e.preventDefault();
+        if (checked.size > 0) setBulkSendBackOpen(true);
+        else if (panel) setSendBackOpen(true);
+        return;
+      }
+      if (key === 'Escape') {
+        if (sendBackOpen || bulkSendBackOpen) return; // let modal handle its own
+        e.preventDefault();
+        setChecked(new Set());
+        if (panel) setPanel(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [queue, cursor, checked, panel, selectedId, sendBackOpen, bulkSendBackOpen, router, setPanel]);
+
+  // Scroll the cursor row into view when it moves via keyboard.
+  useEffect(() => {
+    const li = listRef.current?.querySelectorAll('li')?.[cursor] as HTMLLIElement | undefined;
+    li?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [cursor]);
+
   if (queue.length === 0) {
     return (
       <EmptyState
@@ -130,20 +232,33 @@ export function ApprovalsInbox({ queue, panel }: Props) {
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4">
       {/* LEFT — inbox list */}
       <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
-        <ul>
-          {queue.map((r) => {
+        <ul ref={listRef}>
+          {queue.map((r, i) => {
             const active = r.timesheet_id === selectedId;
+            const isCursor = i === cursor;
             const isChecked = checked.has(r.timesheet_id);
             return (
               <li key={r.timesheet_id}>
                 <div
                   className={[
-                    'group w-full px-4 py-3 border-b border-[var(--color-border-soft)] flex items-center gap-3 transition-colors',
+                    'group relative w-full px-4 py-3 border-b border-[var(--color-border-soft)] flex items-center gap-3 transition-colors',
                     active
                       ? 'bg-[var(--color-accent-tint)] border-l-2 border-l-[var(--color-accent)] pl-[calc(1rem-2px)]'
-                      : 'hover:bg-[var(--color-surface-2)]/40',
+                      : isCursor
+                        ? 'bg-[var(--color-surface-2)]/60'
+                        : 'hover:bg-[var(--color-surface-2)]/40',
                   ].join(' ')}
+                  onMouseEnter={() => setCursor(i)}
                 >
+                  {/* Cursor indicator — a thin dot on the far left when not the
+                      active panel row (that one already shows an accent border). */}
+                  {isCursor && !active ? (
+                    <span
+                      aria-hidden
+                      className="absolute left-1 top-1/2 -translate-y-1/2 h-4 w-[2px] rounded"
+                      style={{ background: 'var(--color-text-muted)' }}
+                    />
+                  ) : null}
                   <input
                     type="checkbox"
                     checked={isChecked}
@@ -153,7 +268,7 @@ export function ApprovalsInbox({ queue, panel }: Props) {
                   />
                   <button
                     type="button"
-                    onClick={() => setPanel(active ? null : r.timesheet_id)}
+                    onClick={() => { setCursor(i); setPanel(active ? null : r.timesheet_id); }}
                     aria-current={active ? 'true' : undefined}
                     className="flex-1 min-w-0 text-left flex items-center gap-3"
                   >
@@ -352,7 +467,38 @@ export function ApprovalsInbox({ queue, panel }: Props) {
           pending={pending}
         />
       ) : null}
+
+      {/* Keyboard hint — sits above the bulk toolbar when it's showing. */}
+      {queue.length > 0 ? (
+        <div
+          className={[
+            'fixed right-4 z-30 rounded-full border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur px-3 py-1.5 text-[11px] text-[var(--color-text-muted)] shadow-[var(--shadow-elevation)]',
+            checked.size > 0 ? 'bottom-20' : 'bottom-4',
+          ].join(' ')}
+        >
+          <span className="hidden md:inline-flex items-center gap-2">
+            <Kbd>j</Kbd><Kbd>k</Kbd> move
+            <span className="text-[var(--color-text-subtle)]">·</span>
+            <Kbd>Space</Kbd> select
+            <span className="text-[var(--color-text-subtle)]">·</span>
+            <Kbd>A</Kbd> approve
+            <span className="text-[var(--color-text-subtle)]">·</span>
+            <Kbd>D</Kbd> send back
+            <span className="text-[var(--color-text-subtle)]">·</span>
+            <Kbd>Esc</Kbd> close
+          </span>
+          <span className="md:hidden">Keyboard: j k Space A D Esc</span>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-flex items-center rounded border border-[var(--color-border)] bg-[var(--color-surface-2)] px-1.5 font-mono text-[10px] leading-[16px] text-[var(--color-text)]">
+      {children}
+    </kbd>
   );
 }
 
