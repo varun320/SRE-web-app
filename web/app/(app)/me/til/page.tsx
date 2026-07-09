@@ -94,14 +94,14 @@ export default async function TilPage() {
                         <td className="text-right px-4 py-2.5">{Number(r.opening_balance).toFixed(2)}</td>
                         <td className="text-right px-4 py-2.5">
                           {earned > 0 ? (
-                            <span className="text-emerald-700 dark:text-emerald-300">+{earned.toFixed(2)}</span>
+                            <span className="text-[var(--color-status-approved-fg)]">+{earned.toFixed(2)}</span>
                           ) : (
                             <span className="text-[var(--color-text-muted)]">0.00</span>
                           )}
                         </td>
                         <td className="text-right px-4 py-2.5">
                           {used > 0 ? (
-                            <span className="text-amber-700 dark:text-amber-300">−{used.toFixed(2)}</span>
+                            <span className="text-[var(--color-status-declined-fg)]">−{used.toFixed(2)}</span>
                           ) : (
                             <span className="text-[var(--color-text-muted)]">0.00</span>
                           )}
@@ -130,9 +130,9 @@ export default async function TilPage() {
 }
 
 const TONE = {
-  success: { ring: 'ring-emerald-500/20', icon: 'text-emerald-600 dark:text-emerald-300' },
-  warning: { ring: 'ring-amber-500/20',   icon: 'text-amber-600 dark:text-amber-300' },
-  info:    { ring: 'ring-blue-500/20',    icon: 'text-blue-600 dark:text-blue-300' },
+  success: { ring: '', icon: 'text-[var(--color-status-approved-fg)]' },
+  warning: { ring: '',   icon: 'text-[var(--color-status-declined-fg)]' },
+  info:    { ring: '',    icon: 'text-[var(--color-status-submitted-fg)]' },
 } as const;
 
 function Stat({

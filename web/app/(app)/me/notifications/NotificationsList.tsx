@@ -11,11 +11,11 @@ import { formatNotification } from '@/lib/notifications/format';
 import { EmptyState } from '@/components/ui/empty-state';
 
 const TONE_DOT: Record<string, string> = {
-  info:    'bg-blue-500',
-  success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  danger:  'bg-red-500',
-  neutral: 'bg-[var(--color-text-muted)]',
+  info:    'dot-info',
+  success: 'dot-success',
+  warning: 'dot-warning',
+  danger:  'dot-danger',
+  neutral: 'dot-neutral',
 };
 
 export function NotificationsList({ initial }: { initial: NotificationRow[] }) {

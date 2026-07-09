@@ -164,7 +164,7 @@ export function CreditCardsEditor({ initial }: Props) {
           </label>
         </div>
         {err ? (
-          <div className="rounded-[var(--radius-md)] border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">{err}</div>
+          <div className="err-box">{err}</div>
         ) : null}
         <div className="flex gap-2">
           <button

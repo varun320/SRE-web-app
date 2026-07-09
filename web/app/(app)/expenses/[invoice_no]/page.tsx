@@ -60,7 +60,7 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
           </StatusBadge>
         </div>
         {report.decline_reason ? (
-          <div className="mt-3 rounded-[var(--radius-md)] border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+          <div className="mt-3 err-box">
             <strong>Reason:</strong> {report.decline_reason}
           </div>
         ) : null}

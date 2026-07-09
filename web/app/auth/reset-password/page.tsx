@@ -112,7 +112,7 @@ function ResetPasswordInner() {
 function InvalidLink() {
   return (
     <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-6 space-y-3">
-      <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-300">
+      <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]">
         <AlertTriangle className="h-4 w-4" />
       </div>
       <h1 className="text-lg font-semibold tracking-tight">This reset link is invalid or expired</h1>

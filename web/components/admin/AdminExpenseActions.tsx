@@ -55,7 +55,7 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
               if (!reason) return;
               run(() => declineExpense(sb, expenseId, reason));
             }}
-            className="rounded-md border border-red-500/40 text-red-700 dark:text-red-300 px-2 py-1 hover:bg-red-500/10 disabled:opacity-50"
+            className="rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
           >
             Decline
           </button>
@@ -69,7 +69,7 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
             if (!reason) return;
             run(() => unlockExpense(sb, expenseId, reason));
           }}
-          className="rounded-md border border-amber-500/40 text-amber-700 dark:text-amber-200 px-2 py-1 hover:bg-amber-500/10 disabled:opacity-50"
+          className="rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
         >
           Unlock
         </button>
@@ -103,7 +103,7 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
           + Payout
         </button>
       )}
-      {err ? <span className="text-red-600">{err}</span> : null}
+      {err ? <span className="text-[var(--color-status-declined-fg)]">{err}</span> : null}
     </div>
   );
 }

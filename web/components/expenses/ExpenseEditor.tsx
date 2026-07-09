@@ -400,7 +400,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
       </Field>
 
       {err ? (
-        <div className="rounded-[var(--radius-md)] border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
+        <div className="err-box">
           {err}
         </div>
       ) : null}

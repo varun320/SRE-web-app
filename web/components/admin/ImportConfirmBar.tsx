@@ -16,7 +16,7 @@ export function ImportConfirmBar({ summary, onCommit, onCancel, isCommitting }: 
     <div className="sticky bottom-0 -mx-3 md:-mx-4 px-3 md:px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur flex flex-wrap items-center justify-between gap-3">
       <div className="text-sm text-[var(--color-text-muted)]">
         {conflict > 0 ? (
-          <span className="text-red-700 dark:text-red-300 font-medium">
+          <span className="text-[var(--color-status-declined-fg)] font-medium">
             {conflict} conflict{conflict === 1 ? '' : 's'} must be resolved before commit
           </span>
         ) : create === 0 ? (

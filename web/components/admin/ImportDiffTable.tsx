@@ -7,11 +7,11 @@ interface Props {
 
 const ACTION_STYLES: Record<ImportPlanItem['action'], string> = {
   create:
-    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30',
+    'bg-[var(--color-status-approved-bg)] text-[var(--color-status-approved-fg)]',
   skip:
-    'bg-[var(--color-surface-2)] text-[var(--color-text-muted)] ring-[var(--color-border)]',
+    'bg-[var(--color-surface-2)] text-[var(--color-text-muted)]',
   conflict:
-    'bg-red-500/10 text-red-700 dark:text-red-300 ring-red-500/30',
+    'bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]',
 };
 
 export function ImportDiffTable({ items, summary }: Props) {
@@ -28,7 +28,7 @@ export function ImportDiffTable({ items, summary }: Props) {
       </header>
 
       {summary.warnings.length > 0 ? (
-        <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/30 text-xs text-amber-800 dark:text-amber-200">
+        <div className="px-4 py-2 bg-[var(--color-status-declined-bg)] border-b border-[var(--color-border-soft)] text-xs text-[var(--color-status-declined-fg)]">
           <strong className="mr-1">Warnings:</strong>
           {summary.warnings.slice(0, 5).join(' · ')}
           {summary.warnings.length > 5 ? ` (+${summary.warnings.length - 5} more)` : null}
@@ -50,7 +50,7 @@ export function ImportDiffTable({ items, summary }: Props) {
                 <td className="px-3 py-2">
                   <span
                     className={[
-                      'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+                      'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium',
                       ACTION_STYLES[it.action],
                     ].join(' ')}
                   >
@@ -81,7 +81,7 @@ function Pill({ action, count }: { action: ImportPlanItem['action']; count: numb
   return (
     <span
       className={[
-        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium',
         ACTION_STYLES[action],
       ].join(' ')}
     >

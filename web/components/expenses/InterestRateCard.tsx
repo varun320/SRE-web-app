@@ -62,7 +62,7 @@ export function InterestRateCard({ apr, graceDays }: Props) {
       >
         {pending ? 'Saving…' : 'Save rate'}
       </button>
-      {err ? <span className="text-xs text-red-600 dark:text-red-300">{err}</span> : null}
+      {err ? <span className="text-xs text-[var(--color-status-declined-fg)]">{err}</span> : null}
     </form>
   );
 }

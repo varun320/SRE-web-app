@@ -60,12 +60,15 @@ const REPORTS: ReportCard[] = [
   },
 ];
 
-const TONE: Record<ReportCard['tone'], { bg: string; ring: string; icon: string }> = {
-  blue:    { bg: 'bg-blue-500/10',    ring: 'ring-blue-500/30',    icon: 'text-blue-600 dark:text-blue-300' },
-  emerald: { bg: 'bg-emerald-500/10', ring: 'ring-emerald-500/30', icon: 'text-emerald-600 dark:text-emerald-300' },
-  amber:   { bg: 'bg-amber-500/10',   ring: 'ring-amber-500/30',   icon: 'text-amber-600 dark:text-amber-300' },
-  violet:  { bg: 'bg-violet-500/10',  ring: 'ring-violet-500/30',  icon: 'text-violet-600 dark:text-violet-300' },
-  rose:    { bg: 'bg-rose-500/10',    ring: 'ring-rose-500/30',    icon: 'text-rose-600 dark:text-rose-300' },
+// Report cards: neutral card treatment with a tinted icon per tone.
+// No coloured rings — DESIGN.md § 3.4 discipline. Tone is carried by icon
+// colour only.
+const TONE: Record<ReportCard['tone'], { icon: string }> = {
+  blue:    { icon: 'text-[var(--color-status-submitted-fg)]' },
+  emerald: { icon: 'text-[var(--color-status-approved-fg)]' },
+  amber:   { icon: 'text-[var(--color-status-declined-fg)]' },
+  violet:  { icon: 'text-[var(--color-accent)]' },
+  rose:    { icon: 'text-[var(--color-status-declined-fg)]' },
 };
 
 export default async function ReportsHome() {
@@ -109,11 +112,11 @@ export default async function ReportsHome() {
             <Link
               key={r.href}
               href={r.href}
-              className={`group rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-card)] transition-all space-y-3 ring-1 ring-inset ${t.ring}`}
+              className="lift-hover group rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 space-y-3"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${t.bg} ${t.icon}`}>
+                  <span className={`inline-flex h-9 w-9 items-center justify-center rounded-md bg-[var(--color-surface-2)] ${t.icon}`}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <div>

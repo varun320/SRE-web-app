@@ -33,17 +33,17 @@ const ACTION_LABEL: Record<string, string> = {
 
 const ACTION_STYLE: Record<string, string> = {
   submit:
-    'bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-blue-500/30',
+    'bg-[var(--color-status-submitted-bg)] text-[var(--color-status-submitted-fg)]',
   approve:
-    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30',
+    'bg-[var(--color-status-approved-bg)] text-[var(--color-status-approved-fg)]',
   decline:
-    'bg-red-500/10 text-red-700 dark:text-red-300 ring-red-500/30',
+    'bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]',
   unlock:
-    'bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-500/30',
+    'bg-[var(--color-status-declined-bg)] text-[var(--color-status-declined-fg)]',
   imported:
-    'bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-violet-500/30',
+    'bg-[var(--color-accent-tint)] text-[var(--color-accent)]',
   ledger_recompute:
-    'bg-[var(--color-surface-2)] text-[var(--color-text-muted)] ring-[var(--color-border)]',
+    'bg-[var(--color-surface-2)] text-[var(--color-text-muted)]',
 };
 
 const ACTIONS = ['submit', 'approve', 'decline', 'unlock', 'imported', 'ledger_recompute'] as const;
@@ -101,7 +101,7 @@ export function ApprovalLogClient({ rows }: { rows: ApprovalLogRow[] }) {
               onClick={() => toggle(a)}
               aria-pressed={enabled.has(a)}
               className={[
-                'inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-opacity',
+                'inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium transition-opacity',
                 enabled.has(a) ? ACTION_STYLE[a] : 'opacity-40 ' + ACTION_STYLE[a],
               ].join(' ')}
             >
@@ -164,7 +164,7 @@ function Stat({ action, count }: { action: string; count: number }) {
     <div className="rounded-[var(--radius-md)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-3">
       <div
         className={[
-          'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset',
+          'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium',
           ACTION_STYLE[action],
         ].join(' ')}
       >
@@ -189,7 +189,7 @@ function Row({ r }: { r: ApprovalLogRow }) {
       <td className="px-3 py-3 align-top">
         <span
           className={[
-            'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+            'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium',
             ACTION_STYLE[r.action] ?? '',
           ].join(' ')}
         >

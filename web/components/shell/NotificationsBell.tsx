@@ -15,11 +15,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const TONE_DOT: Record<string, string> = {
-  info:    'bg-blue-500',
-  success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  danger:  'bg-red-500',
-  neutral: 'bg-[var(--color-text-muted)]',
+  info:    'dot-info',
+  success: 'dot-success',
+  warning: 'dot-warning',
+  danger:  'dot-danger',
+  neutral: 'dot-neutral',
 };
 
 export function NotificationsBell() {

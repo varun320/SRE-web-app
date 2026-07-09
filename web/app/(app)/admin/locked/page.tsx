@@ -109,7 +109,7 @@ export default async function LockedWeeksPage() {
                     <td className="px-4 py-3 text-right font-mono tabular-nums">{r.total_hrs.toFixed(2)}</td>
                     <td className="px-4 py-3 text-right font-mono tabular-nums">
                       {r.overtime_earned > 0 ? (
-                        <span className="text-amber-700 dark:text-amber-300 font-medium">{r.overtime_earned.toFixed(2)}</span>
+                        <span className="text-[var(--color-status-declined-fg)] font-medium">{r.overtime_earned.toFixed(2)}</span>
                       ) : (
                         '0.00'
                       )}
