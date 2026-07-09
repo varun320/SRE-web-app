@@ -55,7 +55,7 @@ export function KpiStrip({ totals, openingTil, openingVacation }: Props) {
   const vacRemaining = openingVacation - totals.vacation_used;
 
   return (
-    <div className="px-6 pb-6">
+    <div className="px-3 md:px-4 pb-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Tile
           label="Hours this week"

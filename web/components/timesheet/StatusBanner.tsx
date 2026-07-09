@@ -23,7 +23,7 @@ export function StatusBanner({ status, declineReason }: { status: TimesheetStatu
   return (
     <div
       role="status"
-      className="mx-6 mt-6 mb-2 flex items-start gap-3 rounded-[var(--radius-lg)] px-4 py-3"
+      className="mx-3 md:mx-4 mt-4 mb-2 flex items-start gap-3 rounded-[var(--radius-lg)] px-4 py-3"
       style={{ background: bg, color: fg }}
     >
       <Icon className="h-5 w-5 mt-0.5 shrink-0" aria-hidden />

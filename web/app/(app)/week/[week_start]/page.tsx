@@ -33,8 +33,8 @@ export default async function WeekPage({ params }: PageProps) {
   }));
 
   return (
-    <main className="mx-auto max-w-7xl">
-      <div className="px-4 md:px-6 pt-8 pb-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <main className="w-full">
+      <div className="px-3 md:px-4 pt-6 pb-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">Week of {week_start}</h1>
           <WeekPicker weekStart={week_start} currentMonday={currentMonday()} />

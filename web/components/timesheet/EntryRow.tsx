@@ -73,7 +73,7 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
           <HourCell value={row[k]} onChange={(n) => onChange({ ...row, [k]: n })} disabled={disabled} ariaLabel={`${DAY_LABELS[i]} hours row ${index+1}`} />
         </td>
       ))}
-      <td className="px-2 py-2.5 align-top w-[35%] min-w-[240px]">
+      <td className="px-2 py-2.5 align-top w-[38%]">
         <div className="relative">
           <textarea
             value={row.description}
