@@ -10,6 +10,13 @@
 
   --color-accent: oklch(58% 0.14 245);
   --color-accent-tint: oklch(95% 0.04 245);
+  --color-accent-fg: oklch(99% 0 0);          /* foreground when placed on accent bg */
+
+  --color-text-subtle: oklch(62% 0.012 70);   /* placeholders, disabled labels, chart axis */
+  --color-surface-sunken: oklch(92% 0.014 80);/* disabled surface, print-safe row alternate */
+
+  --color-destructive: oklch(48% 0.16 25);    /* destructive action bg / danger fg */
+  --color-destructive-fg: oklch(99% 0 0);
 
   --color-status-draft-fg:       oklch(40% 0.02 80);
   --color-status-draft-bg:       oklch(95% 0.015 80);
@@ -51,10 +58,16 @@
   --color-surface: oklch(17% 0.012 80);
   --color-surface-2: oklch(21% 0.012 80);
   --color-surface-3: oklch(25% 0.012 80);
+  --color-surface-sunken: oklch(14% 0.010 80);
   --color-text: oklch(96% 0.005 80);
   --color-text-muted: oklch(68% 0.012 80);
+  --color-text-subtle: oklch(55% 0.012 80);
   --color-border: oklch(30% 0.012 80);
   --color-border-soft: oklch(26% 0.012 80);
+
+  --color-accent-fg: oklch(99% 0 0);
+  --color-destructive: oklch(60% 0.18 25);
+  --color-destructive-fg: oklch(99% 0 0);
 
   --color-status-draft-bg:       oklch(28% 0.012 80);
   --color-status-draft-fg:       oklch(80% 0.012 80);
