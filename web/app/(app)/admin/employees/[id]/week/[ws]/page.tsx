@@ -4,6 +4,7 @@ import { DailyBreakdown } from '@/components/report/DailyBreakdown';
 import { CategoryTable } from '@/components/report/CategoryTable';
 import { SubCategoryTable } from '@/components/report/SubCategoryTable';
 import { ProjectTable } from '@/components/report/ProjectTable';
+import { LineItems } from '@/components/report/LineItems';
 import { notFound } from 'next/navigation';
 import type { TimesheetStatus, MainCategory } from '@/lib/types';
 
@@ -61,6 +62,7 @@ export default async function AdminWeekReview({ params }: Props) {
         </div>
       ) : (
         <>
+          <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Line items</h2><LineItems rows={r} /></section>
           <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Daily breakdown</h2><DailyBreakdown rows={r} /></section>
           <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by category</h2><CategoryTable rows={r} /></section>
           <section className="px-4 md:px-6"><h2 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Hours by sub-category</h2><SubCategoryTable rows={r} /></section>

@@ -27,13 +27,45 @@ describe('computeTotals', () => {
     expect(t.total_hrs).toBe(20);
   });
 
-  it('computes per-day overtime as max(0, day_total - 8) excluding TIL Payout rows', () => {
+  it('accrues overtime only after 40 base hours in the week', () => {
+    // 40 regular + 8 weekend = 8h overtime
     const rows = [
-      row(subs.admin_regular, { mon_hrs: 10, tue_hrs: 10, wed_hrs: 8 }),
-      row(subs.admin_payout,  { mon_hrs: 4 }),
+      row(subs.admin_regular, { mon_hrs: 8, tue_hrs: 8, wed_hrs: 8, thu_hrs: 8, fri_hrs: 8 }),
+      row(subs.admin_regular, { sat_hrs: 8 }),
     ];
     const t = computeTotals(rows, Object.values(subs));
-    expect(t.overtime_earned).toBe(4);
+    expect(t.overtime_earned).toBe(8);
+  });
+
+  it('does not treat TIL Payout as base hours', () => {
+    const rows = [
+      row(subs.admin_regular, { mon_hrs: 8, tue_hrs: 8, wed_hrs: 8, thu_hrs: 8, fri_hrs: 8 }),
+      row(subs.admin_payout,  { mon_hrs: 20 }),
+    ];
+    const t = computeTotals(rows, Object.values(subs));
+    expect(t.overtime_earned).toBe(0);
+  });
+
+  it('does not treat TIL Overtime Taken as base hours (does not inflate overtime)', () => {
+    // Utsav scenario: 32h work Mon–Thu + 8h TIL Overtime Taken on Fri.
+    // Base = 32, no overtime should accrue from time-off row.
+    const rows = [
+      row(subs.admin_regular,   { mon_hrs: 8, tue_hrs: 8, wed_hrs: 8, thu_hrs: 8 }),
+      row(subs.admin_overtaken, { fri_hrs: 8 }),
+    ];
+    const t = computeTotals(rows, Object.values(subs));
+    expect(t.overtime_earned).toBe(0);
+    expect(t.til_used).toBe(8);
+  });
+
+  it('does not treat Vacation Hours as base hours', () => {
+    const rows = [
+      row(subs.admin_regular,  { mon_hrs: 8, tue_hrs: 8, wed_hrs: 8, thu_hrs: 8 }),
+      row(subs.admin_vacation, { fri_hrs: 8 }),
+    ];
+    const t = computeTotals(rows, Object.values(subs));
+    expect(t.overtime_earned).toBe(0);
+    expect(t.vacation_used).toBe(8);
   });
 
   it('counts TIL used as sum of consumes_til rows', () => {
