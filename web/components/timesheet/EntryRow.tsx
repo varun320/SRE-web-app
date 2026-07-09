@@ -49,7 +49,7 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
       className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/40 transition-colors"
       style={{ borderLeft: `3px solid ${borderColor}` }}
     >
-      <td className="px-2 py-2.5">
+      <td className="px-2 py-2.5 align-top">
         <CategoryCell
           mainCategory={row.main_category}
           subCategoryId={row.sub_category_id}
@@ -58,7 +58,7 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
           disabled={disabled}
         />
       </td>
-      <td className="px-2 py-2.5">
+      <td className="px-2 py-2.5 align-top">
         <ProjectCell
           projectId={row.project_id}
           required={requiresProject}
@@ -69,11 +69,11 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
         {missingProject ? <span className="block text-[10px] text-[var(--color-status-declined-fg)] mt-1">required</span> : null}
       </td>
       {DAY_KEYS.map((k, i) => (
-        <td key={k} className="px-0.5 py-2.5 text-center">
+        <td key={k} className="px-0.5 py-2.5 text-center align-top">
           <HourCell value={row[k]} onChange={(n) => onChange({ ...row, [k]: n })} disabled={disabled} ariaLabel={`${DAY_LABELS[i]} hours row ${index+1}`} />
         </td>
       ))}
-      <td className="px-2 py-2.5 min-w-[320px] w-[40%]">
+      <td className="px-2 py-2.5 align-top w-[35%] min-w-[240px]">
         <div className="relative">
           <textarea
             value={row.description}
@@ -106,7 +106,7 @@ export function EntryRow({ row, index, subCategories, projects, onChange, onRemo
           </span>
         ) : null}
       </td>
-      <td className="px-2 py-2.5 text-right font-mono tabular-nums text-sm">{rowTotal.toFixed(2)}</td>
+      <td className="px-2 py-2.5 text-right font-mono tabular-nums text-sm align-top whitespace-nowrap">{rowTotal.toFixed(2)}</td>
     </tr>
   );
 }

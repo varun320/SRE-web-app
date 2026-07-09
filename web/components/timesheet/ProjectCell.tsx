@@ -34,7 +34,15 @@ export function ProjectCell({ projectId, required, projects, onChange, disabled 
       onValueChange={(v) => onChange(v)}
       disabled={disabled}
     >
-      <SelectTrigger className="h-9 w-40 font-mono"><SelectValue placeholder="Project #" /></SelectTrigger>
+      <SelectTrigger className="h-9 w-40 font-mono">
+        <SelectValue placeholder="Project #">
+          {(v: unknown) => {
+            if (typeof v !== 'string' || !v) return 'Project #';
+            const p = projects.find((pr) => pr.id === v);
+            return p ? String(p.project_number) : 'Project #';
+          }}
+        </SelectValue>
+      </SelectTrigger>
       <SelectContent>
         {projects.map((p) => (
           <SelectItem key={p.id} value={p.id}>

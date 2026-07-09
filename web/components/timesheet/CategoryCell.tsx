@@ -19,6 +19,7 @@ export function CategoryCell({ mainCategory, subCategoryId, subCategories, onCha
     () => subCategories.filter((s) => s.main_category === mainCategory),
     [subCategories, mainCategory],
   );
+  const subById = useMemo(() => new Map(subCategories.map((s) => [s.id, s])), [subCategories]);
 
   return (
     <div className="flex items-center gap-2">
@@ -47,7 +48,13 @@ export function CategoryCell({ mainCategory, subCategoryId, subCategories, onCha
         disabled={disabled || !mainCategory}
       >
         <SelectTrigger className="h-8 w-52 [&>span]:truncate [&>span]:block [&>span]:text-left">
-          <SelectValue placeholder="Sub…" />
+          <SelectValue placeholder="Sub…">
+            {(v: unknown) => {
+              if (typeof v !== 'string' || !v) return 'Sub…';
+              const s = subById.get(v);
+              return s ? subCategoryLabel(s.name) : 'Sub…';
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-w-xs">
           {filtered.map((s) => (
