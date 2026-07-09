@@ -28,20 +28,19 @@ export default function LoginPage() {
             >
               SRE
             </span>
-            <span>Timesheet</span>
+            <span>Sulfur Recovery</span>
           </div>
         </div>
 
         <div className="relative z-10 max-w-md">
-          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">
-            Weekly timesheets,
+          <h1 className="text-[44px] lg:text-[52px] font-semibold tracking-tight leading-[1.05]">
+            Close the week
             <br />
-            <span className="text-[var(--color-accent)]">without the spreadsheet pain.</span>
+            <span className="text-[var(--color-accent)]">without the spreadsheet.</span>
           </h1>
-          <p className="mt-4 text-sm text-[var(--color-text-muted)] leading-relaxed">
-            Sulfur Recovery Engineering&apos;s in-house system for logging hours, tracking TIL,
-            and approving weeks. Replaces the per-employee Excel workbook with a single shared
-            source of truth.
+          <p className="mt-5 text-body-lg text-[var(--color-text-muted)] leading-relaxed max-w-[36ch]">
+            The in-house system for logging hours, tracking TIL, and approving weeks at Sulfur
+            Recovery Engineering. One place. Print-ready when the audit binder needs it.
           </p>
 
           <ul className="mt-6 space-y-2.5 text-sm">
@@ -80,7 +79,7 @@ export default function LoginPage() {
             >
               SRE
             </span>
-            <span>Timesheet</span>
+            <span>Sulfur Recovery</span>
           </div>
 
           <div>
