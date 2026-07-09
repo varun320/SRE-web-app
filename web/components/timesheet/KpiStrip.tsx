@@ -69,7 +69,7 @@ export function KpiStrip({ totals, openingTil, openingVacation }: Props) {
           value={totals.overtime_earned}
           sub="added to TIL bank"
           tone="blue"
-          hint="Overtime is anything above 40 base hours in the week (Mon–Sun combined, excluding TIL Payout). Weekend hours only become overtime once you cross 40h. Overtime is banked as TIL automatically."
+          hint="Overtime is anything above 40 base hours in the week (Mon–Sun combined). Time-off rows — TIL taken, TIL payout, vacation — do not count as base hours, so taking TIL doesn't inflate overtime. Overtime is banked as TIL automatically."
         />
         <Tile
           label="TIL remaining"
