@@ -58,17 +58,11 @@ export default async function AdminExpensesPage({
   const statuses = ['all', 'draft', 'submitted', 'approved', 'declined', 'paid'];
 
   return (
-    <main className="w-full px-3 md:px-4 py-5 space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Expense reports</h1>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            All employee expense submissions across the org.
-          </p>
-        </div>
+    <main className="w-full px-3 md:px-4 py-5 md:py-6 space-y-4">
+      <div className="flex items-center justify-end">
         <Link
           href="/admin/expenses/payouts"
-          className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)]"
+          className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
         >
           Payout log →
         </Link>

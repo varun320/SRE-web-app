@@ -44,13 +44,7 @@ export default async function PayrollReportPage({
   const downloadHref = `/api/admin/reports/payroll?${new URLSearchParams({ from, to }).toString()}`;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-base font-medium tracking-tight">Payroll export</h3>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          One row per employee × bi-weekly pay period. Periods anchor to {DEFAULT_EPOCH} (Monday).
-        </p>
-      </div>
+    <div className="space-y-3">
       <DateRangePicker defaultFrom={from} defaultTo={to} />
       <PayrollPreview rows={payroll} downloadHref={downloadHref} />
     </div>

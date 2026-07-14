@@ -28,23 +28,13 @@ export default async function TilPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
-        <div className="lift-hover rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-6 md:p-8 flex flex-col gap-3">
-          <div className="text-caption text-[var(--color-text-muted)]">
-            Current balance{current ? ` · as of ${current.week_start}` : ''}
-          </div>
-          <div className="flex items-baseline gap-3">
-            <span className="font-mono tabular text-[44px] font-medium leading-none text-[var(--color-status-approved-fg)]">
-              {balance.toFixed(2)}
-            </span>
-            <span className="text-body-lg text-[var(--color-text-muted)]">hours</span>
-          </div>
-        </div>
-
-        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-soft)] flex flex-col">
-          <StatRow label="OT earned (lifetime)" value={`${earnedYtd.toFixed(2)} h`} tone="success" />
-          <StatRow label="TIL used (lifetime)"  value={`${usedYtd.toFixed(2)} h`} tone="warning" />
-        </div>
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
+        <StatCell
+          label={`Current balance${current ? ` · ${current.week_start}` : ''}`}
+          value={`${balance.toFixed(2)} h`}
+        />
+        <StatCell label="OT earned (lifetime)" value={`${earnedYtd.toFixed(2)} h`} />
+        <StatCell label="TIL used (lifetime)"  value={`${usedYtd.toFixed(2)} h`} />
       </div>
 
       <section className="space-y-3">
@@ -113,23 +103,11 @@ export default async function TilPage() {
   );
 }
 
-function StatRow({
-  label,
-  value,
-  tone = 'neutral',
-}: {
-  label: string;
-  value: string;
-  tone?: 'neutral' | 'success' | 'warning';
-}) {
-  const color =
-    tone === 'success' ? 'var(--color-status-approved-fg)'
-    : tone === 'warning' ? 'var(--color-status-declined-fg)'
-    : 'var(--color-text)';
+function StatCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="px-5 py-4 flex items-baseline justify-between gap-3">
+    <div className="px-5 py-4 flex flex-col gap-1">
       <div className="text-caption text-[var(--color-text-muted)]">{label}</div>
-      <div className="font-mono tabular text-[18px] font-medium leading-none" style={{ color }}>
+      <div className="font-mono tabular text-[22px] font-medium leading-none text-[var(--color-text)]">
         {value}
       </div>
     </div>

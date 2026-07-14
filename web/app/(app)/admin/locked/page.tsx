@@ -62,15 +62,10 @@ export default async function LockedWeeksPage() {
   });
 
   return (
-    <div className="px-3 md:px-4 py-5 space-y-5">
-      <header>
-        <h2 className="text-lg font-medium tracking-tight">Locked weeks</h2>
-        <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-          Every approved &amp; locked week. Click <strong>Unlock</strong> to send a week back to
-          the employee for edits — that marks subsequent ledger rows stale and reverts the week
-          to <em>declined</em> with your reason in the audit log.
-        </p>
-      </header>
+    <div className="px-3 md:px-4 py-5 md:py-6 space-y-4">
+      <p className="text-body-sm text-[var(--color-text-muted)] max-w-2xl">
+        Every approved &amp; locked week. Unlock sends a week back to the employee for edits, marks subsequent ledger rows stale, and reverts the week to <em>declined</em> with your reason in the audit log.
+      </p>
 
       {rows.length === 0 ? (
         <EmptyState

@@ -468,26 +468,18 @@ export function ApprovalsInbox({ queue, panel }: Props) {
         />
       ) : null}
 
-      {/* Keyboard hint — sits above the bulk toolbar when it's showing. */}
+      {/* Inline keyboard hint — spans full width under the two panes on desktop. */}
       {queue.length > 0 ? (
-        <div
-          className={[
-            'fixed right-4 z-30 rounded-full border border-[var(--color-border-soft)] bg-[var(--color-surface)]/95 backdrop-blur px-3 py-1.5 text-[11px] text-[var(--color-text-muted)] shadow-[var(--shadow-elevation)]',
-            checked.size > 0 ? 'bottom-20' : 'bottom-4',
-          ].join(' ')}
-        >
-          <span className="hidden md:inline-flex items-center gap-2">
-            <Kbd>j</Kbd><Kbd>k</Kbd> move
-            <span className="text-[var(--color-text-subtle)]">·</span>
-            <Kbd>Space</Kbd> select
-            <span className="text-[var(--color-text-subtle)]">·</span>
-            <Kbd>A</Kbd> approve
-            <span className="text-[var(--color-text-subtle)]">·</span>
-            <Kbd>D</Kbd> send back
-            <span className="text-[var(--color-text-subtle)]">·</span>
-            <Kbd>Esc</Kbd> close
-          </span>
-          <span className="md:hidden">Keyboard: j k Space A D Esc</span>
+        <div className="lg:col-span-2 hidden md:flex items-center justify-end gap-2 text-[11px] text-[var(--color-text-muted)]">
+          <Kbd>j</Kbd><Kbd>k</Kbd> move
+          <span className="text-[var(--color-text-subtle)]">·</span>
+          <Kbd>Space</Kbd> select
+          <span className="text-[var(--color-text-subtle)]">·</span>
+          <Kbd>A</Kbd> approve
+          <span className="text-[var(--color-text-subtle)]">·</span>
+          <Kbd>D</Kbd> send back
+          <span className="text-[var(--color-text-subtle)]">·</span>
+          <Kbd>Esc</Kbd> close
         </div>
       ) : null}
     </div>

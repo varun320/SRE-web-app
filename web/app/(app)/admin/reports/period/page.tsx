@@ -53,22 +53,13 @@ export default async function PeriodReportPage({
     : [];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 print:hidden">
-        <div>
-          <h3 className="text-base font-medium tracking-tight">Per-employee period summary</h3>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            Pick an employee + range, then <strong>Print or Save as PDF</strong>.
-          </p>
-        </div>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div className="flex flex-wrap items-center gap-3">
+          <DateRangePicker defaultFrom={from} defaultTo={to} />
           <EmployeePicker employees={employees ?? []} selected={userId} />
-          {employee ? <PrintButton /> : null}
         </div>
-      </div>
-
-      <div className="print:hidden">
-        <DateRangePicker defaultFrom={from} defaultTo={to} />
+        {employee ? <PrintButton /> : null}
       </div>
 
       {employee ? (

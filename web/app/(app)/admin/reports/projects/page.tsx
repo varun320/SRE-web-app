@@ -52,18 +52,11 @@ export default async function ProjectsReportPage({
   const downloadHref = `/api/admin/reports/projects?${params.toString()}`;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
-        <div>
-          <h3 className="text-base font-medium tracking-tight">Hours by project</h3>
-          <p className="text-sm text-[var(--color-text-muted)]">
-            How many approved hours each project absorbed in the range, broken down by employee.
-          </p>
-        </div>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <DateRangePicker defaultFrom={from} defaultTo={to} />
         <ProjectFilter projects={(projectsRes.data ?? []) as { id: string; project_number: number; name: string; status: string }[]} selected={projectId} />
       </div>
-
-      <DateRangePicker defaultFrom={from} defaultTo={to} />
       <ProjectsBreakdown rows={breakdown} downloadHref={downloadHref} />
     </div>
   );

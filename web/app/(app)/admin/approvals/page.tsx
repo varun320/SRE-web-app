@@ -61,13 +61,7 @@ export default async function ApprovalLogPage() {
   });
 
   return (
-    <div className="px-3 md:px-4 py-5 space-y-5">
-      <header>
-        <h2 className="text-lg font-medium tracking-tight">Audit log</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Every submit, approve, decline, unlock, import, and ledger recompute is recorded here. Latest 500 events.
-        </p>
-      </header>
+    <div className="px-3 md:px-4 py-5 md:py-6 space-y-3">
       <ApprovalLogClient rows={rows} />
     </div>
   );

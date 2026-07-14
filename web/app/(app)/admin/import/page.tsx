@@ -16,14 +16,10 @@ export default async function AdminImportPage() {
     .order('employee_code');
 
   return (
-    <div className="px-3 md:px-4 py-5 space-y-4">
-      <header>
-        <h2 className="text-lg font-medium tracking-tight">Historical import</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Bring legacy balances and weekly timesheets into the system. Dry-run first; conflicts
-          block commit.
-        </p>
-      </header>
+    <div className="px-3 md:px-4 py-5 md:py-6 space-y-3">
+      <p className="text-body-sm text-[var(--color-text-muted)]">
+        Bring legacy balances and weekly timesheets into the system. Dry-run first — conflicts block commit.
+      </p>
       <ImportClient employees={data ?? []} />
     </div>
   );
