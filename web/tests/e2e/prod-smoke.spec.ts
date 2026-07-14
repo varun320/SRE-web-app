@@ -25,25 +25,26 @@ test.describe(PROD ? 'prod smoke' : 'prod smoke (skipped — set PROD_URL)', () 
     ]);
     await expect(page.getByRole('link', { name: /Timesheet|Week$/ }).first()).toBeVisible({ timeout: 30_000 });
 
-    // Week page renders the entry table
+    // Login now lands on /home; navigate to the week editor explicitly.
+    await page.goto('/week/current', { waitUntil: 'domcontentloaded' });
     await page.waitForURL(/\/week\/\d{4}-\d{2}-\d{2}/, { timeout: 15_000 });
     await expect(page.getByRole('button', { name: /Submit for approval/ })).toBeVisible();
 
     // TIL bank — hero balance
     await page.goto('/me/til');
-    await expect(page.getByText(/Time-In-Lieu|TIL bank/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /TIL bank/i })).toBeVisible();
 
     // Vacation
     await page.goto('/me/vacation');
-    await expect(page.getByText(/Vacation hours/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /Vacation/i })).toBeVisible();
 
-    // Admin landing
+    // Admin landing (approvals tab is default view)
     await page.goto('/admin');
-    await expect(page.getByText(/Approval queue|Inbox zero/i).first()).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Inbox/i }).first()).toBeVisible();
 
-    // Reports landing
+    // Reports landing — redirects to /admin/reports/payroll
     await page.goto('/admin/reports');
-    await expect(page.getByRole('heading', { name: /Payroll/i }).first()).toBeVisible();
+    await page.waitForURL(/\/admin\/reports\/payroll/, { timeout: 10_000 });
 
     // Notifications page
     await page.goto('/me/notifications');

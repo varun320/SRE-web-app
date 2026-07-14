@@ -70,7 +70,7 @@ describe('MCP tool registry', () => {
           description: 'design review',
         },
       ],
-    });
+    }) as { entries: unknown[] };
     expect(parsed.entries).toHaveLength(1);
   });
 
@@ -91,7 +91,7 @@ describe('MCP tool registry', () => {
           amount_cad: 350,
         },
       ],
-    });
+    }) as { lines: Array<{ gst_cad: number }> };
     expect(parsed.lines[0].gst_cad).toBe(0); // default
   });
 
