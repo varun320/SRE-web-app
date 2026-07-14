@@ -9,6 +9,7 @@ import { Check, CircleDashed, Plus } from 'lucide-react';
 import { computeTotals } from '@/lib/totals';
 import { DAY_KEYS } from '@/lib/dates';
 import { useSaveEntries, useSubmit } from '@/lib/hooks';
+import { filterPersistable } from '@/lib/timesheet/persistable';
 import { toast } from 'sonner';
 import { fireConfetti } from '@/components/ui/confetti';
 
@@ -53,6 +54,11 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rowsRef = useRef(rows);
+  // In-flight guard: while a save is running, don't start another. If the
+  // rows changed during that window, flip this flag so the on-completion
+  // path can re-run the save with the latest snapshot.
+  const savingRef = useRef(false);
+  const rerunRef = useRef(false);
   const locked = timesheet.locked || timesheet.status === 'submitted' || timesheet.status === 'approved';
 
   useEffect(() => { rowsRef.current = rows; }, [rows]);
@@ -88,9 +94,19 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
 
   const performSave = useCallback(async (silent: boolean) => {
     if (locked) return;
+    if (savingRef.current) {
+      // Another save is in-flight — mark that we need to run again with
+      // the latest rows once it finishes. Silent saves compound to silent;
+      // an explicit ⌘S in-between promotes the follow-up to non-silent.
+      rerunRef.current = true;
+      return;
+    }
+    savingRef.current = true;
     setSaveState('saving');
     try {
-      await save.mutateAsync(rowsRef.current.map(({ id: _id, ...rest }) => rest));
+      const persistable = filterPersistable(rowsRef.current, subCategories)
+        .map(({ id: _id, ...rest }) => rest);
+      await save.mutateAsync(persistable);
       setDirty(false);
       setSavedAt(Date.now());
       setSaveState('saved');
@@ -98,8 +114,15 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
     } catch (e) {
       setSaveState('error');
       toast.error((e as Error).message);
+    } finally {
+      savingRef.current = false;
+      if (rerunRef.current) {
+        rerunRef.current = false;
+        // Kick off the follow-up on the next tick so state updates flush.
+        setTimeout(() => { void performSave(true); }, 0);
+      }
     }
-  }, [locked, save]);
+  }, [locked, save, subCategories]);
 
   const setRow = (i: number, next: TimesheetEntryDraft) => {
     setRows((rs) => rs.map((r, idx) => idx === i ? next : r));

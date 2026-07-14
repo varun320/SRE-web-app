@@ -41,16 +41,12 @@ export async function fetchTimesheet(sb: SupabaseClient, id: string): Promise<{ 
 }
 
 export async function replaceEntries(sb: SupabaseClient, timesheetId: string, entries: Omit<TimesheetEntryDraft,'id'>[]): Promise<void> {
-  // Skip rows without a main_category — main_category is a Postgres enum and
-  // rejects empty strings. Unfinished rows stay in client state; the moment
-  // the user picks a category, autosave picks them up.
-  const persistable = entries.filter((e) => e.main_category && e.main_category.length > 0);
-
-  const { error: delErr } = await sb.from('timesheet_entries').delete().eq('timesheet_id', timesheetId);
-  if (delErr) throw delErr;
-  if (persistable.length === 0) return;
-  const payload = persistable.map((e, i) => ({
-    timesheet_id: timesheetId,
+  // The caller must have already filtered out half-finished rows via
+  // filterPersistable() — this function trusts its input. It calls a
+  // transactional RPC so the delete-then-insert is atomic: if the insert
+  // trips a check constraint or the validate_entry trigger, the delete
+  // rolls back too and the user never loses previously-saved rows.
+  const payload = entries.map((e, i) => ({
     main_category: e.main_category,
     sub_category_id: e.sub_category_id,
     project_id: e.project_id,
@@ -59,7 +55,10 @@ export async function replaceEntries(sb: SupabaseClient, timesheetId: string, en
     description: e.description,
     position: i,
   }));
-  const { error } = await sb.from('timesheet_entries').insert(payload);
+  const { error } = await sb.rpc('replace_timesheet_entries', {
+    p_timesheet_id: timesheetId,
+    p_entries: payload,
+  });
   if (error) throw error;
 }
 

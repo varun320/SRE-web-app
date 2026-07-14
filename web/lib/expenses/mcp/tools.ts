@@ -51,6 +51,21 @@ export const approveInput = z.object({
 export const declineInput = approveInput.extend({ reason: z.string().min(3).max(500) });
 export const unlockInput = declineInput;
 
+export const expenseLineInput = z.object({
+  line_date: dateStr,
+  category: z.string().min(1).max(40),
+  description: z.string().trim().min(1).max(500),
+  amount_cad: z.number().nonnegative(),
+  gst_cad: z.number().nonnegative().default(0),
+  credit_card_id: z.string().uuid().nullable().optional(),
+  receipt_url: z.string().max(400).nullable().optional(),
+});
+export const replaceLinesInput = z.object({
+  invoice_no: z.string().min(3),
+  lines: z.array(expenseLineInput),
+});
+export const listLinesInput = z.object({ invoice_no: z.string().min(3) });
+
 async function findByInvoice(
   sb: SupabaseClient,
   userId: string,
@@ -93,11 +108,54 @@ export async function getExpense(
   if (rErr) throw new Error(rErr.message);
   if (!report) throw new Error(`No expense with invoice_no=${input.invoice_no}`);
 
-  const [{ data: bal }, { data: pays }] = await Promise.all([
+  const [{ data: bal }, { data: pays }, { data: lines }] = await Promise.all([
     sb.from('v_expense_balance_full').select('*').eq('id', (report as { id: string }).id).maybeSingle(),
     sb.from('expense_payouts').select('*').eq('user_id', userId).eq('invoice_no', input.invoice_no),
+    sb.from('expense_line_items').select('*').eq('expense_id', (report as { id: string }).id).order('position'),
   ]);
-  return { report, balance: bal, payouts: pays ?? [] };
+  return { report, balance: bal, payouts: pays ?? [], lines: lines ?? [] };
+}
+
+export async function listExpenseLines(
+  sb: SupabaseClient,
+  userId: string,
+  input: z.infer<typeof listLinesInput>,
+) {
+  const row = await findByInvoice(sb, userId, input.invoice_no);
+  if (!row) throw new Error(`No expense with invoice_no=${input.invoice_no}`);
+  const { data, error } = await sb
+    .from('expense_line_items')
+    .select('*')
+    .eq('expense_id', row.id)
+    .order('position');
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function replaceExpenseLines(
+  sb: SupabaseClient,
+  userId: string,
+  input: z.infer<typeof replaceLinesInput>,
+) {
+  const row = await findByInvoice(sb, userId, input.invoice_no);
+  if (!row) throw new Error(`No expense with invoice_no=${input.invoice_no}`);
+  const { error } = await sb.rpc('expense_lines_replace', {
+    p_expense_id: row.id,
+    p_lines: input.lines,
+  });
+  if (error) throw new Error(error.message);
+  return { id: row.id, count: input.lines.length };
+}
+
+export async function listCreditCards(sb: SupabaseClient, userId: string) {
+  const { data, error } = await sb
+    .from('user_credit_cards')
+    .select('id, label, last_four, is_default, is_active')
+    .eq('user_id', userId)
+    .order('is_default', { ascending: false })
+    .order('label');
+  if (error) throw new Error(error.message);
+  return data ?? [];
 }
 
 export async function upsertDraft(
