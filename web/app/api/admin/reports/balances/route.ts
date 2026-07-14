@@ -5,6 +5,7 @@ import { fetchCurrentBalances } from '@/lib/admin/reports/balances';
 import { csvResponse } from '@/lib/admin/reports/csv';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const COLUMNS = [
   'employee_code',

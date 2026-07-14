@@ -6,6 +6,7 @@ import { aggregatePayroll, type PayrollRow } from '@/lib/admin/reports/payroll';
 import { csvResponse } from '@/lib/admin/reports/csv';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const DEFAULT_EPOCH = '2026-01-05';
 

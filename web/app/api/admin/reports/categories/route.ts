@@ -5,6 +5,7 @@ import { aggregateByCategory, fetchCategoryHours } from '@/lib/admin/reports/cat
 import { csvResponse } from '@/lib/admin/reports/csv';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
