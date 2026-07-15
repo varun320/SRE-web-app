@@ -19,14 +19,21 @@ export default async function TilPage() {
 
   return (
     <main className="w-full px-3 md:px-4 py-6 md:py-10 space-y-8">
-      <header className="max-w-3xl">
-        <h1 className="text-h1">TIL bank</h1>
-        <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
-          Every hour above 40 base hours in a week gets added here when the week is approved.
-          Spend it later by logging <strong className="text-[var(--color-text)]">Overtime Taken</strong> or{' '}
-          <strong className="text-[var(--color-text)]">TIL Payout</strong> under the Admin category.
-        </p>
-      </header>
+      <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-70"
+          style={{ background: 'radial-gradient(circle, var(--color-accent-tint) 0%, transparent 70%)' }}
+        />
+        <header className="relative max-w-3xl">
+          <h1 className="text-h1">TIL bank</h1>
+          <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
+            Every hour above 40 base hours in a week gets added here when the week is approved.
+            Spend it later by logging <strong className="text-[var(--color-text)]">Overtime Taken</strong> or{' '}
+            <strong className="text-[var(--color-text)]">TIL Payout</strong> under the Admin category.
+          </p>
+        </header>
+      </section>
 
       <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
         <StatCell

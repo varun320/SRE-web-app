@@ -20,14 +20,21 @@ export default async function VacationPage() {
 
   return (
     <main className="w-full px-3 md:px-4 py-6 md:py-10 space-y-8">
-      <header className="max-w-3xl">
-        <h1 className="text-h1">Vacation</h1>
-        <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
-          Your annual entitlement is set by your position. To use vacation, log{' '}
-          <strong className="text-[var(--color-text)]">Vacation Hours</strong> under the Admin category
-          on a timesheet — the hours come out of this balance when the week is approved.
-        </p>
-      </header>
+      <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-70"
+          style={{ background: 'radial-gradient(circle, var(--color-accent-tint) 0%, transparent 70%)' }}
+        />
+        <header className="relative max-w-3xl">
+          <h1 className="text-h1">Vacation</h1>
+          <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
+            Your annual entitlement is set by your position. To use vacation, log{' '}
+            <strong className="text-[var(--color-text)]">Vacation Hours</strong> under the Admin category
+            on a timesheet — the hours come out of this balance when the week is approved.
+          </p>
+        </header>
+      </section>
 
       <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
         <StatCell

@@ -38,18 +38,24 @@ export default async function ExpensesPage() {
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
-      <section className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div className="max-w-xl">
-          <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
-            <Receipt className="h-3.5 w-3.5" />
-            Expense reports
+      <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 md:p-7">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-70"
+          style={{ background: 'radial-gradient(circle, var(--color-accent-tint) 0%, transparent 70%)' }}
+        />
+        <div className="relative flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="max-w-xl">
+            <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
+              <Receipt className="h-3.5 w-3.5" />
+              Expense reports
+            </div>
+            <h1 className="mt-1 text-h1">Your monthly submissions</h1>
+            <p className="mt-2 text-body-sm text-[var(--color-text-muted)]">
+              One row per monthly expense report. Submit by the 30th of each month; interest accrues
+              on any unpaid balance after Net-30.
+            </p>
           </div>
-          <h1 className="mt-1 text-h1">Your monthly submissions</h1>
-          <p className="mt-2 text-body-sm text-[var(--color-text-muted)]">
-            One row per monthly expense report. Submit by the 30th of each month; interest accrues
-            on any unpaid balance after Net-30.
-          </p>
-        </div>
           <div className="flex gap-2">
             <Link
               href="/expenses/new"
@@ -72,6 +78,7 @@ export default async function ExpensesPage() {
               <span className="hidden md:inline">Settings</span>
             </Link>
           </div>
+        </div>
       </section>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
