@@ -109,7 +109,7 @@ export function Header({ email, isAdmin }: HeaderProps) {
             ].join(' ')}
             title="psst — tap me 5×"
           >
-            <img src="/sre-logo.svg" alt="SRE" className="h-6 w-6" />
+            <img src="/sre-mark.webp" alt="SRE" className="h-6 w-auto" />
           </span>
           <span className="hidden sm:inline text-sm">SRE</span>
         </Link>

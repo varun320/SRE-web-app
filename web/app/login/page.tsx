@@ -31,12 +31,13 @@ export default function LoginPage() {
         style={{ background: 'var(--color-accent)' }}
       />
 
-      {/* Brand mark, small, top */}
+      {/* Brand wordmark, top */}
       <header className="relative z-10 w-full max-w-md flex justify-center">
-        <div className="flex items-center gap-2 font-semibold tracking-tight">
-          <img src="/sre-logo.svg" alt="Sulfur Recovery Engineering" className="h-8 w-8" />
-          <span>Sulfur Recovery</span>
-        </div>
+        <img
+          src="/sre-wordmark.webp"
+          alt="Sulfur Recovery Engineering"
+          className="h-10 md:h-12 w-auto"
+        />
       </header>
 
       {/* Editorial hero + form, stacked in one column */}
