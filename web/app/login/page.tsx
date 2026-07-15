@@ -34,13 +34,7 @@ export default function LoginPage() {
       {/* Brand mark, small, top */}
       <header className="relative z-10 w-full max-w-md flex justify-center">
         <div className="flex items-center gap-2 font-semibold tracking-tight">
-          <span
-            aria-hidden
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-bold text-white"
-            style={{ background: 'var(--color-accent)' }}
-          >
-            SRE
-          </span>
+          <img src="/sre-logo.svg" alt="Sulfur Recovery Engineering" className="h-8 w-8" />
           <span>Sulfur Recovery</span>
         </div>
       </header>

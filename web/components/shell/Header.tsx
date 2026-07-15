@@ -102,16 +102,14 @@ export function Header({ email, isAdmin }: HeaderProps) {
           className="flex items-center gap-2 font-semibold tracking-tight text-[var(--color-text)]"
         >
           <span
-            aria-hidden
             onClick={(e) => { e.preventDefault(); onBrandTap(); }}
             className={[
-              'inline-flex h-6 w-6 items-center justify-center rounded-md text-[10px] font-bold text-white cursor-pointer select-none active:scale-95 transition-transform',
+              'inline-flex h-6 w-6 items-center justify-center cursor-pointer select-none active:scale-95 transition-transform',
               wiggle ? 'brand-wiggle' : '',
             ].join(' ')}
-            style={{ background: 'var(--color-accent)' }}
             title="psst — tap me 5×"
           >
-            SRE
+            <img src="/sre-logo.svg" alt="SRE" className="h-6 w-6" />
           </span>
           <span className="hidden sm:inline text-sm">SRE</span>
         </Link>
