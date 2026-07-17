@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import {
   approveExpense,
@@ -44,9 +45,10 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
           <button
             disabled={pending}
             onClick={() => run(() => approveExpense(sb, expenseId))}
-            className="rounded-md bg-emerald-600 text-white px-2 py-1 hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md bg-emerald-600 text-white px-2 py-1 hover:opacity-90 disabled:opacity-50"
           >
-            Approve
+            {pending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : null}
+            {pending ? 'Working…' : 'Approve'}
           </button>
           <button
             disabled={pending}
@@ -55,7 +57,7 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
               if (!reason) return;
               run(() => declineExpense(sb, expenseId, reason));
             }}
-            className="rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
           >
             Decline
           </button>
@@ -69,8 +71,9 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
             if (!reason) return;
             run(() => unlockExpense(sb, expenseId, reason));
           }}
-          className="rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
+          className="inline-flex items-center gap-1 rounded-md border border-[color-mix(in_oklab,var(--color-destructive)_40%,transparent)] text-[var(--color-status-declined-fg)] px-2 py-1 hover:bg-[color-mix(in_oklab,var(--color-destructive)_8%,transparent)] disabled:opacity-50"
         >
+          {pending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : null}
           Unlock
         </button>
       )}
@@ -98,8 +101,9 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
               }),
             );
           }}
-          className="rounded-md bg-[var(--color-accent)] text-white px-2 py-1 hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-1 rounded-md bg-[var(--color-accent)] text-white px-2 py-1 hover:opacity-90 disabled:opacity-50"
         >
+          {pending ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : null}
           + Payout
         </button>
       )}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Paperclip, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Paperclip, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
@@ -15,6 +15,7 @@ interface Props {
   initialLines?: ExpenseLineItem[];
   creditCards?: CreditCard[];
   projects?: Project[];
+  suggestedInvoice?: string;
   isNew: boolean;
 }
 
@@ -50,7 +51,7 @@ function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft
   };
 }
 
-export function ExpenseEditor({ initial, initialLines, creditCards = [], projects = [], isNew }: Props) {
+export function ExpenseEditor({ initial, initialLines, creditCards = [], projects = [], suggestedInvoice, isNew }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
   const initialPeriodFrom = initial?.period_from ?? '';
   const [form, setForm] = useState({
     id: initial?.id ?? '',
-    invoice_no: initial?.invoice_no ?? '',
+    invoice_no: initial?.invoice_no ?? suggestedInvoice ?? '',
     period_from: initialPeriodFrom,
     period_to: initial?.period_to ?? '',
     submission_date: initial?.submission_date ?? today(),
@@ -238,16 +239,14 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
               <tr>
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Date</th>
-                <th className="text-left px-2 py-2 font-normal w-[160px]">Category</th>
-                <th className="text-left px-2 py-2 font-normal w-[140px]">Project</th>
+                <th className="text-left px-2 py-2 font-normal w-[150px]">Category</th>
+                <th className="text-left px-2 py-2 font-normal w-[130px]">Project</th>
                 <th className="text-left px-2 py-2 font-normal">Description</th>
-                <th className="text-left px-2 py-2 font-normal w-[150px]">Card</th>
-                <th className="text-left px-2 py-2 font-normal w-[70px]">Native cur.</th>
-                <th className="text-right px-2 py-2 font-normal w-[110px]">Native amt.</th>
+                <th className="text-left px-2 py-2 font-normal w-[130px]">Card</th>
+                <th className="text-left px-2 py-2 font-normal w-[170px]">Native (foreign)</th>
                 <th className="text-right px-2 py-2 font-normal w-[120px]">Amount (CAD)</th>
-                <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
-                <th className="text-right px-2 py-2 font-normal w-[110px]">Line total</th>
-                <th className="text-left px-2 py-2 font-normal w-[120px]">Receipt</th>
+                <th className="text-right px-2 py-2 font-normal w-[100px]">GST</th>
+                <th className="w-[64px]">Receipt</th>
                 <th className="w-[36px]"></th>
               </tr>
             </thead>
@@ -319,24 +318,26 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                       </select>
                     </td>
                     <td className="px-2 py-2">
-                      <input
-                        className={`${inputCls} uppercase font-mono`}
-                        maxLength={3}
-                        placeholder="USD"
-                        value={l.native_currency}
-                        onChange={(e) => updateLine(i, { native_currency: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
-                        disabled={readOnly}
-                      />
-                    </td>
-                    <td className="px-2 py-2">
-                      <input
-                        type="number" step="0.01" min="0"
-                        className={`${inputCls} text-right font-mono`}
-                        placeholder="—"
-                        value={l.native_amount}
-                        onChange={(e) => updateLine(i, { native_amount: e.target.value })}
-                        disabled={readOnly}
-                      />
+                      <div className="flex items-stretch gap-1">
+                        <input
+                          aria-label="Native currency"
+                          className={`${inputCls} uppercase font-mono w-[54px] px-1 text-center`}
+                          maxLength={3}
+                          placeholder="USD"
+                          value={l.native_currency}
+                          onChange={(e) => updateLine(i, { native_currency: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
+                          disabled={readOnly}
+                        />
+                        <input
+                          aria-label="Native amount"
+                          type="number" step="0.01" min="0"
+                          className={`${inputCls} text-right font-mono flex-1 min-w-0`}
+                          placeholder="—"
+                          value={l.native_amount}
+                          onChange={(e) => updateLine(i, { native_amount: e.target.value })}
+                          disabled={readOnly}
+                        />
+                      </div>
                     </td>
                     <td className="px-2 py-2">
                       <input
@@ -347,6 +348,9 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                         disabled={readOnly}
                         required
                       />
+                      <div className="mt-0.5 text-[10px] text-[var(--color-text-muted)] text-right font-mono tabular-nums">
+                        line: {lineTotal.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
+                      </div>
                     </td>
                     <td className="px-2 py-2">
                       <input
@@ -357,19 +361,20 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                         disabled={readOnly}
                       />
                     </td>
-                    <td className="px-2 py-2 text-right font-mono tabular-nums">
-                      {lineTotal.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
-                    </td>
-                    <td className="px-2 py-2">
+                    <td className="px-2 py-2 text-center align-middle">
                       {l.receipt_url ? (
-                        <div className="flex items-center gap-1 text-xs">
-                          <Paperclip className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-                          <span className="truncate max-w-[70px]" title={l.receipt_url}>attached</span>
+                        <div className="inline-flex items-center gap-0.5">
+                          <span
+                            className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-[var(--color-surface-2)] text-[var(--color-accent)]"
+                            title="Receipt attached"
+                          >
+                            <Paperclip className="h-3.5 w-3.5" />
+                          </span>
                           {!readOnly ? (
                             <button
                               type="button"
                               onClick={() => updateLine(i, { receipt_url: null })}
-                              className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)]"
+                              className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] text-sm leading-none px-1"
                               aria-label="Detach receipt"
                             >
                               ×
@@ -377,9 +382,16 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                           ) : null}
                         </div>
                       ) : canAttach ? (
-                        <label className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer">
-                          <Paperclip className="h-3.5 w-3.5" />
-                          {uploadingIdx === i ? 'Uploading…' : 'Attach'}
+                        <label
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border-strong)] cursor-pointer"
+                          title={uploadingIdx === i ? 'Uploading…' : 'Attach receipt'}
+                          aria-label={uploadingIdx === i ? 'Uploading' : 'Attach receipt'}
+                        >
+                          {uploadingIdx === i ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Paperclip className="h-3.5 w-3.5" />
+                          )}
                           <input
                             type="file"
                             accept="image/*,application/pdf"
@@ -392,7 +404,12 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                           />
                         </label>
                       ) : (
-                        <span className="text-[10px] text-[var(--color-text-muted)]">save draft first</span>
+                        <span
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-md text-[var(--color-text-muted)] opacity-50"
+                          title="Save draft first, then you can attach"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" />
+                        </span>
                       )}
                     </td>
                     <td className="px-2 py-2 align-middle">
@@ -413,7 +430,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
             </tbody>
             <tfoot>
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                <td colSpan={7} className="px-2 py-2">
+                <td colSpan={6} className="px-2 py-2">
                   {!readOnly ? (
                     <button
                       type="button"
@@ -430,11 +447,9 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                 <td className="px-2 py-2 text-right font-mono tabular-nums font-semibold">
                   {totals.gst.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
                 </td>
-                <td className="px-2 py-2 text-right font-mono tabular-nums font-semibold">
-                  {totals.total.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
+                <td colSpan={2} className="px-2 py-2 text-right font-mono tabular-nums font-semibold">
+                  ={' '}{totals.total.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
                 </td>
-                <td></td>
-                <td></td>
               </tr>
             </tfoot>
           </table>

@@ -5,9 +5,35 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchMyCreditCards } from '@/lib/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
 
+function suggestNextInvoice(last: string | null | undefined): string {
+  // Increment the trailing integer of the previous invoice #, keeping the
+  // prefix and zero-padding intact (e.g. UC2026004 → UC2026005).
+  if (!last) return '';
+  const m = /^(.*?)(\d+)$/.exec(last);
+  if (!m) return '';
+  const prefix = m[1];
+  const num = m[2];
+  const next = (Number(num) + 1).toString().padStart(num.length, '0');
+  return `${prefix}${next}`;
+}
+
 export default async function NewExpensePage() {
   const sb = await getSupabaseServer();
   const [cards, projects] = await Promise.all([fetchMyCreditCards(sb), fetchProjects(sb)]);
+
+  const { data: userRow } = await sb.auth.getUser();
+  const uid = userRow.user?.id;
+  const { data: last } = uid
+    ? await sb
+        .from('expense_reports')
+        .select('invoice_no')
+        .eq('user_id', uid)
+        .order('submission_date', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+  const suggestedInvoice = suggestNextInvoice((last as { invoice_no?: string } | null)?.invoice_no);
+
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <Link
@@ -27,7 +53,13 @@ export default async function NewExpensePage() {
           </p>
         ) : null}
         <div className="mt-5">
-          <ExpenseEditor initial={null} creditCards={cards} projects={projects} isNew />
+          <ExpenseEditor
+            initial={null}
+            creditCards={cards}
+            projects={projects}
+            suggestedInvoice={suggestedInvoice}
+            isNew
+          />
         </div>
       </section>
     </main>
