@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Paperclip } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
+import { ReceiptViewer } from '@/components/admin/ReceiptViewer';
 import type { ExpenseLineItem, ExpenseReport, ExpensePayout, CreditCard } from '@/lib/expenses/types';
 
 function money(n: number): string {
@@ -224,14 +225,7 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
                       <td className="px-3 py-2 text-right font-mono tabular-nums font-semibold">{money(total)}</td>
                       <td className="px-3 py-2">
                         {url ? (
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:underline"
-                          >
-                            <Paperclip className="h-3.5 w-3.5" /> View
-                          </a>
+                          <ReceiptViewer url={url} filename={l.receipt_url ?? undefined} />
                         ) : (
                           <span className="text-xs text-[var(--color-text-muted)]">—</span>
                         )}

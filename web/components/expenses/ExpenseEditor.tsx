@@ -29,10 +29,10 @@ interface LineDraft {
   gst_cad: string;
   credit_card_id: string | null;
   receipt_url: string | null;
+  pending_file: File | null;   // set when a receipt is picked before the draft has an id
   project_id: string | null;
-  native_amount: string;
-  native_currency: string;
-  is_personal: boolean;
+  // native_amount + native_currency + is_personal kept in DB for MCP/back-compat
+  // but no longer surfaced in the editor UI.
 }
 
 function today(): string {
@@ -48,10 +48,8 @@ function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft
     gst_cad: '',
     credit_card_id: defaultCardId,
     receipt_url: null,
+    pending_file: null,
     project_id: null,
-    native_amount: '',
-    native_currency: '',
-    is_personal: false,
   };
 }
 
@@ -83,29 +81,29 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         gst_cad: String(l.gst_cad ?? 0),
         credit_card_id: l.credit_card_id,
         receipt_url: l.receipt_url,
+        pending_file: null,
         project_id: l.project_id,
-        native_amount: l.native_amount == null ? '' : String(l.native_amount),
-        native_currency: l.native_currency ?? '',
-        is_personal: l.is_personal ?? false,
       }));
     }
     return [emptyLine(initialPeriodFrom || today(), defaultCardId)];
   });
 
   const readOnly = !isNew && initial ? initial.locked || (initial.status !== 'draft' && initial.status !== 'declined') : false;
-  const canAttach = !readOnly && !!initial?.id;
+  const canAttach = !readOnly;
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
 
+  // If the draft already has an id, upload immediately. Otherwise stash the
+  // File on the line and defer the upload until save() creates the report.
   async function attachReceipt(i: number, file: File) {
+    setErr(null);
     if (!initial?.id) {
-      setErr('Save the draft first, then attach receipts.');
+      updateLine(i, { pending_file: file, receipt_url: null });
       return;
     }
-    setErr(null);
     setUploadingIdx(i);
     try {
       const key = await uploadReceipt(getSupabaseBrowser(), initial.id, file);
-      updateLine(i, { receipt_url: key });
+      updateLine(i, { receipt_url: key, pending_file: null });
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Upload failed');
     } finally {
@@ -117,7 +115,6 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
     let amount = 0;
     let gst = 0;
     for (const l of lines) {
-      if (l.is_personal) continue;
       amount += Number(l.amount_cad || 0);
       gst += Number(l.gst_cad || 0);
     }
@@ -153,10 +150,8 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         gst_cad: String(f.gst_cad),
         credit_card_id: defaultCardId,
         receipt_url: null,
+        pending_file: null,
         project_id: f.project_id,
-        native_amount: '',
-        native_currency: '',
-        is_personal: false,
       },
     ]);
   }
@@ -190,9 +185,6 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         credit_card_id: l.credit_card_id ?? null,
         receipt_url: l.receipt_url ?? null,
         project_id: l.project_id ?? null,
-        native_amount: l.native_amount ? Number(l.native_amount) : null,
-        native_currency: l.native_currency ? l.native_currency.toUpperCase() : null,
-        is_personal: l.is_personal,
       });
       if (!p.success) {
         setErr(`Line ${i + 1}: ${p.error.issues[0]?.message ?? 'invalid'}`);
@@ -210,6 +202,17 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
       try {
         const sb = getSupabaseBrowser();
         const id = await upsertExpenseDraft(sb, draft.data);
+
+        // Upload any receipts that were picked before the draft had an id.
+        for (const [i, l] of lines.entries()) {
+          if (l.pending_file) {
+            const key = await uploadReceipt(sb, id, l.pending_file);
+            parsedLines[i] = { ...parsedLines[i], receipt_url: key };
+            // Reflect the new key so we don't try to re-upload on next save.
+            updateLine(i, { receipt_url: key, pending_file: null });
+          }
+        }
+
         await replaceExpenseLines(sb, id, parsedLines);
         if (thenSubmit) await submitExpense(sb, id);
         router.push(`/expenses/${encodeURIComponent(draft.data.invoice_no)}`);
@@ -280,11 +283,10 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                 <th className="text-left px-2 py-2 font-normal w-[150px]">Category</th>
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Project</th>
                 <th className="text-left px-2 py-2 font-normal">Description</th>
-                <th className="text-left px-2 py-2 font-normal w-[130px]">Card</th>
-                <th className="text-left px-2 py-2 font-normal w-[170px]">Native (foreign)</th>
-                <th className="text-right px-2 py-2 font-normal w-[120px]">Amount (CAD)</th>
-                <th className="text-right px-2 py-2 font-normal w-[100px]">GST</th>
-                <th className="w-[64px]">Receipt</th>
+                <th className="text-left px-2 py-2 font-normal w-[150px]">Card</th>
+                <th className="text-right px-2 py-2 font-normal w-[130px]">Amount (CAD)</th>
+                <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
+                <th className="w-[70px]">Receipt</th>
                 <th className="w-[36px]"></th>
               </tr>
             </thead>
@@ -292,7 +294,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
               {lines.map((l, i) => {
                 const lineTotal = Number(l.amount_cad || 0) + Number(l.gst_cad || 0);
                 return (
-                  <tr key={i} className={`border-t border-[var(--color-border-soft)] align-top ${l.is_personal ? 'opacity-50 bg-[var(--color-surface-2)]/30' : ''}`}>
+                  <tr key={i} className="border-t border-[var(--color-border-soft)] align-top">
                     <td className="px-2 py-2">
                       <DatePicker
                         value={l.line_date}
@@ -355,28 +357,6 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                       </select>
                     </td>
                     <td className="px-2 py-2">
-                      <div className="flex items-stretch gap-1">
-                        <input
-                          aria-label="Native currency"
-                          className={`${inputCls} uppercase font-mono w-[54px] px-1 text-center`}
-                          maxLength={3}
-                          placeholder="USD"
-                          value={l.native_currency}
-                          onChange={(e) => updateLine(i, { native_currency: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
-                          disabled={readOnly}
-                        />
-                        <input
-                          aria-label="Native amount"
-                          type="number" step="0.01" min="0"
-                          className={`${inputCls} text-right font-mono flex-1 min-w-0`}
-                          placeholder="—"
-                          value={l.native_amount}
-                          onChange={(e) => updateLine(i, { native_amount: e.target.value })}
-                          disabled={readOnly}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-2 py-2">
                       <input
                         type="number" step="0.01" min="0"
                         className={`${inputCls} text-right font-mono`}
@@ -418,6 +398,25 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                             </button>
                           ) : null}
                         </div>
+                      ) : l.pending_file ? (
+                        <div className="inline-flex items-center gap-0.5">
+                          <span
+                            className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-dashed border-[var(--color-accent)] text-[var(--color-accent)]"
+                            title={`Will upload on save: ${l.pending_file.name}`}
+                          >
+                            <Paperclip className="h-3.5 w-3.5" />
+                          </span>
+                          {!readOnly ? (
+                            <button
+                              type="button"
+                              onClick={() => updateLine(i, { pending_file: null })}
+                              className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] text-sm leading-none px-1"
+                              aria-label="Remove pending receipt"
+                            >
+                              ×
+                            </button>
+                          ) : null}
+                        </div>
                       ) : canAttach ? (
                         <label
                           className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border-strong)] cursor-pointer"
@@ -443,38 +442,22 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                       ) : (
                         <span
                           className="inline-flex items-center justify-center h-7 w-7 rounded-md text-[var(--color-text-muted)] opacity-50"
-                          title="Save draft first, then you can attach"
                         >
                           <Paperclip className="h-3.5 w-3.5" />
                         </span>
                       )}
                     </td>
                     <td className="px-2 py-2 align-middle">
-                      <div className="flex flex-col items-center gap-1">
-                        <label
-                          className="inline-flex items-center gap-1 text-[10px] text-[var(--color-text-muted)] cursor-pointer"
-                          title="Mark as personal — kept for your records but excluded from the submitted total"
+                      {!readOnly && lines.length > 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => removeLine(i)}
+                          aria-label={`Remove line ${i + 1}`}
+                          className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1 rounded"
                         >
-                          <input
-                            type="checkbox"
-                            checked={l.is_personal}
-                            onChange={(e) => updateLine(i, { is_personal: e.target.checked })}
-                            disabled={readOnly}
-                            className="h-3 w-3"
-                          />
-                          personal
-                        </label>
-                        {!readOnly && lines.length > 1 ? (
-                          <button
-                            type="button"
-                            onClick={() => removeLine(i)}
-                            aria-label={`Remove line ${i + 1}`}
-                            className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1 rounded"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        ) : null}
-                      </div>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 );
@@ -482,7 +465,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
             </tbody>
             <tfoot>
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                <td colSpan={6} className="px-2 py-2">
+                <td colSpan={5} className="px-2 py-2">
                   {!readOnly ? (
                     <div className="flex items-center gap-3">
                       <button
