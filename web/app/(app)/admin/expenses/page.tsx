@@ -136,7 +136,13 @@ export default async function AdminExpensesPage({
 
   return (
     <main className="w-full px-3 md:px-4 py-5 md:py-6 space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Link
+          href="/admin/expenses/lines"
+          className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
+        >
+          Line items →
+        </Link>
         <Link
           href="/admin/expenses/payouts"
           className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"

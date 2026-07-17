@@ -64,6 +64,12 @@ export default async function ExpensesPage() {
               <Plus className="h-4 w-4" /> New report
             </Link>
             <Link
+              href="/expenses/lines"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)]"
+            >
+              All lines <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link
               href="/expenses/balance"
               className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-2 text-sm font-medium hover:bg-[var(--color-surface-2)]"
             >
