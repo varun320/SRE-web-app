@@ -71,13 +71,21 @@ export interface ExpenseSettings {
 }
 
 export const EXPENSE_CATEGORIES = [
-  'Meals',
-  'Fuel',
-  'Transport',
+  'Airfare',
+  'Airport Cart',
+  'Cab',
+  'Credit Card fees',
+  'Gift for Client / Marketing',
+  'Ground Transportation',
+  'GYM Membership',
   'Hotel',
-  'Office Supplies',
-  'Communications',
-  'Client Entertainment',
+  'Meal',
+  'Meal with Client',
+  'Office/Lab Supplies',
+  'SCBA Rental',
+  'Software Subscription',
+  'Tools',
+  'Uber Membership',
   'Other',
 ] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
@@ -92,6 +100,9 @@ export interface ExpenseLineItem {
   gst_cad: number;
   credit_card_id: string | null;
   receipt_url: string | null;
+  project_id: string | null;
+  native_amount: number | null;
+  native_currency: string | null;
   position: number;
 }
 
@@ -102,6 +113,7 @@ export interface ExpenseLineDraft {
   amount_cad: number;
   gst_cad: number;
   credit_card_id?: string | null;
+  project_id?: string | null;
 }
 
 export interface CreditCard {

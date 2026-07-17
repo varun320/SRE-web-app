@@ -59,6 +59,9 @@ export const expenseLineInput = z.object({
   gst_cad: z.number().nonnegative().default(0),
   credit_card_id: z.string().uuid().nullable().optional(),
   receipt_url: z.string().max(400).nullable().optional(),
+  project_id: z.string().uuid().nullable().optional(),
+  native_amount: z.number().nonnegative().nullable().optional(),
+  native_currency: z.string().regex(/^[A-Za-z]{3}$/).nullable().optional(),
 });
 export const replaceLinesInput = z.object({
   invoice_no: z.string().min(3),

@@ -120,12 +120,16 @@ export default async function AdminExpensesPage({
                 {filtered.map((r) => {
                   const u = userMap.get(r.user_id);
                   return (
-                    <tr key={r.id} className="border-t border-[var(--color-border-soft)]">
+                    <tr key={r.id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/30">
                       <td className="px-4 py-2.5">
-                        <div className="font-medium">{u?.full_name ?? '—'}</div>
-                        <div className="text-[11px] text-[var(--color-text-muted)]">{u?.employee_code ?? ''}</div>
+                        <Link href={`/admin/expenses/${r.id}`} className="block">
+                          <div className="font-medium">{u?.full_name ?? '—'}</div>
+                          <div className="text-[11px] text-[var(--color-text-muted)]">{u?.employee_code ?? ''}</div>
+                        </Link>
                       </td>
-                      <td className="px-4 py-2.5 font-medium">{r.invoice_no}</td>
+                      <td className="px-4 py-2.5 font-medium">
+                        <Link href={`/admin/expenses/${r.id}`} className="hover:underline">{r.invoice_no}</Link>
+                      </td>
                       <td className="px-4 py-2.5 text-[var(--color-text-muted)]">
                         {r.period_from} → {r.period_to}
                       </td>

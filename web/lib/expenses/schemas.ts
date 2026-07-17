@@ -20,7 +20,13 @@ export const expenseLineSchema = z.object({
   gst_cad: z.number().nonnegative().default(0),
   credit_card_id: z.string().uuid().nullable().optional(),
   receipt_url: z.string().max(400).nullable().optional(),
-});
+  project_id: z.string().uuid().nullable().optional(),
+  native_amount: z.number().nonnegative().nullable().optional(),
+  native_currency: z.string().regex(/^[A-Za-z]{3}$/, '3-letter code').nullable().optional(),
+}).refine(
+  (v) => (v.native_amount == null) === (v.native_currency == null),
+  { message: 'Enter both native amount and currency, or leave both blank', path: ['native_currency'] },
+);
 
 export const creditCardSchema = z.object({
   id: z.string().uuid().optional(),

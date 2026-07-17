@@ -36,6 +36,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const from = searchParams.get('from');
   const to = searchParams.get('to');
+  const userId = searchParams.get('user_id') ?? undefined;
   if (!from || !ISO_DATE.test(from) || !to || !ISO_DATE.test(to)) {
     return NextResponse.json({ error: 'from and to must be YYYY-MM-DD' }, { status: 400 });
   }
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'from must be ≤ to' }, { status: 400 });
   }
 
-  const rows = await fetchPeriodSummary(sb, { from, to });
+  const rows = await fetchPeriodSummary(sb, { from, to, userId });
   const payroll = aggregatePayroll(rows, { epoch: new Date(`${DEFAULT_EPOCH}T00:00:00Z`) });
 
   const csvRows = payroll.map((r) =>
@@ -55,5 +56,6 @@ export async function GET(req: Request) {
     ),
   );
 
-  return csvResponse(`payroll-${from}-${to}.csv`, csvRows, { columns: COLUMNS as string[] });
+  const suffix = userId ? `-${userId.slice(0, 8)}` : '';
+  return csvResponse(`payroll-${from}-${to}${suffix}.csv`, csvRows, { columns: COLUMNS as string[] });
 }

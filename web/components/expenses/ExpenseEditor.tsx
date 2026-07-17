@@ -8,11 +8,13 @@ import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
 import { uploadReceipt } from '@/lib/expenses/receipts';
 import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
+import type { Project } from '@/lib/types';
 
 interface Props {
   initial?: ExpenseReport | null;
   initialLines?: ExpenseLineItem[];
   creditCards?: CreditCard[];
+  projects?: Project[];
   isNew: boolean;
 }
 
@@ -24,6 +26,9 @@ interface LineDraft {
   gst_cad: string;
   credit_card_id: string | null;
   receipt_url: string | null;
+  project_id: string | null;
+  native_amount: string;
+  native_currency: string;
 }
 
 function today(): string {
@@ -33,16 +38,19 @@ function today(): string {
 function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft {
   return {
     line_date: defaultDate,
-    category: 'Meals',
+    category: 'Meal',
     description: '',
     amount_cad: '',
     gst_cad: '',
     credit_card_id: defaultCardId,
     receipt_url: null,
+    project_id: null,
+    native_amount: '',
+    native_currency: '',
   };
 }
 
-export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }: Props) {
+export function ExpenseEditor({ initial, initialLines, creditCards = [], projects = [], isNew }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -69,6 +77,9 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
         gst_cad: String(l.gst_cad ?? 0),
         credit_card_id: l.credit_card_id,
         receipt_url: l.receipt_url,
+        project_id: l.project_id,
+        native_amount: l.native_amount == null ? '' : String(l.native_amount),
+        native_currency: l.native_currency ?? '',
       }));
     }
     return [emptyLine(initialPeriodFrom || today(), defaultCardId)];
@@ -148,6 +159,9 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
         gst_cad: Number(l.gst_cad || 0),
         credit_card_id: l.credit_card_id ?? null,
         receipt_url: l.receipt_url ?? null,
+        project_id: l.project_id ?? null,
+        native_amount: l.native_amount ? Number(l.native_amount) : null,
+        native_currency: l.native_currency ? l.native_currency.toUpperCase() : null,
       });
       if (!p.success) {
         setErr(`Line ${i + 1}: ${p.error.issues[0]?.message ?? 'invalid'}`);
@@ -225,9 +239,12 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
               <tr>
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Date</th>
                 <th className="text-left px-2 py-2 font-normal w-[160px]">Category</th>
+                <th className="text-left px-2 py-2 font-normal w-[140px]">Project</th>
                 <th className="text-left px-2 py-2 font-normal">Description</th>
                 <th className="text-left px-2 py-2 font-normal w-[150px]">Card</th>
-                <th className="text-right px-2 py-2 font-normal w-[120px]">Amount</th>
+                <th className="text-left px-2 py-2 font-normal w-[70px]">Native cur.</th>
+                <th className="text-right px-2 py-2 font-normal w-[110px]">Native amt.</th>
+                <th className="text-right px-2 py-2 font-normal w-[120px]">Amount (CAD)</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">Line total</th>
                 <th className="text-left px-2 py-2 font-normal w-[120px]">Receipt</th>
@@ -262,6 +279,21 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
                       </select>
                     </td>
                     <td className="px-2 py-2">
+                      <select
+                        className={inputCls}
+                        value={l.project_id ?? ''}
+                        onChange={(e) => updateLine(i, { project_id: e.target.value || null })}
+                        disabled={readOnly}
+                      >
+                        <option value="">— none —</option>
+                        {projects.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.project_number} — {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-2 py-2">
                       <input
                         className={inputCls}
                         value={l.description}
@@ -285,6 +317,26 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-2 py-2">
+                      <input
+                        className={`${inputCls} uppercase font-mono`}
+                        maxLength={3}
+                        placeholder="USD"
+                        value={l.native_currency}
+                        onChange={(e) => updateLine(i, { native_currency: e.target.value.toUpperCase().replace(/[^A-Z]/g, '') })}
+                        disabled={readOnly}
+                      />
+                    </td>
+                    <td className="px-2 py-2">
+                      <input
+                        type="number" step="0.01" min="0"
+                        className={`${inputCls} text-right font-mono`}
+                        placeholder="—"
+                        value={l.native_amount}
+                        onChange={(e) => updateLine(i, { native_amount: e.target.value })}
+                        disabled={readOnly}
+                      />
                     </td>
                     <td className="px-2 py-2">
                       <input
@@ -361,7 +413,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], isNew }
             </tbody>
             <tfoot>
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                <td colSpan={4} className="px-2 py-2">
+                <td colSpan={7} className="px-2 py-2">
                   {!readOnly ? (
                     <button
                       type="button"

@@ -3,10 +3,11 @@ import { ArrowLeft } from 'lucide-react';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchMyCreditCards } from '@/lib/expenses/queries';
+import { fetchProjects } from '@/lib/queries';
 
 export default async function NewExpensePage() {
   const sb = await getSupabaseServer();
-  const cards = await fetchMyCreditCards(sb);
+  const [cards, projects] = await Promise.all([fetchMyCreditCards(sb), fetchProjects(sb)]);
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <Link
@@ -26,7 +27,7 @@ export default async function NewExpensePage() {
           </p>
         ) : null}
         <div className="mt-5">
-          <ExpenseEditor initial={null} creditCards={cards} isNew />
+          <ExpenseEditor initial={null} creditCards={cards} projects={projects} isNew />
         </div>
       </section>
     </main>
