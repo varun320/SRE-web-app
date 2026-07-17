@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Paperclip, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { DatePicker } from '@/components/ui/date-picker';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
 import { uploadReceipt } from '@/lib/expenses/receipts';
@@ -203,32 +204,29 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
           />
         </Field>
         <Field label="Submission date">
-          <input
-            type="date"
-            className={inputCls}
+          <DatePicker
             value={form.submission_date}
-            onChange={(e) => updateForm('submission_date', e.target.value)}
+            onChange={(v) => updateForm('submission_date', v)}
             disabled={readOnly}
+            ariaLabel="Submission date"
           />
         </Field>
         <Field label="Period from">
-          <input
-            type="date"
-            className={inputCls}
+          <DatePicker
             value={form.period_from}
-            onChange={(e) => updateForm('period_from', e.target.value)}
+            onChange={(v) => updateForm('period_from', v)}
             disabled={readOnly}
             required
+            ariaLabel="Period from"
           />
         </Field>
         <Field label="Period to">
-          <input
-            type="date"
-            className={inputCls}
+          <DatePicker
             value={form.period_to}
-            onChange={(e) => updateForm('period_to', e.target.value)}
+            onChange={(v) => updateForm('period_to', v)}
             disabled={readOnly}
             required
+            ariaLabel="Period to"
           />
         </Field>
       </div>
@@ -256,13 +254,12 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                 return (
                   <tr key={i} className="border-t border-[var(--color-border-soft)] align-top">
                     <td className="px-2 py-2">
-                      <input
-                        type="date"
-                        className={inputCls}
+                      <DatePicker
                         value={l.line_date}
-                        onChange={(e) => updateLine(i, { line_date: e.target.value })}
+                        onChange={(v) => updateLine(i, { line_date: v })}
                         disabled={readOnly}
                         required
+                        ariaLabel={`Line ${i + 1} date`}
                       />
                     </td>
                     <td className="px-2 py-2">

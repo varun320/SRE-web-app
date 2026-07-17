@@ -59,6 +59,20 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
   const totalAmount = lines.reduce((s, l) => s + Number(l.amount_cad), 0);
   const totalGst = lines.reduce((s, l) => s + Number(l.gst_cad), 0);
 
+  const byCategory = lines.reduce<Map<string, number>>((acc, l) => {
+    const key = l.category;
+    acc.set(key, (acc.get(key) ?? 0) + Number(l.amount_cad) + Number(l.gst_cad));
+    return acc;
+  }, new Map());
+  const categoryBreakdown = Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]);
+
+  const byProject = lines.reduce<Map<string, number>>((acc, l) => {
+    const key = l.project_id ?? '__none__';
+    acc.set(key, (acc.get(key) ?? 0) + Number(l.amount_cad) + Number(l.gst_cad));
+    return acc;
+  }, new Map());
+  const projectBreakdown = Array.from(byProject.entries()).sort((a, b) => b[1] - a[1]);
+
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
       <Link
@@ -99,6 +113,45 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
           <p className="mt-3 text-sm text-[var(--color-text-muted)] whitespace-pre-wrap">{report.notes}</p>
         ) : null}
       </section>
+
+      {lines.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-4 space-y-3">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">By category</div>
+            <div className="flex flex-wrap gap-1.5">
+              {categoryBreakdown.map(([cat, amt]) => (
+                <span
+                  key={cat}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-2)] px-2.5 py-1 text-xs"
+                >
+                  <span className="font-medium">{cat}</span>
+                  <span className="font-mono tabular-nums text-[var(--color-text-muted)]">{money(amt)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+          {projectBreakdown.length > 0 ? (
+            <div>
+              <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">By project</div>
+              <div className="flex flex-wrap gap-1.5">
+                {projectBreakdown.map(([pid, amt]) => {
+                  const p = pid === '__none__' ? null : projectMap.get(pid);
+                  return (
+                    <span
+                      key={pid}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface-2)] px-2.5 py-1 text-xs"
+                    >
+                      <span className="font-mono font-medium">{p ? p.project_number : 'unassigned'}</span>
+                      {p ? <span className="text-[var(--color-text-muted)] truncate max-w-[160px]">{p.name}</span> : null}
+                      <span className="font-mono tabular-nums text-[var(--color-text-muted)]">{money(amt)}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
         <div className="overflow-x-auto">

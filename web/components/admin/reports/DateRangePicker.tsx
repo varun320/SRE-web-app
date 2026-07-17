@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface Preset {
   label: string;
@@ -94,23 +95,11 @@ export function DateRangePicker({ defaultFrom, defaultTo }: Props) {
       <div className="flex flex-col md:flex-row md:items-end gap-3">
         <div className="space-y-1">
           <label htmlFor="rp-from" className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">From</label>
-          <input
-            id="rp-from"
-            type="date"
-            defaultValue={from}
-            onBlur={(e) => apply(e.currentTarget.value, to)}
-            className="block rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm"
-          />
+          <DatePicker value={from} onChange={(v) => apply(v, to)} ariaLabel="Range from" className="min-w-[140px]" />
         </div>
         <div className="space-y-1">
           <label htmlFor="rp-to" className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">To</label>
-          <input
-            id="rp-to"
-            type="date"
-            defaultValue={to}
-            onBlur={(e) => apply(from, e.currentTarget.value)}
-            className="block rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm"
-          />
+          <DatePicker value={to} onChange={(v) => apply(from, v)} ariaLabel="Range to" className="min-w-[140px]" />
         </div>
         <div className="flex-1" />
         <div className="flex flex-wrap gap-1.5">

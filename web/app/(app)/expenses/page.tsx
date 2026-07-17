@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Receipt, Plus, ArrowUpRight, Settings } from 'lucide-react';
+import { Receipt, Plus, ArrowUpRight, Settings, Copy } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchMyExpenses, fetchSummary } from '@/lib/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -108,6 +108,7 @@ export default async function ExpensesPage() {
                   <th className="num">GST</th>
                   <th className="num">Total</th>
                   <th>Status</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -124,6 +125,15 @@ export default async function ExpensesPage() {
                     <td className="num">{money(Number(r.gst_cad))}</td>
                     <td className="num font-medium">{money(Number(r.total_cad))}</td>
                     <td><StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge></td>
+                    <td className="text-right">
+                      <Link
+                        href={`/expenses/new?dup=${encodeURIComponent(r.invoice_no)}`}
+                        title="Start a new report with the same lines"
+                        className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      >
+                        <Copy className="h-3.5 w-3.5" /> Duplicate
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

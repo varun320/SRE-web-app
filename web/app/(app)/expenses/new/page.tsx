@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchMyCreditCards } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards } from '@/lib/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
+import type { ExpenseLineItem } from '@/lib/expenses/types';
 
 function suggestNextInvoice(last: string | null | undefined): string {
   // Increment the trailing integer of the previous invoice #, keeping the
@@ -17,7 +18,14 @@ function suggestNextInvoice(last: string | null | undefined): string {
   return `${prefix}${next}`;
 }
 
-export default async function NewExpensePage() {
+export default async function NewExpensePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ dup?: string }>;
+}) {
+  const sp = (await searchParams) ?? {};
+  const dupInvoice = sp.dup;
+
   const sb = await getSupabaseServer();
   const [cards, projects] = await Promise.all([fetchMyCreditCards(sb), fetchProjects(sb)]);
 
@@ -33,6 +41,22 @@ export default async function NewExpensePage() {
         .maybeSingle()
     : { data: null };
   const suggestedInvoice = suggestNextInvoice((last as { invoice_no?: string } | null)?.invoice_no);
+
+  // If ?dup=INV, clone the source report's line items into a fresh draft.
+  let dupLines: ExpenseLineItem[] | undefined;
+  if (dupInvoice && uid) {
+    const source = await fetchExpenseByInvoice(sb, uid, dupInvoice);
+    if (source) {
+      const rawLines = await fetchExpenseLines(sb, source.id);
+      // Reset ids + drop receipt attachments (they belong to the original).
+      dupLines = rawLines.map((l) => ({
+        ...l,
+        id: '',
+        expense_id: '',
+        receipt_url: null,
+      }));
+    }
+  }
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
@@ -55,6 +79,7 @@ export default async function NewExpensePage() {
         <div className="mt-5">
           <ExpenseEditor
             initial={null}
+            initialLines={dupLines}
             creditCards={cards}
             projects={projects}
             suggestedInvoice={suggestedInvoice}

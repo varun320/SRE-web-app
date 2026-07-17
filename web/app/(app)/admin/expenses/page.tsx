@@ -1,23 +1,8 @@
 import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { Receipt, ArrowDown, ArrowUp } from 'lucide-react';
-import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
-
-function money(n: number): string {
-  return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
-}
-
-function statusTone(s: string): 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'muted' {
-  switch (s) {
-    case 'approved': return 'info';
-    case 'paid':     return 'success';
-    case 'submitted': return 'warning';
-    case 'declined': return 'danger';
-    default:         return 'muted';
-  }
-}
+import { Receipt } from 'lucide-react';
+import { AdminExpensesTableBody } from '@/components/admin/AdminExpensesTableBody';
 
 type SortKey = 'submission_date' | 'invoice_no' | 'total_cad' | 'status' | 'employee';
 const SORT_KEYS: readonly SortKey[] = ['submission_date', 'invoice_no', 'total_cad', 'status', 'employee'];
@@ -118,9 +103,7 @@ export default async function AdminExpensesPage({
     p.set('dir', nextDir);
     return `?${p.toString()}`;
   };
-
-  const arrow = (key: SortKey) =>
-    sort === key ? (dir === 'asc' ? <ArrowUp className="inline h-3 w-3" /> : <ArrowDown className="inline h-3 w-3" />) : null;
+  const sortHrefs = Object.fromEntries(SORT_KEYS.map((k) => [k, sortHref(k)])) as Record<SortKey, string>;
 
   function renderEmpty() {
     return (
@@ -192,69 +175,13 @@ export default async function AdminExpensesPage({
       ) : (
         <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
-                <tr>
-                  <th className="text-left px-4 py-2.5 font-normal">
-                    <Link href={sortHref('employee')} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Employee {arrow('employee')}</Link>
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-normal">
-                    <Link href={sortHref('invoice_no')} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Invoice # {arrow('invoice_no')}</Link>
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-normal">Period</th>
-                  <th className="text-left px-4 py-2.5 font-normal">
-                    <Link href={sortHref('submission_date')} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Submitted {arrow('submission_date')}</Link>
-                  </th>
-                  <th className="text-right px-4 py-2.5 font-normal">
-                    <Link href={sortHref('total_cad')} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Total {arrow('total_cad')}</Link>
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-normal">
-                    <Link href={sortHref('status')} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Status {arrow('status')}</Link>
-                  </th>
-                  <th className="text-right px-4 py-2.5 font-normal">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => {
-                  const u = userMap.get(r.user_id);
-                  return (
-                    <tr key={r.id} className="border-t border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/30">
-                      <td className="px-4 py-2.5">
-                        <Link href={`/admin/expenses/${r.id}`} className="block">
-                          <div className="font-medium">{u?.full_name ?? '—'}</div>
-                          <div className="text-[11px] text-[var(--color-text-muted)]">{u?.employee_code ?? ''}</div>
-                        </Link>
-                      </td>
-                      <td className="px-4 py-2.5 font-medium">
-                        <Link href={`/admin/expenses/${r.id}`} className="hover:underline">{r.invoice_no}</Link>
-                      </td>
-                      <td className="px-4 py-2.5 text-[var(--color-text-muted)]">
-                        {r.period_from} → {r.period_to}
-                      </td>
-                      <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.submission_date}</td>
-                      <td className="px-4 py-2.5 text-right font-mono tabular-nums">
-                        {money(Number(r.total_cad))}
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge>
-                        {r.locked ? (
-                          <StatusBadge tone="muted" className="ml-1">locked</StatusBadge>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <AdminExpenseActions
-                          expenseId={r.id}
-                          status={r.status}
-                          locked={r.locked}
-                          userId={r.user_id}
-                          invoiceNo={r.invoice_no}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <AdminExpensesTableBody
+              rows={filtered as Parameters<typeof AdminExpensesTableBody>[0]['rows']}
+              users={(usersRes.data ?? []) as Parameters<typeof AdminExpensesTableBody>[0]['users']}
+              sort={sort}
+              dir={dir}
+              sortHrefs={sortHrefs}
+            />
           </div>
         </section>
       )}
