@@ -6,6 +6,7 @@ import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFa
 import { fetchProjects } from '@/lib/queries';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { UnsubmitButton } from '@/components/expenses/UnsubmitButton';
+import { DeleteDraftButton } from '@/components/expenses/DeleteDraftButton';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 function money(n: number): string {
@@ -76,6 +77,11 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
         {report.status === 'submitted' && report.submitted_at ? (
           <div className="mt-3">
             <UnsubmitButton expenseId={report.id} submittedAt={report.submitted_at} />
+          </div>
+        ) : null}
+        {report.status === 'draft' ? (
+          <div className="mt-3">
+            <DeleteDraftButton expenseId={report.id} invoiceNo={report.invoice_no} />
           </div>
         ) : null}
         <div className="mt-5">

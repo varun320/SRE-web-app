@@ -70,6 +70,12 @@ export async function unsubmitExpense(sb: SupabaseClient, id: string): Promise<v
   if (error) throw new Error(error.message);
 }
 
+export async function deleteExpenseDraft(sb: SupabaseClient, id: string): Promise<void> {
+  // RLS on expense_reports allows delete only when user_id=auth.uid() and status='draft'.
+  const { error } = await sb.from('expense_reports').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 export async function approveExpense(sb: SupabaseClient, id: string): Promise<void> {
   const { error } = await sb.rpc('expense_approve', { p_expense_id: id });
   if (error) throw new Error(error.message);
