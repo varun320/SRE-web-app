@@ -23,11 +23,11 @@ export default async function EmployeeDetail({ params }: Props) {
       </div>
 
       <div className="grid grid-cols-2 gap-4 max-w-md">
-        <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] p-4">
+        <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] p-4">
           <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">TIL balance</div>
           <div className="text-2xl font-mono">{Number(til?.closing_balance ?? 0).toFixed(2)} h</div>
         </div>
-        <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface-2)] p-4">
+        <div className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] border border-[var(--color-border-soft)] p-4">
           <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">Vacation balance</div>
           <div className="text-2xl font-mono">{Number(vac?.closing_balance ?? 0).toFixed(2)} h</div>
         </div>

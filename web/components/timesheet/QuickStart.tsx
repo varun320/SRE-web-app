@@ -31,7 +31,7 @@ export function QuickStart() {
   return (
     <div
       className="mx-3 md:mx-4 mt-2 mb-2 rounded-[var(--radius-lg)] px-4 py-3 flex items-start gap-3 border border-[var(--color-border-soft)]"
-      style={{ background: 'var(--color-surface-2)', color: 'var(--color-text)' }}
+      style={{ background: 'var(--color-surface)', color: 'var(--color-text)' }}
     >
       <Sparkles className="h-4 w-4 mt-0.5 shrink-0 opacity-70" aria-hidden />
       <div className="flex-1 text-sm leading-snug">

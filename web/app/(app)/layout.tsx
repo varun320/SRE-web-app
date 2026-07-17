@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect('/login');
   const admin = await fetchIsAdmin(supabase);
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col bg-[var(--color-surface-2)]">
       <Header email={user.email ?? ''} isAdmin={admin} />
       <div className="flex-1">{children}</div>
     </div>

@@ -47,7 +47,7 @@ export default async function AdminWeekReview({ params }: Props) {
   const r = (rows ?? []) as ReportRow[];
   return (
     <div className="space-y-6">
-      <div className="mx-3 md:mx-4 mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface-2)] px-5 py-4">
+      <div className="mx-3 md:mx-4 mt-4 rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-5 py-4">
         <div className="text-xs uppercase tracking-wider text-[var(--color-text-muted)]">{user?.employee_code}</div>
         <div className="text-lg font-semibold">{user?.full_name}</div>
         <div className="text-sm text-[var(--color-text-muted)]">
