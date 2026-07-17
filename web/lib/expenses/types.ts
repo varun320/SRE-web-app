@@ -126,3 +126,14 @@ export interface CreditCard {
   is_default: boolean;
   is_active: boolean;
 }
+
+export interface ExpenseLineFavourite {
+  id: string;
+  user_id: string;
+  label: string;
+  category: ExpenseCategory;
+  description: string;
+  amount_cad: number;
+  gst_cad: number;
+  project_id: string | null;
+}

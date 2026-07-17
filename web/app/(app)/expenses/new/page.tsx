@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites } from '@/lib/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
 import type { ExpenseLineItem } from '@/lib/expenses/types';
 
@@ -27,7 +27,11 @@ export default async function NewExpensePage({
   const dupInvoice = sp.dup;
 
   const sb = await getSupabaseServer();
-  const [cards, projects] = await Promise.all([fetchMyCreditCards(sb), fetchProjects(sb)]);
+  const [cards, projects, favourites] = await Promise.all([
+    fetchMyCreditCards(sb),
+    fetchProjects(sb),
+    fetchMyFavourites(sb),
+  ]);
 
   const { data: userRow } = await sb.auth.getUser();
   const uid = userRow.user?.id;
@@ -82,6 +86,7 @@ export default async function NewExpensePage({
             initialLines={dupLines}
             creditCards={cards}
             projects={projects}
+            favourites={favourites}
             suggestedInvoice={suggestedInvoice}
             isNew
           />

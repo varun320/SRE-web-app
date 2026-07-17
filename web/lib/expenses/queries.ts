@@ -1,5 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { CreditCard, ExpenseBalanceRow, ExpenseLineItem, ExpensePayout, ExpenseReport, ExpenseSummary } from './types';
+import type { CreditCard, ExpenseBalanceRow, ExpenseLineFavourite, ExpenseLineItem, ExpensePayout, ExpenseReport, ExpenseSummary } from './types';
+
+export async function fetchMyFavourites(sb: SupabaseClient): Promise<ExpenseLineFavourite[]> {
+  const { data, error } = await sb
+    .from('expense_line_favourites')
+    .select('*')
+    .order('label', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ExpenseLineFavourite[];
+}
 
 export async function fetchMyCreditCards(sb: SupabaseClient): Promise<CreditCard[]> {
   const { data, error } = await sb

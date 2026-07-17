@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchMyCreditCards } from '@/lib/expenses/queries';
+import { fetchMyCreditCards, fetchMyFavourites } from '@/lib/expenses/queries';
+import { fetchProjects } from '@/lib/queries';
 import { CreditCardsEditor } from '@/components/expenses/CreditCardsEditor';
+import { FavouritesEditor } from '@/components/expenses/FavouritesEditor';
 import { InterestRateCard } from '@/components/expenses/InterestRateCard';
 
 export default async function ExpenseSettingsPage() {
@@ -11,8 +13,10 @@ export default async function ExpenseSettingsPage() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [cards, settingsRes] = await Promise.all([
+  const [cards, favourites, projects, settingsRes] = await Promise.all([
     fetchMyCreditCards(sb),
+    fetchMyFavourites(sb),
+    fetchProjects(sb),
     sb.from('expense_settings').select('apr, grace_days, currency').eq('user_id', userId).maybeSingle(),
   ]);
 
@@ -49,6 +53,17 @@ export default async function ExpenseSettingsPage() {
         </p>
         <div className="mt-3">
           <CreditCardsEditor initial={cards} />
+        </div>
+      </section>
+
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+        <h2 className="text-sm font-medium">Favourite line items</h2>
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          Recurring rows (gym membership, software, Uber). One click adds them to a new report — no
+          retyping the same description + amount every month.
+        </p>
+        <div className="mt-3">
+          <FavouritesEditor initial={favourites} projects={projects} />
         </div>
       </section>
     </main>

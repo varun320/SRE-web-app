@@ -8,7 +8,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
 import { uploadReceipt } from '@/lib/expenses/receipts';
-import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
+import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineFavourite, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
 import type { Project } from '@/lib/types';
 
 interface Props {
@@ -16,6 +16,7 @@ interface Props {
   initialLines?: ExpenseLineItem[];
   creditCards?: CreditCard[];
   projects?: Project[];
+  favourites?: ExpenseLineFavourite[];
   suggestedInvoice?: string;
   isNew: boolean;
 }
@@ -54,7 +55,7 @@ function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft
   };
 }
 
-export function ExpenseEditor({ initial, initialLines, creditCards = [], projects = [], suggestedInvoice, isNew }: Props) {
+export function ExpenseEditor({ initial, initialLines, creditCards = [], projects = [], favourites = [], suggestedInvoice, isNew }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -137,6 +138,27 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
 
   function removeLine(i: number) {
     setLines((ls) => (ls.length === 1 ? ls : ls.filter((_, idx) => idx !== i)));
+  }
+
+  function addFromFavourite(favId: string) {
+    const f = favourites.find((x) => x.id === favId);
+    if (!f) return;
+    setLines((ls) => [
+      ...ls,
+      {
+        line_date: form.period_to || form.period_from || today(),
+        category: f.category,
+        description: f.description,
+        amount_cad: String(f.amount_cad),
+        gst_cad: String(f.gst_cad),
+        credit_card_id: defaultCardId,
+        receipt_url: null,
+        project_id: f.project_id,
+        native_amount: '',
+        native_currency: '',
+        is_personal: false,
+      },
+    ]);
   }
 
   async function save(thenSubmit: boolean) {
@@ -462,13 +484,36 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
                 <td colSpan={6} className="px-2 py-2">
                   {!readOnly ? (
-                    <button
-                      type="button"
-                      onClick={addLine}
-                      className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                    >
-                      <Plus className="h-3.5 w-3.5" /> Add line
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={addLine}
+                        className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add line
+                      </button>
+                      {favourites.length > 0 ? (
+                        <label className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                          <Plus className="h-3.5 w-3.5" />
+                          <span>from favourite</span>
+                          <select
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                addFromFavourite(e.target.value);
+                                e.target.value = '';
+                              }
+                            }}
+                            className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-1 py-0.5 text-xs"
+                          >
+                            <option value="">— pick —</option>
+                            {favourites.map((f) => (
+                              <option key={f.id} value={f.id}>{f.label}</option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
+                    </div>
                   ) : null}
                 </td>
                 <td className="px-2 py-2 text-right font-mono tabular-nums font-semibold">

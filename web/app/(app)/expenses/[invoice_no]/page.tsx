@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchPayouts } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites, fetchPayouts } from '@/lib/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
 import { UnsubmitButton } from '@/components/expenses/UnsubmitButton';
@@ -22,11 +22,12 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
 
   const report = await fetchExpenseByInvoice(supabase, userId, invoice);
   if (!report) notFound();
-  const [payouts, lines, cards, projects] = await Promise.all([
+  const [payouts, lines, cards, projects, favourites] = await Promise.all([
     fetchPayouts(supabase, invoice),
     fetchExpenseLines(supabase, report.id),
     fetchMyCreditCards(supabase),
     fetchProjects(supabase),
+    fetchMyFavourites(supabase),
   ]);
 
   return (
@@ -78,7 +79,7 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
           </div>
         ) : null}
         <div className="mt-5">
-          <ExpenseEditor initial={report} initialLines={lines} creditCards={cards} projects={projects} isNew={false} />
+          <ExpenseEditor initial={report} initialLines={lines} creditCards={cards} projects={projects} favourites={favourites} isNew={false} />
         </div>
       </section>
 
