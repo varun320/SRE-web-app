@@ -32,12 +32,16 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
   if (error) throw new Error(error.message);
   if (!report) notFound();
 
-  const [userRes, linesRes, payoutsRes, cardsRes, projectsRes] = await Promise.all([
+  const [userRes, linesRes, payoutsRes, cardsRes, projectsRes, logRes] = await Promise.all([
     sb.from('users').select('id, full_name, employee_code, email').eq('id', report.user_id).maybeSingle(),
     sb.from('expense_line_items').select('*').eq('expense_id', report.id).order('position', { ascending: true }),
     sb.from('expense_payouts').select('*').eq('invoice_no', report.invoice_no).order('payout_date', { ascending: false }),
     sb.from('user_credit_cards').select('id, label, last_four').eq('user_id', report.user_id),
     sb.from('projects').select('id, project_number, name'),
+    sb.from('expense_approval_log')
+      .select('id, action, comment, created_at, actor_id')
+      .eq('expense_id', report.id)
+      .order('created_at', { ascending: false }),
   ]);
 
   // Admin never sees personal lines; they stay in the DB for the employee's
@@ -48,6 +52,15 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
   const cardMap = new Map(cards.map((c) => [c.id, c]));
   const projects = (projectsRes.data ?? []) as { id: string; project_number: number; name: string }[];
   const projectMap = new Map(projects.map((p) => [p.id, p]));
+
+  const logRows = (logRes.data ?? []) as Array<{
+    id: string; action: string; comment: string | null; created_at: string; actor_id: string;
+  }>;
+  const actorIds = Array.from(new Set(logRows.map((r) => r.actor_id)));
+  const actorsRes = actorIds.length
+    ? await sb.from('users').select('id, full_name').in('id', actorIds)
+    : { data: [] as Array<{ id: string; full_name: string }> };
+  const actorMap = new Map((actorsRes.data ?? []).map((u) => [u.id, u.full_name]));
 
   const receiptKeys = lines.map((l) => l.receipt_url).filter((k): k is string => !!k);
   const signed = receiptKeys.length
@@ -244,6 +257,30 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
           </table>
         </div>
       </section>
+
+      {logRows.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+          <h2 className="text-sm font-medium">Activity</h2>
+          <ol className="mt-2 space-y-1.5 text-sm">
+            {logRows.map((row) => (
+              <li key={row.id} className="flex items-baseline gap-2">
+                <span className="w-16 shrink-0 text-[11px] font-mono uppercase tracking-wider text-[var(--color-text-muted)]">
+                  {row.action}
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="font-medium">{actorMap.get(row.actor_id) ?? '—'}</span>
+                  {row.comment ? (
+                    <span className="text-[var(--color-text-muted)]"> — {row.comment}</span>
+                  ) : null}
+                </span>
+                <span className="shrink-0 text-[11px] font-mono text-[var(--color-text-muted)]">
+                  {new Date(row.created_at).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
         <h2 className="text-sm font-medium">Payments received</h2>

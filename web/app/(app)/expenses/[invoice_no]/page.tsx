@@ -5,6 +5,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchPayouts } from '@/lib/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
 import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
+import { UnsubmitButton } from '@/components/expenses/UnsubmitButton';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 function money(n: number): string {
@@ -69,6 +70,11 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
         {report.decline_reason ? (
           <div className="mt-3 err-box">
             <strong>Reason:</strong> {report.decline_reason}
+          </div>
+        ) : null}
+        {report.status === 'submitted' && report.submitted_at ? (
+          <div className="mt-3">
+            <UnsubmitButton expenseId={report.id} submittedAt={report.submitted_at} />
           </div>
         ) : null}
         <div className="mt-5">

@@ -65,6 +65,11 @@ export async function submitExpense(sb: SupabaseClient, id: string): Promise<voi
   if (error) throw new Error(error.message);
 }
 
+export async function unsubmitExpense(sb: SupabaseClient, id: string): Promise<void> {
+  const { error } = await sb.rpc('expense_unsubmit', { p_expense_id: id });
+  if (error) throw new Error(error.message);
+}
+
 export async function approveExpense(sb: SupabaseClient, id: string): Promise<void> {
   const { error } = await sb.rpc('expense_approve', { p_expense_id: id });
   if (error) throw new Error(error.message);
