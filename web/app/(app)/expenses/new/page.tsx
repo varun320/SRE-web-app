@@ -35,16 +35,23 @@ export default async function NewExpensePage({
 
   const { data: userRow } = await sb.auth.getUser();
   const uid = userRow.user?.id;
-  const { data: last } = uid
+  const { data: existingInvoices } = uid
     ? await sb
         .from('expense_reports')
         .select('invoice_no')
         .eq('user_id', uid)
         .order('submission_date', { ascending: false })
-        .limit(1)
-        .maybeSingle()
     : { data: null };
-  const suggestedInvoice = suggestNextInvoice((last as { invoice_no?: string } | null)?.invoice_no);
+  const takenInvoices = new Set((existingInvoices ?? []).map((r) => (r as { invoice_no: string }).invoice_no));
+  // Seed from the most recent, then bump until the number isn't already taken.
+  // Prevents the "cannot edit in status submitted" error when the latest
+  // draft's next number is already a submitted report.
+  let suggestedInvoice = suggestNextInvoice((existingInvoices?.[0] as { invoice_no?: string } | undefined)?.invoice_no);
+  while (suggestedInvoice && takenInvoices.has(suggestedInvoice)) {
+    const next = suggestNextInvoice(suggestedInvoice);
+    if (!next || next === suggestedInvoice) break;
+    suggestedInvoice = next;
+  }
 
   // If ?dup=INV, clone the source report's line items into a fresh draft.
   let dupLines: ExpenseLineItem[] | undefined;
