@@ -40,7 +40,9 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
     sb.from('projects').select('id, project_number, name'),
   ]);
 
-  const lines = (linesRes.data ?? []) as ExpenseLineItem[];
+  // Admin never sees personal lines; they stay in the DB for the employee's
+  // records but don't count toward the report total either (recompute skips them).
+  const lines = ((linesRes.data ?? []) as ExpenseLineItem[]).filter((l) => !l.is_personal);
   const payouts = (payoutsRes.data ?? []) as ExpensePayout[];
   const cards = (cardsRes.data ?? []) as Pick<CreditCard, 'id' | 'label' | 'last_four'>[];
   const cardMap = new Map(cards.map((c) => [c.id, c]));
@@ -93,6 +95,11 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
               {report.period_from} → {report.period_to}
               {' · submitted '}{report.submission_date}
             </p>
+            {report.trip_label ? (
+              <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                <span className="rounded bg-[var(--color-surface-2)] px-2 py-0.5">{report.trip_label}</span>
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge tone={tone(report.status)}>{report.status}</StatusBadge>

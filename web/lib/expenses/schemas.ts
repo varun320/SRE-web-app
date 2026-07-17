@@ -10,6 +10,7 @@ export const expenseDraftSchema = z.object({
   amount_cad: z.number().nonnegative(),
   gst_cad: z.number().nonnegative().default(0),
   notes: z.string().max(2000).optional().nullable(),
+  trip_label: z.string().trim().max(120).optional().nullable(),
 });
 
 export const expenseLineSchema = z.object({
@@ -23,6 +24,7 @@ export const expenseLineSchema = z.object({
   project_id: z.string().uuid().nullable().optional(),
   native_amount: z.number().nonnegative().nullable().optional(),
   native_currency: z.string().regex(/^[A-Za-z]{3}$/, '3-letter code').nullable().optional(),
+  is_personal: z.boolean().default(false),
 }).refine(
   (v) => (v.native_amount == null) === (v.native_currency == null),
   { message: 'Enter both native amount and currency, or leave both blank', path: ['native_currency'] },

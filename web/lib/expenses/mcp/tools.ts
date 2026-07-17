@@ -21,6 +21,7 @@ export const upsertDraftInput = z.object({
   amount_cad: z.number().nonnegative(),
   gst_cad: z.number().nonnegative().default(0),
   notes: z.string().max(2000).optional(),
+  trip_label: z.string().max(120).optional(),
 });
 
 export const listExpensesInput = z.object({
@@ -62,6 +63,7 @@ export const expenseLineInput = z.object({
   project_id: z.string().uuid().nullable().optional(),
   native_amount: z.number().nonnegative().nullable().optional(),
   native_currency: z.string().regex(/^[A-Za-z]{3}$/).nullable().optional(),
+  is_personal: z.boolean().optional(),
 });
 export const replaceLinesInput = z.object({
   invoice_no: z.string().min(3),

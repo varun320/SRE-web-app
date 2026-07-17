@@ -31,6 +31,7 @@ interface LineDraft {
   project_id: string | null;
   native_amount: string;
   native_currency: string;
+  is_personal: boolean;
 }
 
 function today(): string {
@@ -49,6 +50,7 @@ function emptyLine(defaultDate: string, defaultCardId: string | null): LineDraft
     project_id: null,
     native_amount: '',
     native_currency: '',
+    is_personal: false,
   };
 }
 
@@ -65,6 +67,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
     period_to: initial?.period_to ?? '',
     submission_date: initial?.submission_date ?? today(),
     notes: initial?.notes ?? '',
+    trip_label: initial?.trip_label ?? '',
   });
 
   const activeCards = creditCards.filter((c) => c.is_active);
@@ -82,6 +85,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         project_id: l.project_id,
         native_amount: l.native_amount == null ? '' : String(l.native_amount),
         native_currency: l.native_currency ?? '',
+        is_personal: l.is_personal ?? false,
       }));
     }
     return [emptyLine(initialPeriodFrom || today(), defaultCardId)];
@@ -112,6 +116,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
     let amount = 0;
     let gst = 0;
     for (const l of lines) {
+      if (l.is_personal) continue;
       amount += Number(l.amount_cad || 0);
       gst += Number(l.gst_cad || 0);
     }
@@ -145,6 +150,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
       amount_cad: totals.amount,
       gst_cad: totals.gst,
       notes: form.notes || null,
+      trip_label: form.trip_label || null,
     });
     if (!draft.success) {
       setErr(draft.error.issues[0]?.message ?? 'Invalid header');
@@ -164,6 +170,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         project_id: l.project_id ?? null,
         native_amount: l.native_amount ? Number(l.native_amount) : null,
         native_currency: l.native_currency ? l.native_currency.toUpperCase() : null,
+        is_personal: l.is_personal,
       });
       if (!p.success) {
         setErr(`Line ${i + 1}: ${p.error.issues[0]?.message ?? 'invalid'}`);
@@ -231,6 +238,17 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         </Field>
       </div>
 
+      <Field label="Trip / occasion" hint="e.g. Czech Republic Aug 2026 — helps admin cluster related lines">
+        <input
+          className={inputCls}
+          value={form.trip_label ?? ''}
+          onChange={(e) => updateForm('trip_label', e.target.value)}
+          disabled={readOnly}
+          maxLength={120}
+          placeholder="Optional"
+        />
+      </Field>
+
       <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -252,7 +270,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
               {lines.map((l, i) => {
                 const lineTotal = Number(l.amount_cad || 0) + Number(l.gst_cad || 0);
                 return (
-                  <tr key={i} className="border-t border-[var(--color-border-soft)] align-top">
+                  <tr key={i} className={`border-t border-[var(--color-border-soft)] align-top ${l.is_personal ? 'opacity-50 bg-[var(--color-surface-2)]/30' : ''}`}>
                     <td className="px-2 py-2">
                       <DatePicker
                         value={l.line_date}
@@ -410,16 +428,31 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                       )}
                     </td>
                     <td className="px-2 py-2 align-middle">
-                      {!readOnly && lines.length > 1 ? (
-                        <button
-                          type="button"
-                          onClick={() => removeLine(i)}
-                          aria-label={`Remove line ${i + 1}`}
-                          className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1 rounded"
+                      <div className="flex flex-col items-center gap-1">
+                        <label
+                          className="inline-flex items-center gap-1 text-[10px] text-[var(--color-text-muted)] cursor-pointer"
+                          title="Mark as personal — kept for your records but excluded from the submitted total"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      ) : null}
+                          <input
+                            type="checkbox"
+                            checked={l.is_personal}
+                            onChange={(e) => updateLine(i, { is_personal: e.target.checked })}
+                            disabled={readOnly}
+                            className="h-3 w-3"
+                          />
+                          personal
+                        </label>
+                        {!readOnly && lines.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => removeLine(i)}
+                            aria-label={`Remove line ${i + 1}`}
+                            className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1 rounded"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 );

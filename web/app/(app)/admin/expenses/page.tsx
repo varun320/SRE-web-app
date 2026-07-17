@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Receipt } from 'lucide-react';
+import { Receipt, AlertTriangle } from 'lucide-react';
 import { AdminExpensesTableBody } from '@/components/admin/AdminExpensesTableBody';
 
 type SortKey = 'submission_date' | 'invoice_no' | 'total_cad' | 'status' | 'employee';
 const SORT_KEYS: readonly SortKey[] = ['submission_date', 'invoice_no', 'total_cad', 'status', 'employee'];
+
+function money(n: number): string {
+  return Number(n).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
+}
 
 function isSortKey(v: string | undefined): v is SortKey {
   return !!v && (SORT_KEYS as readonly string[]).includes(v);
@@ -37,6 +41,13 @@ export default async function AdminExpensesPage({
     .select('id, project_number, name')
     .order('project_number', { ascending: false });
 
+  const overduePromise = sb
+    .from('v_expense_balance_full')
+    .select('id, user_id, invoice_no, submission_date, days_overdue, outstanding, interest_owing, total_owing, balance_status')
+    .in('balance_status', ['overdue', 'interest_owing'])
+    .order('days_overdue', { ascending: false })
+    .limit(5);
+
   let q = sb
     .from('expense_reports')
     .select('id, user_id, invoice_no, period_from, period_to, submission_date, total_cad, status, locked, decline_reason')
@@ -61,10 +72,18 @@ export default async function AdminExpensesPage({
   }
   q = q.order('submission_date', { ascending: false }); // secondary key
 
-  const [{ data: rows, error }, projectsRes] = await Promise.all([q, projectsPromise]);
+  const [{ data: rows, error }, projectsRes, overdueRes] = await Promise.all([
+    q,
+    projectsPromise,
+    overduePromise,
+  ]);
   if (error) throw new Error(error.message);
+  const overdueRows = overdueRes.data ?? [];
 
-  const userIds = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
+  const userIds = Array.from(new Set([
+    ...(rows ?? []).map((r) => r.user_id as string),
+    ...overdueRows.map((o) => o.user_id as string),
+  ]));
   const usersRes = userIds.length
     ? await sb.from('users').select('id, full_name, employee_code').in('id', userIds)
     : { data: [] as Array<{ id: string; full_name: string; employee_code: string }> };
@@ -113,6 +132,8 @@ export default async function AdminExpensesPage({
     );
   }
 
+  const overdueTotal = overdueRows.reduce((s, r) => s + Number(r.total_owing ?? 0), 0);
+
   return (
     <main className="w-full px-3 md:px-4 py-5 md:py-6 space-y-4">
       <div className="flex items-center justify-end">
@@ -123,6 +144,39 @@ export default async function AdminExpensesPage({
           Payout log →
         </Link>
       </div>
+
+      {overdueRows.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-[color-mix(in_oklab,var(--color-destructive)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-destructive)_5%,var(--color-surface))] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-[var(--color-status-declined-fg)]" />
+              <span className="text-sm font-medium">Overdue payouts</span>
+              <span className="text-xs text-[var(--color-text-muted)]">
+                {overdueRows.length} report{overdueRows.length === 1 ? '' : 's'} · total owing {money(overdueTotal)}
+              </span>
+            </div>
+          </div>
+          <ul className="mt-2 divide-y divide-[var(--color-border-soft)]">
+            {overdueRows.map((o) => {
+              const u = userMap.get(o.user_id);
+              return (
+                <li key={o.id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Link href={`/admin/expenses/${o.id}`} className="font-medium hover:underline">
+                      {o.invoice_no}
+                    </Link>
+                    <span className="text-[var(--color-text-muted)] truncate">{u?.full_name ?? '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs whitespace-nowrap">
+                    <span className="text-[var(--color-status-declined-fg)] font-medium">{o.days_overdue}d overdue</span>
+                    <span className="font-mono tabular-nums">{money(Number(o.total_owing))}</span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       <form className="flex flex-wrap gap-2 items-end">
         <label className="block">

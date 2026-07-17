@@ -18,6 +18,7 @@ export interface ExpenseReport {
   decided_at: string | null;
   decided_by: string | null;
   decline_reason: string | null;
+  trip_label: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -103,6 +104,7 @@ export interface ExpenseLineItem {
   project_id: string | null;
   native_amount: number | null;
   native_currency: string | null;
+  is_personal: boolean;
   position: number;
 }
 

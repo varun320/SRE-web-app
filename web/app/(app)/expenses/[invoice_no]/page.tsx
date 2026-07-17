@@ -44,6 +44,11 @@ export default async function ExpenseDetail({ params }: { params: Promise<{ invo
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               {report.period_from} → {report.period_to} • submitted {report.submission_date}
             </p>
+            {report.trip_label ? (
+              <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                <span className="rounded bg-[var(--color-surface-2)] px-2 py-0.5">{report.trip_label}</span>
+              </p>
+            ) : null}
           </div>
           <StatusBadge
             tone={
