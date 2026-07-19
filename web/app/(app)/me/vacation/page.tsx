@@ -2,6 +2,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { Palmtree } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { InfoHint } from '@/components/ui/info-hint';
 
 export default async function VacationPage() {
   const supabase = await getSupabaseServer();
@@ -27,7 +28,14 @@ export default async function VacationPage() {
           style={{ background: 'radial-gradient(circle, var(--color-accent-tint) 0%, transparent 70%)' }}
         />
         <header className="relative max-w-3xl">
-          <h1 className="text-h1">Vacation</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-h1">Vacation</h1>
+            <InfoHint label="Vacation">
+              <p className="mb-1"><strong>Balance</strong> = opening + accrued − used. Locked once a week is approved.</p>
+              <p className="mb-1">Log time off with the <em>Admin → Vacation Hours</em> row on your timesheet — the hours draw from this balance when the week gets approved.</p>
+              <p><strong>Stat holidays</strong> are separate; use <em>Statutory Holiday</em>, not vacation.</p>
+            </InfoHint>
+          </div>
           <p className="mt-2 text-body-lg text-[var(--color-text-muted)]">
             Your annual entitlement is set by your position. To use vacation, log{' '}
             <strong className="text-[var(--color-text)]">Vacation Hours</strong> under the Admin category

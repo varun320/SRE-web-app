@@ -4,6 +4,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchMyExpenses, fetchSummary } from '@/lib/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { InfoHint } from '@/components/ui/info-hint';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
@@ -50,7 +51,16 @@ export default async function ExpensesPage() {
               <Receipt className="h-3.5 w-3.5" />
               Expense reports
             </div>
-            <h1 className="mt-1 text-h1">Your monthly submissions</h1>
+            <div className="mt-1 flex items-center gap-1.5">
+              <h1 className="text-h1">Your monthly submissions</h1>
+              <InfoHint label="Expense reports">
+                <p className="mb-1"><strong>Draft</strong> — still editing. Attach receipts anytime.</p>
+                <p className="mb-1"><strong>Submitted</strong> — sent to admin. You can pull it back to draft within 24 h.</p>
+                <p className="mb-1"><strong>Approved</strong> — locked, waiting on payment.</p>
+                <p className="mb-1"><strong>Paid</strong> — payout logged. Any unpaid balance past Net-30 accrues interest.</p>
+                <p>Use <em>Duplicate</em> to clone a prior report&apos;s line items (receipts don&apos;t copy over).</p>
+              </InfoHint>
+            </div>
             <p className="mt-2 text-body-sm text-[var(--color-text-muted)]">
               One row per monthly expense report. Submit by the 30th of each month; interest accrues
               on any unpaid balance after Net-30.

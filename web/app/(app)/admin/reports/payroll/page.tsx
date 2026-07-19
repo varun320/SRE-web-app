@@ -4,6 +4,7 @@ import { aggregatePayroll } from '@/lib/admin/reports/payroll';
 import { DateRangePicker } from '@/components/admin/reports/DateRangePicker';
 import { EmployeePicker } from '@/components/admin/reports/EmployeePicker';
 import { PayrollPreview } from '@/components/admin/reports/PayrollPreview';
+import { PageHeader } from '@/components/ui/page-header';
 
 const DEFAULT_EPOCH = '2026-01-05'; // Monday — TODO: read from organizations.payroll_epoch
 
@@ -55,7 +56,17 @@ export default async function PayrollReportPage({
   const downloadHref = `/api/admin/reports/payroll?${downloadParams.toString()}`;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <PageHeader
+        title="Payroll report"
+        description="Aggregated hours, TIL, and vacation per employee across a date range. Download the CSV to hand to payroll."
+        tip={
+          <>
+            <p className="mb-1">Rows only include <strong>approved</strong> weeks — draft or submitted sheets don&apos;t count.</p>
+            <p>Filter by employee to spot-check one person; leave blank for the full team.</p>
+          </>
+        }
+      />
       <div className="flex flex-wrap items-center gap-3">
         <DateRangePicker defaultFrom={from} defaultTo={to} />
         <EmployeePicker employees={employees ?? []} selected={userId} />

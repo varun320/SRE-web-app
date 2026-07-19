@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Paperclip, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { DatePicker } from '@/components/ui/date-picker';
+import { InfoHint } from '@/components/ui/info-hint';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
 import { uploadReceipt } from '@/lib/expenses/receipts';
@@ -280,13 +281,48 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
               <tr>
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Date</th>
-                <th className="text-left px-2 py-2 font-normal w-[150px]">Category</th>
-                <th className="text-left px-2 py-2 font-normal w-[130px]">Project</th>
+                <th className="text-left px-2 py-2 font-normal w-[150px]">
+                  <span className="inline-flex items-center gap-1">
+                    Category
+                    <InfoHint label="Category">
+                      <p>Pick from the 16-item list (Airfare, Hotel, Meal, SCBA Rental, …). Sets how accounting buckets the spend.</p>
+                    </InfoHint>
+                  </span>
+                </th>
+                <th className="text-left px-2 py-2 font-normal w-[130px]">
+                  <span className="inline-flex items-center gap-1">
+                    Project
+                    <InfoHint label="Project">
+                      <p>Bill the line to a specific project number. Leave blank for overhead / general spend.</p>
+                    </InfoHint>
+                  </span>
+                </th>
                 <th className="text-left px-2 py-2 font-normal w-[260px]">Description</th>
-                <th className="text-left px-2 py-2 font-normal w-[150px]">Card</th>
-                <th className="text-right px-2 py-2 font-normal w-[130px]">Amount (CAD)</th>
+                <th className="text-left px-2 py-2 font-normal w-[150px]">
+                  <span className="inline-flex items-center gap-1">
+                    Card
+                    <InfoHint label="Card">
+                      <p>Which card paid. Register your cards under <em>Settings → Cards</em> so they show up here.</p>
+                    </InfoHint>
+                  </span>
+                </th>
+                <th className="text-right px-2 py-2 font-normal w-[130px]">
+                  <span className="inline-flex items-center gap-1">
+                    Amount (CAD)
+                    <InfoHint label="Amount">
+                      <p>CAD is authoritative. For foreign receipts, convert to CAD here — describe the FX rate in the row description if it matters.</p>
+                    </InfoHint>
+                  </span>
+                </th>
                 <th className="text-right px-2 py-2 font-normal w-[110px]">GST</th>
-                <th className="w-[70px]">Receipt</th>
+                <th className="w-[70px]">
+                  <span className="inline-flex items-center gap-1">
+                    Receipt
+                    <InfoHint label="Receipt">
+                      <p>Attach an image or PDF once the draft is saved. Admins view it inline during approval.</p>
+                    </InfoHint>
+                  </span>
+                </th>
                 <th className="w-[36px]"></th>
               </tr>
             </thead>

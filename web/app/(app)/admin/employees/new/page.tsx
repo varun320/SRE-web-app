@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChevronLeftIcon } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmployeeForm } from '@/components/admin/EmployeeForm';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function NewEmployeePage() {
   const sb = await getSupabaseServer();
@@ -16,10 +17,19 @@ export default async function NewEmployeePage() {
           <ChevronLeftIcon className="size-3.5" />
           All employees
         </Link>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight">Add employee</h2>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)] max-w-2xl">
-          Creates the auth user, employee profile, opening balances, and role assignment in one step.
-        </p>
+        <div className="mt-2">
+          <PageHeader
+            title="Add employee"
+            description="Creates the auth user, employee profile, opening balances, and role assignment in one step."
+            tip={
+              <>
+                <p className="mb-1"><strong>Email</strong> is the sign-in username. If you leave <em>password</em> blank, the user can sign in via magic link.</p>
+                <p className="mb-1"><strong>Position</strong> sets the default vacation bank in hours.</p>
+                <p><strong>Opening balances</strong> seed the TIL / vacation ledger — enter 0 for new hires, or the carry-over balance for a mid-year switch.</p>
+              </>
+            }
+          />
+        </div>
       </div>
       <EmployeeForm positions={positions ?? []} />
     </div>

@@ -4,6 +4,7 @@ import { WeekPicker } from '@/components/timesheet/WeekPicker';
 import { currentMonday, isMondayISO } from '@/lib/dates';
 import { notFound } from 'next/navigation';
 import type { MainCategory, Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib/types';
+import { InfoHint } from '@/components/ui/info-hint';
 
 interface PageProps { params: Promise<{ week_start: string }> }
 
@@ -36,7 +37,15 @@ export default async function WeekPage({ params }: PageProps) {
     <main className="w-full">
       <div className="px-3 md:px-4 pt-6 pb-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <h1 className="text-h1">Week of {week_start}</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-h1">Week of {week_start}</h1>
+            <InfoHint label="Weekly timesheet">
+              <p className="mb-1">Add one row per activity, split hours across the day columns.</p>
+              <p className="mb-1"><strong>Project</strong> rows need a project number (e.g. <code>2026101</code>). Admin and Office &amp; Sales rows don&apos;t.</p>
+              <p className="mb-1">Hours over <strong>8/day</strong> earn overtime; approved overtime lands in your TIL bank.</p>
+              <p><strong>Save</strong> keeps a draft; <strong>Submit</strong> sends it to admin for approval.</p>
+            </InfoHint>
+          </div>
           <WeekPicker weekStart={week_start} currentMonday={currentMonday()} />
         </div>
         <a href={`/week/${week_start}/report`} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-4 hover:underline">

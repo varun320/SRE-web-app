@@ -1,5 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { ApprovalLogClient, type ApprovalLogRow } from '@/components/admin/ApprovalLogClient';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function ApprovalLogPage() {
   const sb = await getSupabaseServer();
@@ -61,7 +62,18 @@ export default async function ApprovalLogPage() {
   });
 
   return (
-    <div className="px-3 md:px-4 py-5 md:py-6 space-y-3">
+    <div className="px-3 md:px-4 py-5 md:py-6 space-y-4">
+      <PageHeader
+        title="Approvals"
+        description="Timeline of every submit, approve, decline, and unlock across all employees."
+        tip={
+          <>
+            <p className="mb-1"><strong>Approve</strong> freezes the week&apos;s ledger rows and rolls carry-forward into the next week.</p>
+            <p className="mb-1"><strong>Decline</strong> sends the sheet back to draft with a reason the employee will see.</p>
+            <p><strong>Unlock</strong> reopens an approved week for edits and marks downstream weeks stale so balances re-flow.</p>
+          </>
+        }
+      />
       <ApprovalLogClient rows={rows} />
     </div>
   );
