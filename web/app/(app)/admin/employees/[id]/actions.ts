@@ -1,0 +1,84 @@
+'use server';
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer } from '@/lib/supabase/server';
+import { fetchIsAdmin } from '@/lib/role';
+import { revalidatePath } from 'next/cache';
+
+function getServiceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) return null;
+  return createClient(url, key);
+}
+
+export async function updateEmployee(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+
+  const id = String(formData.get('id') ?? '').trim();
+  if (!id) return { error: 'missing id' };
+
+  const fullName = String(formData.get('full_name') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim();
+  const employeeCode = String(formData.get('employee_code') ?? '').trim();
+  const department = String(formData.get('department') ?? '').trim() || null;
+  const positionId = String(formData.get('position_id') ?? '').trim() || null;
+  const isActive = String(formData.get('is_active') ?? 'true') === 'true';
+  const role = (formData.get('role') as string) || 'employee';
+
+  if (!fullName || !email || !employeeCode) return { error: 'name, email, and code are required' };
+
+  const admin = getServiceClient();
+  if (!admin) return { error: 'SUPABASE_SERVICE_ROLE_KEY not configured on the server' };
+
+  const { data: existing, error: readErr } = await admin
+    .from('users')
+    .select('email')
+    .eq('id', id)
+    .maybeSingle();
+  if (readErr) return { error: readErr.message };
+
+  const { error: updErr } = await admin.from('users').update({
+    full_name: fullName,
+    email,
+    employee_code: employeeCode,
+    department,
+    position_id: positionId,
+    is_active: isActive,
+  }).eq('id', id);
+  if (updErr) return { error: updErr.message };
+
+  if (existing?.email && existing.email.toLowerCase() !== email.toLowerCase()) {
+    const { error: authErr } = await admin.auth.admin.updateUserById(id, { email });
+    if (authErr) return { error: `profile saved, but auth email update failed: ${authErr.message}` };
+  }
+
+  const { error: roleWipeErr } = await admin.from('user_roles').delete().eq('user_id', id);
+  if (roleWipeErr) return { error: roleWipeErr.message };
+  const rolesToInsert = role === 'admin'
+    ? [{ user_id: id, role: 'admin' }, { user_id: id, role: 'employee' }]
+    : [{ user_id: id, role: 'employee' }];
+  const { error: roleErr } = await admin.from('user_roles').insert(rolesToInsert);
+  if (roleErr) return { error: roleErr.message };
+
+  revalidatePath(`/admin/employees/${id}`);
+  revalidatePath('/admin/employees');
+  return { ok: true };
+}
+
+export async function resetEmployeePassword(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+
+  const id = String(formData.get('id') ?? '').trim();
+  const password = String(formData.get('password') ?? '').trim();
+  if (!id || !password) return { error: 'id and new password required' };
+  if (password.length < 8) return { error: 'password must be at least 8 characters' };
+
+  const admin = getServiceClient();
+  if (!admin) return { error: 'SUPABASE_SERVICE_ROLE_KEY not configured on the server' };
+
+  const { error } = await admin.auth.admin.updateUserById(id, { password });
+  if (error) return { error: error.message };
+  return { ok: true };
+}
