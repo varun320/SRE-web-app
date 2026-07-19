@@ -11,6 +11,7 @@ import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/ex
 import { uploadReceipt } from '@/lib/expenses/receipts';
 import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineFavourite, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
 import type { Project } from '@/lib/types';
+import { ExpenseLineCardMobile } from './ExpenseLineCardMobile';
 
 interface Props {
   initial?: ExpenseReport | null;
@@ -275,7 +276,65 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
         />
       </Field>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
+      {/* Mobile: stacked cards. Desktop: the table below. */}
+      <div className="md:hidden space-y-3">
+        {lines.map((l, i) => (
+          <ExpenseLineCardMobile
+            key={i}
+            index={i}
+            line={l}
+            activeCards={activeCards}
+            projects={projects}
+            readOnly={readOnly}
+            canAttach={canAttach}
+            canRemove={!readOnly && lines.length > 1}
+            uploading={uploadingIdx === i}
+            onChange={(patch) => updateLine(i, patch)}
+            onRemove={() => removeLine(i)}
+            onAttach={(f) => attachReceipt(i, f)}
+          />
+        ))}
+        <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] p-3">
+          {!readOnly ? (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <button
+                type="button"
+                onClick={addLine}
+                className="inline-flex items-center gap-1 text-[var(--color-accent)] font-medium"
+              >
+                <Plus className="h-4 w-4" /> Add line
+              </button>
+              {favourites.length > 0 ? (
+                <label className="inline-flex items-center gap-1 text-[var(--color-text-muted)]">
+                  from favourite
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        addFromFavourite(e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1"
+                  >
+                    <option value="">— pick —</option>
+                    {favourites.map((f) => (
+                      <option key={f.id} value={f.id}>{f.label}</option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/60 p-3 space-y-1 text-sm">
+          <TotalsRow label="Amount" value={totals.amount} />
+          <TotalsRow label="GST" value={totals.gst} />
+          <TotalsRow label="Total" value={totals.total} bold />
+        </div>
+      </div>
+
+      <div className="hidden md:block rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
@@ -597,6 +656,17 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
 
 const inputCls =
   'w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-60';
+
+function TotalsRow({ label, value, bold = false }: { label: string; value: number; bold?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between ${bold ? 'font-semibold text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
+      <span>{label}</span>
+      <span className="font-mono tabular-nums">
+        {value.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' })}
+      </span>
+    </div>
+  );
+}
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (

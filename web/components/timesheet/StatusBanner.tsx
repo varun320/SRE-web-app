@@ -16,10 +16,18 @@ const CONFIG: Record<TimesheetStatus, {
   declined:  { icon: AlertTriangle, title: 'Declined — fix and resubmit', body: '', tone: 'declined' },
 };
 
-export function StatusBanner({ status, declineReason }: { status: TimesheetStatus; declineReason: string | null }) {
+interface Props {
+  status: TimesheetStatus;
+  declineReason: string | null;
+  /** Monday-ISO of the week — used to compute the submit-by-Sunday deadline copy. */
+  weekStart?: string;
+}
+
+export function StatusBanner({ status, declineReason, weekStart }: Props) {
   const { icon: Icon, title, body, tone } = CONFIG[status];
   const bg = `var(--color-status-${tone}-bg)`;
   const fg = `var(--color-status-${tone}-fg)`;
+  const draftDeadline = status === 'draft' && weekStart ? deadlineCopy(weekStart) : null;
   return (
     <div
       role="status"
@@ -37,9 +45,31 @@ export function StatusBanner({ status, declineReason }: { status: TimesheetStatu
             <div className="opacity-80 mt-1 text-xs">What to do next: edit the rows above and click Submit for approval again.</div>
           </>
         ) : (
-          <div className="opacity-80">{body}</div>
+          <div className="opacity-80">
+            {body}
+            {draftDeadline ? <span className="ml-1 font-medium">· {draftDeadline}</span> : null}
+          </div>
         )}
       </div>
     </div>
   );
+}
+
+/** "Submit by Sunday · 3 days left" / "Due today" / "2 days overdue". */
+function deadlineCopy(weekStartIso: string): string | null {
+  const start = new Date(`${weekStartIso}T00:00:00`);
+  if (Number.isNaN(start.getTime())) return null;
+  const sunday = new Date(start);
+  sunday.setDate(start.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+
+  const now = new Date();
+  const ms = sunday.getTime() - now.getTime();
+  const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
+
+  if (days > 1) return `Submit by Sunday · ${days} days left`;
+  if (days === 1) return 'Submit by Sunday · 1 day left';
+  if (days === 0) return 'Due today';
+  const overdue = Math.abs(days);
+  return `${overdue} day${overdue === 1 ? '' : 's'} overdue — submit as soon as you can`;
 }

@@ -168,7 +168,7 @@ export function EntryTable({ timesheet, initialEntries, subCategories, projects,
 
   return (
     <div>
-      <StatusBanner status={timesheet.status} declineReason={timesheet.decline_reason} />
+      <StatusBanner status={timesheet.status} declineReason={timesheet.decline_reason} weekStart={timesheet.week_start} />
       <KpiStrip totals={totals} openingTil={openingTil} openingVacation={openingVacation} />
       <EmptyStateToast rows={rows} locked={locked} timesheetId={timesheet.id} />
 
