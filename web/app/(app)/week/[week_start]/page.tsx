@@ -5,6 +5,7 @@ import { currentMonday, isMondayISO, formatDate } from '@/lib/dates';
 import { notFound } from 'next/navigation';
 import type { MainCategory, Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib/types';
 import { InfoHint } from '@/components/ui/info-hint';
+import { CopyLastWeekButton } from '@/components/timesheet/CopyLastWeekButton';
 
 interface PageProps { params: Promise<{ week_start: string }> }
 
@@ -48,9 +49,14 @@ export default async function WeekPage({ params }: PageProps) {
           </div>
           <WeekPicker weekStart={week_start} currentMonday={currentMonday()} />
         </div>
-        <a href={`/week/${week_start}/report`} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-4 hover:underline">
-          View report →
-        </a>
+        <div className="flex items-center gap-3">
+          {(tsRes.data as Timesheet).status === 'draft' ? (
+            <CopyLastWeekButton weekStart={week_start} hasEntries={initialEntries.length > 0} />
+          ) : null}
+          <a href={`/week/${week_start}/report`} className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-4 hover:underline">
+            View report →
+          </a>
+        </div>
       </div>
       <EntryTable
         timesheet={tsRes.data as Timesheet}
