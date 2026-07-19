@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
+import { FirstVisitHint } from './FirstVisitHint';
 import { ThemeToggle } from './ThemeToggle';
 import { SnakeGame } from '@/components/fun/SnakeGame';
 import { useIdle } from '@/lib/hooks/useIdle';
@@ -124,6 +125,7 @@ export function Header({ email, isAdmin }: HeaderProps) {
         <div className="md:hidden" />
 
         {/* Right — chrome */}
+        <FirstVisitHint />
         <div className="hidden md:flex items-center gap-1 justify-self-end">
           <NotificationsBell />
           <HelpButton />
