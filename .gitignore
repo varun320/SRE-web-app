@@ -16,5 +16,18 @@ scripts/import/.venv/
 scripts/import/**/__pycache__/
 scripts/import/.pytest_cache/
 
+# Local dev artifacts at repo root (screenshots, source docs, MCP traces)
+/*.png
+/*.docx
+/*.xlsx
+.playwright-mcp/
+
+# Alternative package manager lockfiles (this repo uses npm)
+web/pnpm-lock.yaml
+web/pnpm-workspace.yaml
+web/.npmrc
+scripts/mcp-expense/pnpm-lock.yaml
+scripts/mcp-expense/pnpm-workspace.yaml
+
 # Keep the example committed
 !web/.env.example

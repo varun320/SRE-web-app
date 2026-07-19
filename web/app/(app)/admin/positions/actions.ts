@@ -33,13 +33,3 @@ export async function updatePosition(formData: FormData) {
   revalidatePath('/admin/positions');
 }
 
-export async function updatePositionVacation(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const id = String(formData.get('id'));
-  const hrs = Number(formData.get('annual_vacation_hours'));
-  if (!Number.isFinite(hrs) || hrs < 0) return { error: 'hours must be ≥ 0' };
-  const { error } = await sb.from('positions').update({ annual_vacation_hours: hrs }).eq('id', id);
-  if (error) return { error: error.message };
-  revalidatePath('/admin/positions');
-}
