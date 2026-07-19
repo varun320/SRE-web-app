@@ -467,6 +467,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                           <input
                             type="file"
                             accept="image/*,application/pdf"
+                            capture="environment"
                             className="hidden"
                             onChange={(e) => {
                               const f = e.target.files?.[0];
