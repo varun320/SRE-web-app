@@ -2,6 +2,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { revalidatePath } from 'next/cache';
+import { friendlyError } from '@/lib/errors';
 
 export async function createProject(formData: FormData) {
   const sb = await getSupabaseServer();
@@ -16,7 +17,7 @@ export async function createProject(formData: FormData) {
     org_id: '00000000-0000-0000-0000-000000000001',
     project_number: number, name,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/projects');
 }
 
@@ -28,7 +29,7 @@ export async function renameProject(formData: FormData) {
   if (!id) return { error: 'missing id' };
   if (!name) return { error: 'name required' };
   const { error } = await sb.from('projects').update({ name }).eq('id', id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/projects');
 }
 
@@ -39,6 +40,6 @@ export async function setProjectStatus(formData: FormData) {
   const status = String(formData.get('status'));
   if (status !== 'active' && status !== 'closed') return { error: 'bad status' };
   const { error } = await sb.from('projects').update({ status }).eq('id', id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/projects');
 }

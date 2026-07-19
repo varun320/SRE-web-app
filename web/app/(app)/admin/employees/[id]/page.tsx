@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ChevronLeftIcon } from 'lucide-react';
 import { EmployeeEditForm, type EmployeeEditValues } from '@/components/admin/EmployeeEditForm';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { formatDate } from '@/lib/dates';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -91,8 +92,8 @@ export default async function EmployeeDetail({ params }: Props) {
           <ul className="space-y-1 text-sm">
             {weeks.map((w) => (
               <li key={w.id}>
-                <Link className="text-[var(--color-accent)] hover:underline font-mono" href={`/admin/employees/${id}/week/${w.week_start}`}>
-                  {w.week_start}
+                <Link className="text-[var(--color-accent)] hover:underline" href={`/admin/employees/${id}/week/${w.week_start}`}>
+                  {formatDate(w.week_start)}
                 </Link>
                 {' — '}
                 <span className="text-[var(--color-text-muted)]">{w.status}</span>

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { redirect } from 'next/navigation';
+import { friendlyError } from '@/lib/errors';
 
 export async function createEmployee(formData: FormData) {
   const sbServer = await getSupabaseServer();
@@ -29,7 +30,7 @@ export async function createEmployee(formData: FormData) {
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email, password: password || undefined, email_confirm: true,
   });
-  if (createErr || !created?.user) return { error: createErr?.message ?? 'createUser failed' };
+  if (createErr || !created?.user) return { error: friendlyError(createErr, 'Could not create the sign-in user') };
   const userId = created.user.id;
 
   const { error: insertErr } = await admin.from('users').insert({
@@ -41,7 +42,7 @@ export async function createEmployee(formData: FormData) {
     department,
     position_id: positionId,
   });
-  if (insertErr) return { error: insertErr.message };
+  if (insertErr) return { error: friendlyError(insertErr) };
 
   await admin.from('user_roles').insert({ user_id: userId, role });
   if (role === 'admin') {

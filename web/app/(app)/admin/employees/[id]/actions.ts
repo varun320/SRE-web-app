@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { revalidatePath } from 'next/cache';
+import { friendlyError } from '@/lib/errors';
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -36,7 +37,7 @@ export async function updateEmployee(formData: FormData) {
     .select('email')
     .eq('id', id)
     .maybeSingle();
-  if (readErr) return { error: readErr.message };
+  if (readErr) return { error: friendlyError(readErr) };
 
   const { error: updErr } = await admin.from('users').update({
     full_name: fullName,
@@ -46,20 +47,20 @@ export async function updateEmployee(formData: FormData) {
     position_id: positionId,
     is_active: isActive,
   }).eq('id', id);
-  if (updErr) return { error: updErr.message };
+  if (updErr) return { error: friendlyError(updErr) };
 
   if (existing?.email && existing.email.toLowerCase() !== email.toLowerCase()) {
     const { error: authErr } = await admin.auth.admin.updateUserById(id, { email });
-    if (authErr) return { error: `profile saved, but auth email update failed: ${authErr.message}` };
+    if (authErr) return { error: `Profile saved, but the sign-in email couldn't be updated: ${friendlyError(authErr)}` };
   }
 
   const { error: roleWipeErr } = await admin.from('user_roles').delete().eq('user_id', id);
-  if (roleWipeErr) return { error: roleWipeErr.message };
+  if (roleWipeErr) return { error: friendlyError(roleWipeErr) };
   const rolesToInsert = role === 'admin'
     ? [{ user_id: id, role: 'admin' }, { user_id: id, role: 'employee' }]
     : [{ user_id: id, role: 'employee' }];
   const { error: roleErr } = await admin.from('user_roles').insert(rolesToInsert);
-  if (roleErr) return { error: roleErr.message };
+  if (roleErr) return { error: friendlyError(roleErr) };
 
   revalidatePath(`/admin/employees/${id}`);
   revalidatePath('/admin/employees');
@@ -98,9 +99,9 @@ export async function updateOpeningBalances(formData: FormData) {
   if (!tilSeed || !vacSeed) return { error: 'no seed ledger rows found — recreate the employee' };
 
   const { error: tilErr } = await admin.from('til_ledger').update({ opening_balance: openingTil }).eq('id', tilSeed.id);
-  if (tilErr) return { error: tilErr.message };
+  if (tilErr) return { error: friendlyError(tilErr) };
   const { error: vacErr } = await admin.from('vacation_ledger').update({ opening_balance: openingVacation }).eq('id', vacSeed.id);
-  if (vacErr) return { error: vacErr.message };
+  if (vacErr) return { error: friendlyError(vacErr) };
 
   // ponytail: mark downstream rows stale so the existing cascade recomputes carry-forward on next touch
   await admin.from('til_ledger').update({ stale: true }).eq('user_id', id).gt('week_start', tilSeed.week_start);
@@ -123,6 +124,6 @@ export async function resetEmployeePassword(formData: FormData) {
   if (!admin) return { error: 'SUPABASE_SERVICE_ROLE_KEY not configured on the server' };
 
   const { error } = await admin.auth.admin.updateUserById(id, { password });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   return { ok: true };
 }

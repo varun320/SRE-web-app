@@ -5,6 +5,7 @@ import { fetchMyExpenses, fetchSummary } from '@/lib/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { InfoHint } from '@/components/ui/info-hint';
+import { formatDate } from '@/lib/dates';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
@@ -135,8 +136,8 @@ export default async function ExpensesPage() {
                         {r.invoice_no}
                       </Link>
                     </td>
-                    <td className="col-muted">{r.period_from} → {r.period_to}</td>
-                    <td className="col-muted">{r.submission_date}</td>
+                    <td className="col-muted">{formatDate(r.period_from)} → {formatDate(r.period_to)}</td>
+                    <td className="col-muted">{formatDate(r.submission_date)}</td>
                     <td className="num">{money(Number(r.amount_cad))}</td>
                     <td className="num">{money(Number(r.gst_cad))}</td>
                     <td className="num font-medium">{money(Number(r.total_cad))}</td>

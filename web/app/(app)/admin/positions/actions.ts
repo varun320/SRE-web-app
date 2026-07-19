@@ -2,6 +2,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { revalidatePath } from 'next/cache';
+import { friendlyError } from '@/lib/errors';
 
 export async function createPosition(formData: FormData) {
   const sb = await getSupabaseServer();
@@ -15,7 +16,7 @@ export async function createPosition(formData: FormData) {
     name,
     annual_vacation_hours: hrs,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/positions');
 }
 
@@ -29,7 +30,7 @@ export async function updatePosition(formData: FormData) {
   if (!name) return { error: 'name required' };
   if (!Number.isFinite(hrs) || hrs < 0) return { error: 'hours must be ≥ 0' };
   const { error } = await sb.from('positions').update({ name, annual_vacation_hours: hrs }).eq('id', id);
-  if (error) return { error: error.message };
+  if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/positions');
 }
 
