@@ -66,6 +66,50 @@ export async function updateEmployee(formData: FormData) {
   return { ok: true };
 }
 
+export async function updateOpeningBalances(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '').trim();
+  if (!id) return { error: 'missing id' };
+  const openingTil = Number(formData.get('opening_til') ?? 0);
+  const openingVacation = Number(formData.get('opening_vacation') ?? 0);
+  if (!Number.isFinite(openingTil) || openingTil < 0) return { error: 'opening TIL must be ≥ 0' };
+  if (!Number.isFinite(openingVacation) || openingVacation < 0) return { error: 'opening vacation must be ≥ 0' };
+
+  const admin = getServiceClient();
+  if (!admin) return { error: 'SUPABASE_SERVICE_ROLE_KEY not configured on the server' };
+
+  const { data: tilSeed } = await admin
+    .from('til_ledger')
+    .select('id, week_start')
+    .eq('user_id', id)
+    .eq('frozen', true)
+    .order('week_start', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const { data: vacSeed } = await admin
+    .from('vacation_ledger')
+    .select('id, week_start')
+    .eq('user_id', id)
+    .eq('frozen', true)
+    .order('week_start', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (!tilSeed || !vacSeed) return { error: 'no seed ledger rows found — recreate the employee' };
+
+  const { error: tilErr } = await admin.from('til_ledger').update({ opening_balance: openingTil }).eq('id', tilSeed.id);
+  if (tilErr) return { error: tilErr.message };
+  const { error: vacErr } = await admin.from('vacation_ledger').update({ opening_balance: openingVacation }).eq('id', vacSeed.id);
+  if (vacErr) return { error: vacErr.message };
+
+  // ponytail: mark downstream rows stale so the existing cascade recomputes carry-forward on next touch
+  await admin.from('til_ledger').update({ stale: true }).eq('user_id', id).gt('week_start', tilSeed.week_start);
+  await admin.from('vacation_ledger').update({ stale: true }).eq('user_id', id).gt('week_start', vacSeed.week_start);
+
+  revalidatePath(`/admin/employees/${id}`);
+  return { ok: true };
+}
+
 export async function resetEmployeePassword(formData: FormData) {
   const sb = await getSupabaseServer();
   if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };

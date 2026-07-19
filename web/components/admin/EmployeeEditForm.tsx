@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { updateEmployee, resetEmployeePassword } from '@/app/(app)/admin/employees/[id]/actions';
+import { updateEmployee, resetEmployeePassword, updateOpeningBalances } from '@/app/(app)/admin/employees/[id]/actions';
 import { toast } from 'sonner';
 
 interface Position { id: string; name: string; annual_vacation_hours: number; }
@@ -22,12 +22,17 @@ export interface EmployeeEditValues {
 export function EmployeeEditForm({
   employee,
   positions,
+  openingTil,
+  openingVacation,
 }: {
   employee: EmployeeEditValues;
   positions: Position[];
+  openingTil: number;
+  openingVacation: number;
 }) {
   const [pending, start] = useTransition();
   const [pwPending, startPw] = useTransition();
+  const [obPending, startOb] = useTransition();
   const [showPw, setShowPw] = useState(false);
 
   return (
@@ -112,6 +117,31 @@ export function EmployeeEditForm({
           </Button>
         </div>
       </form>
+
+      <FormSection
+        title="Opening balances"
+        description="Rewrites the seed ledger row and marks later weeks stale so carry-forward recomputes."
+      >
+        <form
+          action={(fd) => startOb(async () => {
+            const res = await updateOpeningBalances(fd);
+            if (res?.error) toast.error(res.error);
+            else toast.success('Opening balances updated');
+          })}
+          className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
+        >
+          <input type="hidden" name="id" value={employee.id} />
+          <Field label="Opening TIL (hours)" htmlFor="opening_til">
+            <Input id="opening_til" name="opening_til" type="number" step="0.25" min="0" defaultValue={openingTil} className="tabular-nums" />
+          </Field>
+          <Field label="Opening vacation (hours)" htmlFor="opening_vacation">
+            <Input id="opening_vacation" name="opening_vacation" type="number" step="0.25" min="0" defaultValue={openingVacation} className="tabular-nums" />
+          </Field>
+          <Button type="submit" variant="outline" disabled={obPending}>
+            {obPending ? 'Updating…' : 'Update balances'}
+          </Button>
+        </form>
+      </FormSection>
 
       <FormSection title="Reset password" description="Sets a new password for this user immediately. Share it over a secure channel.">
         <form

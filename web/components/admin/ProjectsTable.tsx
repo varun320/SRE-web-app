@@ -1,7 +1,9 @@
 'use client';
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { setProjectStatus } from '@/app/(app)/admin/projects/actions';
+import { Input } from '@/components/ui/input';
+import { renameProject, setProjectStatus } from '@/app/(app)/admin/projects/actions';
+import { toast } from 'sonner';
 
 interface Row { id: string; project_number: number; name: string; status: 'active' | 'closed'; }
 
@@ -29,7 +31,25 @@ export function ProjectsTable({ rows }: { rows: Row[] }) {
           {rows.map((p) => (
             <tr key={p.id} className="border-t border-[var(--color-border-soft)]">
               <td className="px-4 py-3 font-mono">{p.project_number}</td>
-              <td className="px-4 py-3">{p.name}</td>
+              <td className="px-4 py-3">
+                <form
+                  action={(fd) => start(async () => {
+                    const res = await renameProject(fd);
+                    if (res?.error) toast.error(res.error);
+                    else toast.success('Saved');
+                  })}
+                  className="flex items-center gap-2"
+                >
+                  <input type="hidden" name="id" value={p.id} />
+                  <Input
+                    name="name"
+                    defaultValue={p.name}
+                    className="min-w-64"
+                    aria-label={`Name for project ${p.project_number}`}
+                  />
+                  <Button type="submit" variant="outline" size="sm" disabled={pending}>Save</Button>
+                </form>
+              </td>
               <td className="px-4 py-3">{p.status}</td>
               <td className="px-4 py-3 text-right">
                 <form action={(fd) => start(async () => { await setProjectStatus(fd); })}>

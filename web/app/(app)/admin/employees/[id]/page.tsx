@@ -17,7 +17,7 @@ export default async function EmployeeDetail({ params }: Props) {
     .maybeSingle();
   if (!u) notFound();
 
-  const [{ data: pos }, { data: positions }, { data: roles }, { data: weeks }, { data: til }, { data: vac }] = await Promise.all([
+  const [{ data: pos }, { data: positions }, { data: roles }, { data: weeks }, { data: til }, { data: vac }, { data: tilSeed }, { data: vacSeed }] = await Promise.all([
     u.position_id
       ? sb.from('positions').select('name, annual_vacation_hours').eq('id', u.position_id).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -26,6 +26,8 @@ export default async function EmployeeDetail({ params }: Props) {
     sb.from('timesheets').select('id, week_start, status').eq('user_id', id).order('week_start', { ascending: false }).limit(20),
     sb.from('v_til_balance').select('closing_balance').eq('user_id', id).maybeSingle(),
     sb.from('v_vacation_balance').select('closing_balance').eq('user_id', id).maybeSingle(),
+    sb.from('til_ledger').select('opening_balance').eq('user_id', id).eq('frozen', true).order('week_start', { ascending: true }).limit(1).maybeSingle(),
+    sb.from('vacation_ledger').select('opening_balance').eq('user_id', id).eq('frozen', true).order('week_start', { ascending: true }).limit(1).maybeSingle(),
   ]);
 
   const isAdmin = (roles ?? []).some((r) => r.role === 'admin');
@@ -76,7 +78,12 @@ export default async function EmployeeDetail({ params }: Props) {
         </div>
       </div>
 
-      <EmployeeEditForm employee={editValues} positions={positions ?? []} />
+      <EmployeeEditForm
+        employee={editValues}
+        positions={positions ?? []}
+        openingTil={Number(tilSeed?.opening_balance ?? 0)}
+        openingVacation={Number(vacSeed?.opening_balance ?? 0)}
+      />
 
       <div>
         <h3 className="text-sm uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Recent weeks</h3>

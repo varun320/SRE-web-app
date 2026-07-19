@@ -1,5 +1,6 @@
-﻿import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import { PositionsTable } from '@/components/admin/PositionsTable';
+import { PositionForm } from '@/components/admin/PositionForm';
 
 export default async function PositionsPage() {
   const sb = await getSupabaseServer();
@@ -12,6 +13,7 @@ export default async function PositionsPage() {
           Default annual vacation hours per role. New employees inherit at creation; edits here don&apos;t retroactively change existing balances.
         </p>
       </div>
+      <PositionForm />
       <PositionsTable rows={(data ?? []) as ({ id: string; name: string; annual_vacation_hours: number })[]} />
     </div>
   );

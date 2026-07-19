@@ -20,6 +20,18 @@ export async function createProject(formData: FormData) {
   revalidatePath('/admin/projects');
 }
 
+export async function renameProject(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  if (!id) return { error: 'missing id' };
+  if (!name) return { error: 'name required' };
+  const { error } = await sb.from('projects').update({ name }).eq('id', id);
+  if (error) return { error: error.message };
+  revalidatePath('/admin/projects');
+}
+
 export async function setProjectStatus(formData: FormData) {
   const sb = await getSupabaseServer();
   if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
