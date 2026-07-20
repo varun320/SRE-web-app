@@ -27,11 +27,32 @@ export async function createEmployee(formData: FormData) {
 
   if (!email || !fullName || !employeeCode || !positionId) return { error: 'missing required fields' };
 
+  let userId: string | undefined;
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email, password: password || undefined, email_confirm: true,
   });
-  if (createErr || !created?.user) return { error: friendlyError(createErr, 'Could not create the sign-in user') };
-  const userId = created.user.id;
+  if (created?.user) {
+    userId = created.user.id;
+  } else {
+    // Auth user may already exist from a prior partial signup — reuse it if the users row is missing.
+    const msg = (createErr?.message || '').toLowerCase();
+    const alreadyExists = msg.includes('already') || msg.includes('registered') || msg.includes('exists');
+    if (!alreadyExists) return { error: friendlyError(createErr, 'Could not create the sign-in user') };
+
+    const { data: existingRow } = await admin.from('users').select('id').eq('email', email).maybeSingle();
+    if (existingRow?.id) return { error: 'An employee with this email already exists.' };
+
+    // Find the orphan auth user by paging listUsers (no getUserByEmail in supabase-js admin API).
+    let found: { id: string } | undefined;
+    for (let page = 1; page <= 20 && !found; page++) {
+      const { data: list } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+      found = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      if (!list || list.users.length < 200) break;
+    }
+    if (!found) return { error: friendlyError(createErr, 'Could not create the sign-in user') };
+    userId = found.id;
+    if (password) await admin.auth.admin.updateUserById(userId, { password });
+  }
 
   const { error: insertErr } = await admin.from('users').insert({
     id: userId,
@@ -42,7 +63,10 @@ export async function createEmployee(formData: FormData) {
     department,
     position_id: positionId,
   });
-  if (insertErr) return { error: friendlyError(insertErr) };
+  if (insertErr) {
+    if (created?.user) await admin.auth.admin.deleteUser(userId);
+    return { error: friendlyError(insertErr) };
+  }
 
   await admin.from('user_roles').insert({ user_id: userId, role });
   if (role === 'admin') {
