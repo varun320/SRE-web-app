@@ -1,10 +1,12 @@
 'use client';
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { updateEmployee, resetEmployeePassword, updateOpeningBalances } from '@/app/(app)/admin/employees/[id]/actions';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { updateEmployee, resetEmployeePassword, updateOpeningBalances, deleteEmployee } from '@/app/(app)/admin/employees/[id]/actions';
 import { toast } from 'sonner';
 
 interface Position { id: string; name: string; annual_vacation_hours: number; }
@@ -34,6 +36,7 @@ export function EmployeeEditForm({
   const [pwPending, startPw] = useTransition();
   const [obPending, startOb] = useTransition();
   const [showPw, setShowPw] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="space-y-4 max-w-3xl">
@@ -176,6 +179,38 @@ export function EmployeeEditForm({
           </Button>
         </form>
       </FormSection>
+
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-danger-border,var(--color-border-soft))] bg-[var(--color-surface)] p-5 md:p-6">
+        <header className="mb-3">
+          <h3 className="text-sm font-medium text-[var(--color-danger,#c0392b)]">Danger zone</h3>
+          <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+            Permanently removes the account, their sign-in, and all their timesheets, expenses, and ledger history. Prefer setting them Inactive above unless you really need this.
+          </p>
+        </header>
+        <ConfirmDialog
+          triggerLabel="Delete employee"
+          triggerVariant="destructive"
+          triggerSize="sm"
+          destructive
+          title={`Delete ${employee.full_name}?`}
+          description={
+            <div className="space-y-2">
+              <p>This wipes their account and every timesheet, expense report, and ledger row tied to them. It can&apos;t be undone.</p>
+              <p>Type nothing, just confirm you&apos;re sure.</p>
+            </div>
+          }
+          confirmLabel="Delete forever"
+          successMessage="Employee deleted"
+          onConfirm={async () => {
+            const fd = new FormData();
+            fd.set('id', employee.id);
+            const res = await deleteEmployee(fd);
+            if (res?.error) throw new Error(res.error);
+            router.push('/admin/employees');
+            router.refresh();
+          }}
+        />
+      </section>
     </div>
   );
 }

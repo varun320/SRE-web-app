@@ -111,6 +111,30 @@ export async function updateOpeningBalances(formData: FormData) {
   return { ok: true };
 }
 
+export async function deleteEmployee(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+
+  const id = String(formData.get('id') ?? '').trim();
+  if (!id) return { error: 'missing id' };
+
+  const { data: { user: me } } = await sb.auth.getUser();
+  if (me?.id === id) return { error: "you can't delete your own account" };
+
+  const admin = getServiceClient();
+  if (!admin) return { error: 'SUPABASE_SERVICE_ROLE_KEY not configured on the server' };
+
+  // auth.users delete cascades public.users → timesheets, expenses, ledgers, etc via FK ON DELETE CASCADE
+  const { error: authErr } = await admin.auth.admin.deleteUser(id);
+  if (authErr) return { error: friendlyError(authErr) };
+
+  // Belt-and-suspenders: if the public.users row didn't cascade, drop it directly
+  await admin.from('users').delete().eq('id', id);
+
+  revalidatePath('/admin/employees');
+  return { ok: true };
+}
+
 export async function resetEmployeePassword(formData: FormData) {
   const sb = await getSupabaseServer();
   if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
