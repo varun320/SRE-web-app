@@ -27,10 +27,28 @@ export default async function ExpensesPage() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [rows, summary] = await Promise.all([
+  const [rows, summary, payoutAgg] = await Promise.all([
     fetchMyExpenses(supabase),
     fetchSummary(supabase, userId),
+    supabase
+      .from('v_expense_payout_agg')
+      .select('user_id, invoice_no, paid_amount')
+      .eq('user_id', userId),
   ]);
+  const paidByInvoice = new Map(
+    (payoutAgg.data ?? []).map((p) => [p.invoice_no as string, Number(p.paid_amount ?? 0)]),
+  );
+
+  function paymentStatus(status: string, total: number, invoiceNo: string): {
+    label: string;
+    tone: 'success' | 'warning' | 'danger' | 'muted';
+  } {
+    if (status !== 'approved' && status !== 'paid') return { label: '—', tone: 'muted' };
+    const paid = paidByInvoice.get(invoiceNo) ?? 0;
+    if (paid <= 0) return { label: 'Unpaid', tone: 'danger' };
+    if (paid + 0.005 < total) return { label: 'Partially Paid', tone: 'warning' };
+    return { label: 'Paid', tone: 'success' };
+  }
 
   const submitted = Number(summary?.total_submitted ?? 0);
   const received = Number(summary?.total_received ?? 0);
@@ -125,11 +143,14 @@ export default async function ExpensesPage() {
                   <th className="num">GST</th>
                   <th className="num">Total</th>
                   <th>Status</th>
+                  <th>Payment</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {rows.map((r) => {
+                  const pay = paymentStatus(r.status, Number(r.total_cad), r.invoice_no);
+                  return (
                   <tr key={r.id}>
                     <td>
                       <Link href={`/expenses/${encodeURIComponent(r.invoice_no)}`} className="font-medium hover:underline">
@@ -142,6 +163,7 @@ export default async function ExpensesPage() {
                     <td className="num">{money(Number(r.gst_cad))}</td>
                     <td className="num font-medium">{money(Number(r.total_cad))}</td>
                     <td><StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge></td>
+                    <td><StatusBadge tone={pay.tone}>{pay.label}</StatusBadge></td>
                     <td className="text-right">
                       <Link
                         href={`/expenses/new?dup=${encodeURIComponent(r.invoice_no)}`}
@@ -152,7 +174,8 @@ export default async function ExpensesPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

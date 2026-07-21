@@ -2,6 +2,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CreditCard } from 'lucide-react';
 import { PayoutBatchForm } from '@/components/admin/PayoutBatchForm';
+import { PayoutRowActions } from '@/components/admin/PayoutRowActions';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
@@ -79,6 +80,7 @@ export default async function AdminPayoutsPage() {
                     <th className="text-right px-4 py-2.5 font-normal">Amount</th>
                     <th className="text-left px-4 py-2.5 font-normal">Reference</th>
                     <th className="text-left px-4 py-2.5 font-normal">Notes</th>
+                    <th className="text-right px-4 py-2.5 font-normal w-[100px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -94,6 +96,19 @@ export default async function AdminPayoutsPage() {
                         </td>
                         <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.reference ?? ''}</td>
                         <td className="px-4 py-2.5 text-[var(--color-text-muted)]">{r.notes ?? ''}</td>
+                        <td className="px-4 py-2.5 text-right">
+                          <PayoutRowActions
+                            payout={{
+                              id: r.id,
+                              user_id: r.user_id,
+                              invoice_no: r.invoice_no,
+                              payout_date: r.payout_date,
+                              amount_cad: Number(r.amount_cad),
+                              reference: r.reference ?? null,
+                              notes: r.notes ?? null,
+                            }}
+                          />
+                        </td>
                       </tr>
                     );
                   })}
