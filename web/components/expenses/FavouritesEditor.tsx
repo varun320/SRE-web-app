@@ -153,14 +153,14 @@ export function FavouritesEditor({ initial, projects }: Props) {
             maxLength={500}
           />
           <input
-            type="number" step="0.01" min="0"
+            type="number" step="0.01"
             className={`${inputCls} text-right font-mono`}
             placeholder="Amount"
             value={draft.amount_cad}
             onChange={(e) => setDraft((d) => ({ ...d, amount_cad: e.target.value }))}
           />
           <input
-            type="number" step="0.01" min="0"
+            type="number" step="0.01"
             className={`${inputCls} text-right font-mono`}
             placeholder="GST"
             value={draft.gst_cad}

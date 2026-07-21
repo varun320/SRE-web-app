@@ -117,7 +117,7 @@ export function ExpenseLineCardMobile({
       <div className="grid grid-cols-2 gap-3">
         <Field label="Amount (CAD)">
           <input
-            type="number" step="0.01" min="0" inputMode="decimal"
+            type="number" step="0.01" inputMode="decimal"
             className={`${inputCls} text-right font-mono`}
             value={line.amount_cad}
             onChange={(e) => onChange({ amount_cad: e.target.value })}
@@ -127,7 +127,7 @@ export function ExpenseLineCardMobile({
         </Field>
         <Field label="GST">
           <input
-            type="number" step="0.01" min="0" inputMode="decimal"
+            type="number" step="0.01" inputMode="decimal"
             className={`${inputCls} text-right font-mono`}
             value={line.gst_cad}
             onChange={(e) => onChange({ gst_cad: e.target.value })}

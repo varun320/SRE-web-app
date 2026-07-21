@@ -453,7 +453,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                     </td>
                     <td className="px-2 py-2">
                       <input
-                        type="number" step="0.01" min="0"
+                        type="number" step="0.01"
                         className={`${inputCls} text-right font-mono`}
                         value={l.amount_cad}
                         onChange={(e) => updateLine(i, { amount_cad: e.target.value })}
@@ -466,7 +466,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                     </td>
                     <td className="px-2 py-2">
                       <input
-                        type="number" step="0.01" min="0"
+                        type="number" step="0.01"
                         className={`${inputCls} text-right font-mono`}
                         value={l.gst_cad}
                         onChange={(e) => updateLine(i, { gst_cad: e.target.value })}
