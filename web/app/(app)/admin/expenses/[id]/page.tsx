@@ -180,6 +180,7 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
           <table className="min-w-full text-sm">
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/40">
               <tr>
+                <th className="text-right px-3 py-2 font-normal w-[36px]">#</th>
                 <th className="text-left px-3 py-2 font-normal">Date</th>
                 <th className="text-left px-3 py-2 font-normal">Category</th>
                 <th className="text-left px-3 py-2 font-normal">Project</th>
@@ -195,18 +196,19 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
             <tbody>
               {lines.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
+                  <td colSpan={11} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                     No line items on this report.
                   </td>
                 </tr>
               ) : (
-                lines.map((l) => {
+                lines.map((l, i) => {
                   const card = l.credit_card_id ? cardMap.get(l.credit_card_id) : null;
                   const url = l.receipt_url ? urlByKey.get(l.receipt_url) : null;
                   const project = l.project_id ? projectMap.get(l.project_id) : null;
                   const total = Number(l.amount_cad) + Number(l.gst_cad);
                   return (
                     <tr key={l.id} className="border-t border-[var(--color-border-soft)] align-top">
+                      <td className="px-3 py-2 text-right font-mono tabular-nums text-[var(--color-text-muted)]">{i + 1}</td>
                       <td className="px-3 py-2 whitespace-nowrap">{l.line_date}</td>
                       <td className="px-3 py-2 whitespace-nowrap">{l.category}</td>
                       <td className="px-3 py-2 whitespace-nowrap font-mono text-xs">
@@ -239,7 +241,7 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
             {lines.length > 0 ? (
               <tfoot>
                 <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                  <td colSpan={6} className="px-3 py-2 text-right text-[var(--color-text-muted)]">Totals</td>
+                  <td colSpan={7} className="px-3 py-2 text-right text-[var(--color-text-muted)]">Totals</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums font-semibold">{money(totalAmount)}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums font-semibold">{money(totalGst)}</td>
                   <td className="px-3 py-2 text-right font-mono tabular-nums font-semibold">

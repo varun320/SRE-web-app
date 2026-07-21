@@ -339,6 +339,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
           <table className="min-w-full text-sm">
             <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50">
               <tr>
+                <th className="text-right px-2 py-2 font-normal w-[36px]">#</th>
                 <th className="text-left px-2 py-2 font-normal w-[130px]">Date</th>
                 <th className="text-left px-2 py-2 font-normal w-[150px]">
                   <span className="inline-flex items-center gap-1">
@@ -390,6 +391,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
                 const lineTotal = Number(l.amount_cad || 0) + Number(l.gst_cad || 0);
                 return (
                   <tr key={i} className="border-t border-[var(--color-border-soft)] align-top">
+                    <td className="px-2 py-2 text-right font-mono tabular-nums text-[var(--color-text-muted)]">{i + 1}</td>
                     <td className="px-2 py-2">
                       <DatePicker
                         value={l.line_date}
@@ -561,7 +563,7 @@ export function ExpenseEditor({ initial, initialLines, creditCards = [], project
             </tbody>
             <tfoot>
               <tr className="border-t border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
-                <td colSpan={5} className="px-2 py-2">
+                <td colSpan={6} className="px-2 py-2">
                   {!readOnly ? (
                     <div className="flex items-center gap-3">
                       <button
