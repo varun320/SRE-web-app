@@ -101,3 +101,8 @@ export async function deletePayout(sb: SupabaseClient, id: string): Promise<void
   const { error } = await sb.rpc('payout_delete', { p_payout_id: id });
   if (error) throw new Error(error.message);
 }
+
+export async function adminDeleteExpense(sb: SupabaseClient, id: string): Promise<void> {
+  const { error } = await sb.rpc('expense_admin_delete', { p_expense_id: id });
+  if (error) throw new Error(error.message);
+}

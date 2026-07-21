@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
+import { PayoutRowActions } from '@/components/admin/PayoutRowActions';
 import { ReceiptViewer } from '@/components/admin/ReceiptViewer';
 import type { ExpenseLineItem, ExpenseReport, ExpensePayout, CreditCard } from '@/lib/expenses/types';
 
@@ -287,6 +288,7 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
                 <th className="text-left py-1 font-normal">Date</th>
                 <th className="text-right py-1 font-normal">Amount</th>
                 <th className="text-left py-1 font-normal">Reference</th>
+                <th className="text-right py-1 font-normal w-[90px]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -295,6 +297,19 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
                   <td className="py-1.5">{p.payout_date}</td>
                   <td className="py-1.5 text-right font-mono tabular-nums">{money(p.amount_cad)}</td>
                   <td className="py-1.5 text-[var(--color-text-muted)]">{p.reference ?? ''}</td>
+                  <td className="py-1.5 text-right">
+                    <PayoutRowActions
+                      payout={{
+                        id: p.id,
+                        user_id: report.user_id,
+                        invoice_no: report.invoice_no,
+                        payout_date: p.payout_date,
+                        amount_cad: Number(p.amount_cad),
+                        reference: p.reference ?? null,
+                        notes: p.notes ?? null,
+                      }}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>

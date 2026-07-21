@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
+  adminDeleteExpense,
   approveExpense,
   declineExpense,
   unlockExpense,
@@ -107,6 +109,26 @@ export function AdminExpenseActions({ expenseId, status, locked, userId, invoice
           + Payout
         </button>
       )}
+      <ConfirmDialog
+        triggerLabel={
+          <>
+            <Trash2 className="h-3 w-3 mr-1" />
+            Delete
+          </>
+        }
+        triggerVariant="outline"
+        triggerSize="xs"
+        title={`Delete report ${invoiceNo}?`}
+        description="This permanently removes the report, its line items, and any recorded payouts against this invoice. Cannot be undone."
+        confirmLabel="Delete"
+        destructive
+        successMessage="Report deleted"
+        onConfirm={async () => {
+          await adminDeleteExpense(sb, expenseId);
+          router.push('/admin/expenses');
+          router.refresh();
+        }}
+      />
       {err ? <span className="text-[var(--color-status-declined-fg)]">{err}</span> : null}
     </div>
   );
