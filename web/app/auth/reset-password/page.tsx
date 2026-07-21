@@ -23,25 +23,29 @@ export default function ResetPasswordPage() {
 function ResetPasswordInner() {
   const sp = useSearchParams();
   const code = sp.get('code');
+  const tokenHash = sp.get('token_hash');
+  const type = sp.get('type');
   const [status, setStatus] = useState<Status>('verifying');
   const [pending, start] = useTransition();
 
   useEffect(() => {
-    if (!code) {
+    if (!code && !tokenHash) {
       setStatus('invalid');
       return;
     }
     let cancelled = false;
     (async () => {
       const sb = getSupabaseBrowser();
-      const { error } = await sb.auth.exchangeCodeForSession(code);
+      const { error } = tokenHash
+        ? await sb.auth.verifyOtp({ type: (type as 'recovery') ?? 'recovery', token_hash: tokenHash })
+        : await sb.auth.exchangeCodeForSession(code!);
       if (cancelled) return;
       setStatus(error ? 'invalid' : 'ready');
     })();
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, tokenHash, type]);
 
   return (
     <main className="min-h-dvh grid place-items-center p-6 bg-[var(--color-surface)]">
