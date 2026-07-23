@@ -42,9 +42,9 @@ test.describe(PROD ? 'prod smoke' : 'prod smoke (skipped — set PROD_URL)', () 
     await page.goto('/admin');
     await expect(page.getByRole('tab', { name: /Inbox/i }).first()).toBeVisible();
 
-    // Reports landing — redirects to /admin/reports/payroll
+    // Reports landing — cards linking to each report
     await page.goto('/admin/reports');
-    await page.waitForURL(/\/admin\/reports\/payroll/, { timeout: 10_000 });
+    await expect(page.getByRole('link', { name: /Pay period/i }).first()).toBeVisible();
 
     // Notifications page
     await page.goto('/me/notifications');

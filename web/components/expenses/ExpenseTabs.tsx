@@ -1,54 +1,14 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Receipt, List, Scale, Settings, BadgeDollarSign } from 'lucide-react';
+import { SectionTabs, type SectionTab } from '@/components/ui/section-tabs';
 
-interface Tab {
-  href: string;
-  label: string;
-  match: (pathname: string) => boolean;
-}
-
-interface Props {
-  tabs: Tab[];
-}
-
-export function ExpenseTabs({ tabs }: Props) {
-  const pathname = usePathname() ?? '';
-  return (
-    <nav
-      aria-label="Expense sections"
-      className="sticky top-0 z-10 -mx-3 md:-mx-4 mb-4 border-b border-[var(--color-border-soft)] bg-[color-mix(in_oklab,var(--color-surface)_92%,transparent)] backdrop-blur px-3 md:px-4"
-    >
-      <ul className="flex gap-1 overflow-x-auto">
-        {tabs.map((t) => {
-          const active = t.match(pathname);
-          return (
-            <li key={t.href}>
-              <Link
-                href={t.href}
-                aria-current={active ? 'page' : undefined}
-                className={
-                  'inline-flex items-center whitespace-nowrap px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ' +
-                  (active
-                    ? 'border-[var(--color-accent)] text-[var(--color-text)] font-medium'
-                    : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]')
-                }
-              >
-                {t.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
-}
-
-export const EMPLOYEE_EXPENSE_TABS: Tab[] = [
+export const EMPLOYEE_EXPENSE_TABS: SectionTab[] = [
   {
     href: '/expenses',
     label: 'Reports',
+    hint: 'Your monthly submissions',
+    icon: Receipt,
     match: (p) =>
       p === '/expenses' ||
       (p.startsWith('/expenses/') &&
@@ -56,21 +16,57 @@ export const EMPLOYEE_EXPENSE_TABS: Tab[] = [
         !p.startsWith('/expenses/balance') &&
         !p.startsWith('/expenses/settings')),
   },
-  { href: '/expenses/lines', label: 'All lines', match: (p) => p.startsWith('/expenses/lines') },
-  { href: '/expenses/balance', label: 'Balance', match: (p) => p.startsWith('/expenses/balance') },
-  { href: '/expenses/settings', label: 'Settings', match: (p) => p.startsWith('/expenses/settings') },
+  {
+    href: '/expenses/lines',
+    label: 'All lines',
+    hint: 'Every line item, filterable',
+    icon: List,
+    match: (p) => p.startsWith('/expenses/lines'),
+  },
+  {
+    href: '/expenses/balance',
+    label: 'Balance',
+    hint: 'What SRE owes you (with interest)',
+    icon: Scale,
+    match: (p) => p.startsWith('/expenses/balance'),
+  },
+  {
+    href: '/expenses/settings',
+    label: 'Settings',
+    hint: 'Credit cards & interest rate',
+    icon: Settings,
+    match: (p) => p.startsWith('/expenses/settings'),
+  },
 ];
 
-export const ADMIN_EXPENSE_TABS: Tab[] = [
+export const ADMIN_EXPENSE_TABS: SectionTab[] = [
   {
     href: '/admin/expenses',
     label: 'Reports',
+    hint: 'Approve, decline, edit submissions',
+    icon: Receipt,
     match: (p) =>
       p === '/admin/expenses' ||
       (p.startsWith('/admin/expenses/') &&
         !p.startsWith('/admin/expenses/lines') &&
         !p.startsWith('/admin/expenses/payouts')),
   },
-  { href: '/admin/expenses/lines', label: 'Line items', match: (p) => p.startsWith('/admin/expenses/lines') },
-  { href: '/admin/expenses/payouts', label: 'Payouts', match: (p) => p.startsWith('/admin/expenses/payouts') },
+  {
+    href: '/admin/expenses/lines',
+    label: 'Line items',
+    hint: 'All lines across the org',
+    icon: List,
+    match: (p) => p.startsWith('/admin/expenses/lines'),
+  },
+  {
+    href: '/admin/expenses/payouts',
+    label: 'Payouts',
+    hint: 'Log & audit payments',
+    icon: BadgeDollarSign,
+    match: (p) => p.startsWith('/admin/expenses/payouts'),
+  },
 ];
+
+export function ExpenseTabs({ tabs }: { tabs: SectionTab[] }) {
+  return <SectionTabs tabs={tabs} ariaLabel="Expense sections" />;
+}
