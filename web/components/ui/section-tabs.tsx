@@ -24,7 +24,7 @@ export function SectionTabs({ tabs, ariaLabel }: Props) {
       aria-label={ariaLabel}
       className="sticky top-0 z-10 -mx-3 md:-mx-4 mb-4 border-b border-[var(--color-border-soft)] bg-[color-mix(in_oklab,var(--color-surface)_92%,transparent)] backdrop-blur px-3 md:px-4"
     >
-      <ul className="flex gap-0.5 overflow-x-auto">
+      <ul className="flex gap-0.5 overflow-x-auto overflow-y-hidden">
         {tabs.map((t) => {
           const active = t.match(pathname);
           const Icon = t.icon;
