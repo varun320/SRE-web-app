@@ -71,6 +71,17 @@ export const replaceLinesInput = z.object({
 });
 export const listLinesInput = z.object({ invoice_no: z.string().min(3) });
 
+const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+
+export const uploadReceiptInput = z.object({
+  invoice_no: z.string().min(3),
+  content_base64: z.string().min(1),
+  filename: z.string().max(120).optional(),
+  mime_type: z
+    .enum(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'application/pdf'])
+    .optional(),
+});
+
 async function findByInvoice(
   sb: SupabaseClient,
   userId: string,
@@ -243,4 +254,44 @@ export async function recordPayout(sb: SupabaseClient, input: z.infer<typeof rec
   const { data, error } = await sb.rpc('payout_upsert', { payload: input });
   if (error) throw new Error(error.message);
   return { id: data as string };
+}
+
+export async function uploadReceiptTool(
+  sb: SupabaseClient,
+  userId: string,
+  input: z.infer<typeof uploadReceiptInput>,
+) {
+  const report = await findByInvoice(sb, userId, input.invoice_no);
+  if (!report) throw new Error('expense not found');
+
+  const buf = Buffer.from(input.content_base64, 'base64');
+  if (buf.length === 0) throw new Error('empty content_base64');
+  if (buf.length > MAX_RECEIPT_BYTES) {
+    throw new Error(`receipt too large (${buf.length} bytes, max ${MAX_RECEIPT_BYTES})`);
+  }
+
+  const mime = input.mime_type ?? 'image/jpeg';
+  const extFromMime =
+    mime === 'image/png' ? 'png'
+    : mime === 'image/webp' ? 'webp'
+    : mime === 'image/heic' ? 'heic'
+    : mime === 'application/pdf' ? 'pdf'
+    : 'jpg';
+  const filename = input.filename ?? `receipt.${extFromMime}`;
+
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const rand = Math.random().toString(36).slice(2, 14);
+  const key = `${userId}/${report.id}/${date}-${rand}.${extFromMime}`;
+
+  const { error: upErr } = await sb.storage
+    .from('expense-receipts')
+    .upload(key, buf, { cacheControl: '3600', upsert: false, contentType: mime });
+  if (upErr) throw new Error(upErr.message);
+
+  const { data: signed, error: signErr } = await sb.storage
+    .from('expense-receipts')
+    .createSignedUrl(key, 3600);
+  if (signErr) throw new Error(signErr.message);
+
+  return { storage_key: key, filename, signed_url: signed.signedUrl, bytes: buf.length };
 }
