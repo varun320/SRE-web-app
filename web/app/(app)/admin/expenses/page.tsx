@@ -136,21 +136,6 @@ export default async function AdminExpensesPage({
 
   return (
     <main className="w-full px-3 md:px-4 py-5 md:py-6 space-y-4">
-      <div className="flex items-center justify-end gap-2">
-        <Link
-          href="/admin/expenses/lines"
-          className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
-        >
-          Line items →
-        </Link>
-        <Link
-          href="/admin/expenses/payouts"
-          className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]"
-        >
-          Payout log →
-        </Link>
-      </div>
-
       {overdueRows.length > 0 ? (
         <section className="rounded-[var(--radius-lg)] border border-[color-mix(in_oklab,var(--color-destructive)_30%,transparent)] bg-[color-mix(in_oklab,var(--color-destructive)_5%,var(--color-surface))] p-4">
           <div className="flex items-center justify-between gap-3">
