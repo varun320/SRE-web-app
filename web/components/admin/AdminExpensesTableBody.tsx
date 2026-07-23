@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { approveExpense } from '@/lib/expenses/mutations';
+import { paymentStatus } from '@/lib/expenses/payment-status';
 
 export type SortKey = 'submission_date' | 'invoice_no' | 'total_cad' | 'status' | 'employee';
 
@@ -32,6 +33,7 @@ interface UserInfo {
 interface Props {
   rows: Row[];
   users: UserInfo[];
+  paidByKey: Record<string, number>;
   sort: SortKey;
   dir: 'asc' | 'desc';
   sortHrefs: Record<SortKey, string>;
@@ -51,7 +53,7 @@ function statusTone(s: string): 'neutral' | 'success' | 'warning' | 'danger' | '
   }
 }
 
-export function AdminExpensesTableBody({ rows, users, sort, dir, sortHrefs }: Props) {
+export function AdminExpensesTableBody({ rows, users, paidByKey, sort, dir, sortHrefs }: Props) {
   const router = useRouter();
   const userMap = new Map(users.map((u) => [u.id, u]));
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -133,13 +135,14 @@ export function AdminExpensesTableBody({ rows, users, sort, dir, sortHrefs }: Pr
             <th className="text-left px-4 py-2.5 font-normal">
               <Link href={sortHrefs.status} className="hover:text-[var(--color-text)] inline-flex items-center gap-1">Status {arrow('status')}</Link>
             </th>
+            <th className="text-left px-4 py-2.5 font-normal">Payment</th>
             <th className="text-right px-4 py-2.5 font-normal">Actions</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={8} className="px-4 py-6 text-center text-[var(--color-text-muted)]">No reports.</td>
+              <td colSpan={9} className="px-4 py-6 text-center text-[var(--color-text-muted)]">No reports.</td>
             </tr>
           ) : null}
           {rows.map((r) => {
@@ -174,6 +177,16 @@ export function AdminExpensesTableBody({ rows, users, sort, dir, sortHrefs }: Pr
                 <td className="px-4 py-2.5">
                   <StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge>
                   {r.locked ? <StatusBadge tone="muted" className="ml-1">locked</StatusBadge> : null}
+                </td>
+                <td className="px-4 py-2.5">
+                  {(() => {
+                    const pay = paymentStatus(
+                      r.status,
+                      Number(r.total_cad),
+                      paidByKey[`${r.user_id}:${r.invoice_no}`] ?? 0,
+                    );
+                    return <StatusBadge tone={pay.tone}>{pay.label}</StatusBadge>;
+                  })()}
                 </td>
                 <td className="px-4 py-2.5 text-right">
                   <AdminExpenseActions

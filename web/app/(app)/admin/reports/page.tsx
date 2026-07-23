@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { REPORT_ITEMS } from '@/components/shell/ReportsSubnav';
+import { REPORT_ITEMS } from '@/lib/reports/items';
 
 export default function ReportsHome() {
   return (

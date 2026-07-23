@@ -72,13 +72,20 @@ export default async function AdminExpensesPage({
   }
   q = q.order('submission_date', { ascending: false }); // secondary key
 
-  const [{ data: rows, error }, projectsRes, overdueRes] = await Promise.all([
+  const [{ data: rows, error }, projectsRes, overdueRes, payoutsRes] = await Promise.all([
     q,
     projectsPromise,
     overduePromise,
+    sb.from('v_expense_payout_agg').select('user_id, invoice_no, paid_to_date'),
   ]);
   if (error) throw new Error(error.message);
   const overdueRows = overdueRes.data ?? [];
+  const paidByKey = new Map(
+    (payoutsRes.data ?? []).map((p) => [
+      `${p.user_id}:${p.invoice_no}`,
+      Number(p.paid_to_date ?? 0),
+    ]),
+  );
 
   const userIds = Array.from(new Set([
     ...(rows ?? []).map((r) => r.user_id as string),
@@ -223,6 +230,7 @@ export default async function AdminExpensesPage({
             <AdminExpensesTableBody
               rows={filtered as Parameters<typeof AdminExpensesTableBody>[0]['rows']}
               users={(usersRes.data ?? []) as Parameters<typeof AdminExpensesTableBody>[0]['users']}
+              paidByKey={Object.fromEntries(paidByKey)}
               sort={sort}
               dir={dir}
               sortHrefs={sortHrefs}

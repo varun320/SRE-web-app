@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { InfoHint } from '@/components/ui/info-hint';
 import { formatDate } from '@/lib/dates';
+import { paymentStatus } from '@/lib/expenses/payment-status';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
@@ -32,23 +33,12 @@ export default async function ExpensesPage() {
     fetchSummary(supabase, userId),
     supabase
       .from('v_expense_payout_agg')
-      .select('user_id, invoice_no, paid_amount')
+      .select('user_id, invoice_no, paid_to_date')
       .eq('user_id', userId),
   ]);
   const paidByInvoice = new Map(
-    (payoutAgg.data ?? []).map((p) => [p.invoice_no as string, Number(p.paid_amount ?? 0)]),
+    (payoutAgg.data ?? []).map((p) => [p.invoice_no as string, Number(p.paid_to_date ?? 0)]),
   );
-
-  function paymentStatus(status: string, total: number, invoiceNo: string): {
-    label: string;
-    tone: 'success' | 'warning' | 'danger' | 'muted';
-  } {
-    if (status !== 'approved' && status !== 'paid') return { label: '—', tone: 'muted' };
-    const paid = paidByInvoice.get(invoiceNo) ?? 0;
-    if (paid <= 0) return { label: 'Unpaid', tone: 'danger' };
-    if (paid + 0.005 < total) return { label: 'Partially Paid', tone: 'warning' };
-    return { label: 'Paid', tone: 'success' };
-  }
 
   const submitted = Number(summary?.total_submitted ?? 0);
   const received = Number(summary?.total_received ?? 0);
@@ -129,7 +119,7 @@ export default async function ExpensesPage() {
               </thead>
               <tbody>
                 {rows.map((r) => {
-                  const pay = paymentStatus(r.status, Number(r.total_cad), r.invoice_no);
+                  const pay = paymentStatus(r.status, Number(r.total_cad), paidByInvoice.get(r.invoice_no) ?? 0);
                   return (
                   <tr key={r.id}>
                     <td>
