@@ -84,5 +84,5 @@ export function ClientsMap({ clients }: { clients: ClientRow[] }) {
     };
   }, [clients]);
 
-  return <div ref={containerRef} className="w-full h-[70vh] rounded-lg border border-border overflow-hidden" />;
+  return <div ref={containerRef} className="w-full h-[70vh] rounded-lg border border-border overflow-hidden relative z-0 isolate" />;
 }
