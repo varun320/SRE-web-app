@@ -1,0 +1,58 @@
+'use client';
+import { useTransition } from 'react';
+import { Button } from '@/components/ui/button';
+import { deleteClient } from '@/app/(app)/clients/actions';
+import { toast } from 'sonner';
+import type { ClientRow } from '@/lib/clients';
+
+export function ClientsTable({ rows, canEdit = false }: { rows: ClientRow[]; canEdit?: boolean }) {
+  const [pending, start] = useTransition();
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-2)]/40 p-6 text-sm text-[var(--color-text-muted)]">
+        No clients yet. Add one above.
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] overflow-hidden">
+      <table className="min-w-full text-sm">
+        <thead className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)]">
+          <tr>
+            <th className="text-left px-4 py-3 font-normal">Name</th>
+            <th className="text-left px-4 py-3 font-normal">Location</th>
+            <th className="text-left px-4 py-3 font-normal">Coordinates</th>
+            <th className="text-left px-4 py-3 font-normal">SharePoint</th>
+            {canEdit && <th className="px-4 py-3"></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((c) => (
+            <tr key={c.id} className="border-t border-[var(--color-border-soft)]">
+              <td className="px-4 py-3">{c.name}</td>
+              <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.location ?? '—'}</td>
+              <td className="px-4 py-3 font-mono tabular-nums text-xs">{c.lat.toFixed(4)}, {c.lng.toFixed(4)}</td>
+              <td className="px-4 py-3">
+                {c.sharepointUrl
+                  ? <a href={c.sharepointUrl} target="_blank" rel="noopener noreferrer" className="text-[var(--color-accent)] underline">Open</a>
+                  : <span className="text-[var(--color-text-muted)]">—</span>}
+              </td>
+              {canEdit && (
+                <td className="px-4 py-3 text-right">
+                  <form action={(fd) => start(async () => {
+                    const res = await deleteClient(fd);
+                    if (res?.error) toast.error(res.error);
+                    else toast.success('Deleted');
+                  })}>
+                    <input type="hidden" name="id" value={c.id} />
+                    <Button type="submit" variant="outline" size="sm" disabled={pending}>Delete</Button>
+                  </form>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

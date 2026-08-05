@@ -17,6 +17,7 @@ import {
   Bell,
   Plug,
   User,
+  MapPin,
 } from 'lucide-react';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from './NotificationsBell';
@@ -48,6 +49,7 @@ const TOP_NAV: NavItem[] = [
   { href: '/home',          label: 'Home',     icon: Home,         match: (p) => p === '/home' || p === '/' },
   { href: '/week/current',  label: 'Week',     icon: CalendarDays, match: (p) => p.startsWith('/week') },
   { href: '/expenses',      label: 'Expenses', icon: Receipt,      match: (p) => p.startsWith('/expenses') },
+  { href: '/clients',       label: 'Clients',  icon: MapPin,       match: (p) => p.startsWith('/clients') },
 ];
 
 const ME_NAV: NavItem[] = [
