@@ -21,7 +21,7 @@ import {
   Briefcase,
 } from 'lucide-react';
 import { HelpButton } from './HelpButton';
-import { NotificationsBell } from './NotificationsBell';
+import { NotificationsBell } from '@/features/notifications/components/NotificationsBell';
 import { FirstVisitHint } from './FirstVisitHint';
 import { ThemeToggle } from './ThemeToggle';
 import { SnakeGame } from '@/components/fun/SnakeGame';

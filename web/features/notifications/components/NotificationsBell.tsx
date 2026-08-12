@@ -5,15 +5,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, CheckCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { fetchRecent, fetchUnreadCount } from '@/lib/notifications/queries';
-import { markAllRead, markRead } from '@/lib/notifications/mutations';
-import { formatNotification } from '@/lib/notifications/format';
+import { fetchRecent, fetchUnreadCount } from '@/features/notifications/queries';
+import { markAllRead, markRead } from '@/features/notifications/mutations';
+import { formatNotification } from '@/features/notifications/format';
 import {
   desktopSupported,
   desktopPermission,
   enableDesktopNotifications,
   fireDesktopNotification,
-} from '@/lib/notifications/desktop';
+} from '@/features/notifications/desktop';
 import {
   DropdownMenu,
   DropdownMenuContent,

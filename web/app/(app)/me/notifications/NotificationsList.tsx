@@ -5,9 +5,9 @@ import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, CheckCheck, Check } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { fetchRecent, type NotificationRow } from '@/lib/notifications/queries';
-import { markRead, markAllRead } from '@/lib/notifications/mutations';
-import { formatNotification } from '@/lib/notifications/format';
+import { fetchRecent, type NotificationRow } from '@/features/notifications/queries';
+import { markRead, markAllRead } from '@/features/notifications/mutations';
+import { formatNotification } from '@/features/notifications/format';
 import { EmptyState } from '@/components/ui/empty-state';
 
 const TONE_DOT: Record<string, string> = {

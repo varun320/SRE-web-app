@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { formatNotification } from '@/lib/notifications/format';
-import type { NotificationRow } from '@/lib/notifications/queries';
+import { formatNotification } from '@/features/notifications/format';
+import type { NotificationRow } from '@/features/notifications/queries';
 
 function n(over: Partial<NotificationRow>): NotificationRow {
   return {
