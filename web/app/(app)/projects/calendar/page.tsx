@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getSupabaseServer } from '@/shared/supabase/server';
-import { fetchTasksInRange, fetchTeamRoster } from '@/features/projects/queries';
+import { fetchTasksInRange, fetchTeamRoster, fetchOnsiteBlocksInRange } from '@/features/projects/queries';
 import { CalendarGrid } from '@/features/projects/components/CalendarGrid';
 
 // Month string helpers — kept local to this route, tiny and dumb.
@@ -34,7 +34,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const to = lastOfMonth(year, month);
 
   const sb = await getSupabaseServer();
-  const [tasks, users] = await Promise.all([fetchTasksInRange(sb, from, to), fetchTeamRoster(sb)]);
+  const [tasks, blocks, users] = await Promise.all([
+    fetchTasksInRange(sb, from, to),
+    fetchOnsiteBlocksInRange(sb, from, to),
+    fetchTeamRoster(sb),
+  ]);
 
   const prev = shift(year, month, -1);
   const next = shift(year, month, +1);
@@ -56,7 +60,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             </div>
             <h1 className="mt-1 text-h1">{label}</h1>
             <p className="mt-1 text-body-sm text-[var(--color-text-muted)]">
-              {tasks.length} task{tasks.length === 1 ? '' : 's'} due this month. Click any chip to open the task.
+              {tasks.length} task{tasks.length === 1 ? '' : 's'} due · {blocks.length} on-site engagement{blocks.length === 1 ? '' : 's'} this month.
+              Colored bars are on-site windows (click to jump to the job). Chips are task due dates.
             </p>
           </div>
           <div className="flex items-center gap-1">
@@ -84,7 +89,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         </div>
       </section>
 
-      <CalendarGrid year={year} month={month} tasks={tasks} assignableUsers={users} />
+      <CalendarGrid year={year} month={month} tasks={tasks} blocks={blocks} assignableUsers={users} />
     </main>
   );
 }

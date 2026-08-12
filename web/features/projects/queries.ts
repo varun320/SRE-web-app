@@ -232,6 +232,51 @@ export interface MyTaskRow extends TaskRow {
   project_name: string;
 }
 
+export interface OnsiteBlock {
+  project_id: string;
+  project_number: number;
+  scope: string;
+  client_name: string | null;
+  onsite_start: string;
+  onsite_end: string;
+  accent_color: string | null;
+  team: Array<{ id: string; full_name: string }>;
+}
+
+/** On-site windows that overlap the [from, to] date range. Used by the
+ * resource-booking calendar to render multi-day blocks under the day cells. */
+export async function fetchOnsiteBlocksInRange(
+  sb: SupabaseClient,
+  from: string,
+  to: string,
+): Promise<OnsiteBlock[]> {
+  const { data, error } = await sb
+    .from('projects')
+    .select('id, project_number, name, scope_title, accent_color, onsite_start, onsite_end, clients(name), project_team_members(user_id, users(id, full_name))')
+    .eq('has_onsite', true)
+    .lte('onsite_start', to)
+    .gte('onsite_end', from);
+  if (error) throw new Error(error.message);
+  type Row = {
+    id: string; project_number: number; name: string; scope_title: string | null;
+    accent_color: string | null; onsite_start: string; onsite_end: string;
+    clients: { name: string } | null;
+    project_team_members: Array<{ user_id: string; users: { id: string; full_name: string } | null }>;
+  };
+  return ((data ?? []) as unknown as Row[]).map((r) => ({
+    project_id: r.id,
+    project_number: r.project_number,
+    scope: r.scope_title ?? r.name,
+    client_name: r.clients?.name ?? null,
+    onsite_start: r.onsite_start,
+    onsite_end: r.onsite_end,
+    accent_color: r.accent_color,
+    team: (r.project_team_members ?? [])
+      .map((m) => m.users)
+      .filter((u): u is { id: string; full_name: string } => !!u),
+  }));
+}
+
 export interface WorkloadRow {
   user_id: string;
   full_name: string;
