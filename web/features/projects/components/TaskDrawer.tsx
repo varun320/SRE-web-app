@@ -4,10 +4,10 @@ import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { updateTask } from '@/app/(app)/projects/actions';
+import { updateTask } from '@/features/projects/actions/tasks';
 import { friendlyError } from '@/lib/errors';
-import type { TaskRow, TaskPriority, TaskStatus } from '@/lib/projects/types';
-import { PHASE_LABEL } from '@/lib/projects/types';
+import type { TaskRow, TaskPriority, TaskStatus } from '@/features/projects/types';
+import { PHASE_LABEL } from '@/features/projects/types';
 
 export interface Assignable {
   id: string;

@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Users } from 'lucide-react';
-import { updateTask } from '@/app/(app)/projects/actions';
+import { updateTask } from '@/features/projects/actions/tasks';
 import { friendlyError } from '@/lib/errors';
 import { formatDate } from '@/lib/dates';
-import { PHASE_LABEL, type TaskRow, type TaskStatus, type ProjectPhase, type TaskPriority } from '@/lib/projects/types';
+import { PHASE_LABEL, type TaskRow, type TaskStatus, type ProjectPhase, type TaskPriority } from '@/features/projects/types';
 import { TaskDrawer, type Assignable } from './TaskDrawer';
 
 interface Props {

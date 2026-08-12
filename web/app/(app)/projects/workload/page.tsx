@@ -3,7 +3,7 @@ import { ArrowLeft, Users } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { fetchTeamWorkload } from '@/lib/projects/queries';
+import { fetchTeamWorkload } from '@/features/projects/queries';
 
 function initials(name: string): string {
   return name.trim().split(/\s+/).map((p) => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');

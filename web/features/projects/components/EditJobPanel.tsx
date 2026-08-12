@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Pencil, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { updateProject } from '@/app/(app)/projects/actions';
+import { updateProject } from '@/features/projects/actions/projects';
 import { friendlyError } from '@/lib/errors';
-import type { ClientWithDirectory, TemplateSummary, UserOption } from '@/lib/projects/queries';
-import type { ProjectPhase } from '@/lib/projects/types';
+import type { ClientWithDirectory, TemplateSummary, UserOption } from '@/features/projects/queries';
+import type { ProjectPhase } from '@/features/projects/types';
 
 interface Props {
   projectId: string;

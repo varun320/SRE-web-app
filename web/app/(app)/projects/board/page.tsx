@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { ArrowLeft, Columns } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
-import { fetchTeamRoster } from '@/lib/projects/queries';
-import type { TaskRow, TaskStatus } from '@/lib/projects/types';
-import { KanbanBoard, type BoardTask } from '@/components/projects/KanbanBoard';
+import { fetchTeamRoster } from '@/features/projects/queries';
+import type { TaskRow, TaskStatus } from '@/features/projects/types';
+import { KanbanBoard, type BoardTask } from '@/features/projects/components/KanbanBoard';
 
 export default async function BoardPage() {
   const sb = await getSupabaseServer();

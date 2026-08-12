@@ -9,8 +9,8 @@ import {
   createTemplate, deleteTemplate,
   createTemplateSection, deleteTemplateSection,
   createTemplateTask, deleteTemplateTask,
-} from '@/app/(app)/projects/actions';
-import type { TemplateWithTasks } from '@/lib/projects/queries';
+} from '@/features/projects/actions/templates';
+import type { TemplateWithTasks } from '@/features/projects/queries';
 
 const PHASE_LABEL = { pre: 'Pre-Job', during: 'During Job', post: 'Post-Job' } as const;
 

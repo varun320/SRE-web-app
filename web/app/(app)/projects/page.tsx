@@ -12,9 +12,9 @@ import {
   fetchClientsWithDirectory,
   fetchTemplates,
   fetchTeamRoster,
-} from '@/lib/projects/queries';
-import { PHASE_LABEL, type ProjectPhase, type TaskPriority } from '@/lib/projects/types';
-import { NewJobModal } from '@/components/projects/NewJobModal';
+} from '@/features/projects/queries';
+import { PHASE_LABEL, type ProjectPhase, type TaskPriority } from '@/features/projects/types';
+import { NewJobModal } from '@/features/projects/components/NewJobModal';
 
 function phaseTone(p: ProjectPhase): 'neutral' | 'info' | 'success' {
   return p === 'pre' ? 'neutral' : p === 'during' ? 'info' : 'success';

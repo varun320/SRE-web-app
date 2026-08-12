@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { TaskDrawer, type Assignable } from './TaskDrawer';
-import type { MyTaskRow } from '@/lib/projects/queries';
+import type { MyTaskRow } from '@/features/projects/queries';
 
 interface Props {
   year: number;

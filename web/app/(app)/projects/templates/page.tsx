@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { ArrowLeft, ClipboardList } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
-import { fetchTemplatesWithTasks } from '@/lib/projects/queries';
-import { TemplatesList } from '@/components/projects/TemplatesList';
+import { fetchTemplatesWithTasks } from '@/features/projects/queries';
+import { TemplatesList } from '@/features/projects/components/TemplatesList';
 
 export default async function TemplatesPage() {
   const sb = await getSupabaseServer();

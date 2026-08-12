@@ -2,96 +2,9 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
 import { friendlyError } from '@/lib/errors';
 
-const ORG_ID_CONST = '00000000-0000-0000-0000-000000000001';
-
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 50) || `tpl_${Date.now()}`;
-}
-
-// ── Templates ────────────────────────────────────────────────────────────
-export async function createTemplate(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const name = String(formData.get('name') ?? '').trim();
-  const description = String(formData.get('description') ?? '').trim() || null;
-  if (!name) return { error: 'name required' };
-  const { error } = await sb.from('project_templates').insert({
-    org_id: ORG_ID_CONST, slug: slugify(name), name, description,
-  });
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-export async function deleteTemplate(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const id = String(formData.get('id') ?? '');
-  // Guard: refuse if any project already uses this template.
-  const { count } = await sb.from('projects').select('id', { count: 'exact', head: true }).eq('template_id', id);
-  if ((count ?? 0) > 0) return { error: `in use by ${count} project(s)` };
-  const { error } = await sb.from('project_templates').delete().eq('id', id);
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-export async function createTemplateSection(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const template_id = String(formData.get('template_id') ?? '');
-  const phase = String(formData.get('phase') ?? 'pre') as 'pre' | 'during' | 'post';
-  const name = String(formData.get('name') ?? '').trim();
-  if (!template_id || !name) return { error: 'template + name required' };
-  const { data: max } = await sb.from('template_sections').select('sort_order').eq('template_id', template_id).eq('phase', phase).order('sort_order', { ascending: false }).limit(1).maybeSingle();
-  const sort_order = ((max?.sort_order as number | undefined) ?? 0) + 1;
-  const { error } = await sb.from('template_sections').insert({ template_id, phase, name, sort_order });
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-export async function deleteTemplateSection(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const id = String(formData.get('id') ?? '');
-  const { error } = await sb.from('template_sections').delete().eq('id', id);
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-export async function createTemplateTask(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const section_id = String(formData.get('section_id') ?? '');
-  const title = String(formData.get('title') ?? '').trim();
-  const priorityRaw = String(formData.get('priority') ?? 'med');
-  const priority = (['low', 'med', 'high'] as const).includes(priorityRaw as 'low' | 'med' | 'high') ? (priorityRaw as 'low' | 'med' | 'high') : 'med';
-  if (!section_id || !title) return { error: 'section + title required' };
-  const { data: max } = await sb.from('template_tasks').select('sort_order').eq('section_id', section_id).order('sort_order', { ascending: false }).limit(1).maybeSingle();
-  const sort_order = ((max?.sort_order as number | undefined) ?? 0) + 1;
-  const { error } = await sb.from('template_tasks').insert({ section_id, title, default_priority: priority, sort_order });
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-export async function deleteTemplateTask(formData: FormData) {
-  const sb = await getSupabaseServer();
-  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
-  const id = String(formData.get('id') ?? '');
-  const { error } = await sb.from('template_tasks').delete().eq('id', id);
-  if (error) return { error: friendlyError(error) };
-  revalidatePath('/projects/templates');
-}
-
-
-const updateTaskSchema = z.object({
-  id: z.string().uuid(),
-  assignee_id: z.string().uuid().nullable().optional(),
-  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  priority: z.enum(['low', 'med', 'high']).optional(),
-  status: z.enum(['todo', 'doing', 'done']).optional(),
-});
+const ORG_ID = '00000000-0000-0000-0000-000000000001';
 
 const updateProjectSchema = z.object({
   id: z.string().uuid(),
@@ -123,7 +36,7 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
 
   const sb = await getSupabaseServer();
 
-  // Read the current row so we can detect a template_id transition null → set
+  // Read current row so we can detect a template_id transition null → set
   // (adoption of a legacy project) and know whether to run task generation.
   const { data: before, error: readErr } = await sb
     .from('projects').select('template_id, client_id, project_number').eq('id', id).maybeSingle();
@@ -132,7 +45,6 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
 
   const clientId = patch.client_id ?? (before as { client_id: string | null }).client_id;
 
-  // Inline site create
   if (new_site_name && !patch.site_id) {
     if (!clientId) return { error: 'pick a client before adding a new site' };
     const { data: s, error: sErr } = await sb
@@ -143,7 +55,6 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
     patch.site_id = s.id;
   }
 
-  // Inline contact create
   if (new_contact_name && !patch.contact_id) {
     if (!clientId) return { error: 'pick a client before adding a new contact' };
     const { data: c, error: cErr } = await sb
@@ -163,7 +74,6 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
     if (uErr) return { error: friendlyError(uErr) };
   }
 
-  // Replace team membership if provided. Lead is always on the team.
   if (team_ids) {
     const leadId = patch.lead_id ?? (await sb.from('projects').select('lead_id').eq('id', id).single()).data?.lead_id as string | undefined;
     const finalTeam = leadId ? Array.from(new Set([...team_ids, leadId])) : team_ids;
@@ -177,8 +87,7 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
   }
 
   // Adoption: template_id going from null → set means "apply template to
-  // this legacy project" — call the RPC to generate tasks. The RPC is idempotent
-  // (no-op if tasks already exist), so it's safe on repeat edits too.
+  // this legacy project" — call the RPC to generate tasks. Idempotent.
   const wasEmpty = (before as { template_id: string | null }).template_id == null;
   const nowSet   = patch.template_id != null;
   if (wasEmpty && nowSet) {
@@ -195,28 +104,6 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
   return { ok: true, project_number: projectNumber };
 }
 
-export async function updateTask(input: z.infer<typeof updateTaskSchema>) {
-  const parsed = updateTaskSchema.safeParse(input);
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'invalid input' };
-  const { id, ...patch } = parsed.data;
-  if (Object.keys(patch).length === 0) return { ok: true };
-
-  const sb = await getSupabaseServer();
-  const { data: row, error } = await sb
-    .from('tasks')
-    .update({ ...patch, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select('project_id, projects(project_number)')
-    .maybeSingle();
-  if (error) return { error: friendlyError(error) };
-  const projectNumber = (row as unknown as { projects: { project_number: number } | null } | null)?.projects?.project_number;
-  revalidatePath('/projects');
-  if (projectNumber) revalidatePath(`/projects/${projectNumber}`);
-  return { ok: true };
-}
-
-const ORG_ID = '00000000-0000-0000-0000-000000000001';
-
 const createProjectSchema = z.object({
   project_number: z.coerce.number().int().min(2020000).max(2099999),
   scope_title: z.string().trim().min(1).max(200),
@@ -229,11 +116,9 @@ const createProjectSchema = z.object({
   // Client must exist — add via /clients admin first (needs map coordinates).
   client_id: z.string().uuid(),
 
-  // Site — either pick, create, or leave blank
   site_choice: z.union([z.string().uuid(), z.literal('__new__'), z.literal('__none__')]).default('__none__'),
   new_site_name: z.string().trim().max(120).optional(),
 
-  // Contact — either pick, create, or leave blank
   contact_choice: z.union([z.string().uuid(), z.literal('__new__'), z.literal('__none__')]).default('__none__'),
   new_contact_name: z.string().trim().max(120).optional(),
   new_contact_email: z.string().email().max(200).optional().or(z.literal('')),
@@ -260,7 +145,6 @@ export async function createProject(formData: FormData) {
 
   const clientId = input.client_id;
 
-  // Resolve or create site
   let siteId: string | null = null;
   if (input.site_choice === '__new__') {
     if (!input.new_site_name) return { error: 'new site name required' };
@@ -275,7 +159,6 @@ export async function createProject(formData: FormData) {
     siteId = input.site_choice;
   }
 
-  // Resolve or create contact
   let contactId: string | null = null;
   if (input.contact_choice === '__new__') {
     if (!input.new_contact_name) return { error: 'new contact name required' };
@@ -297,7 +180,6 @@ export async function createProject(formData: FormData) {
     contactId = input.contact_choice;
   }
 
-  // Get template name for project.name (existing lookup table)
   const { data: tpl } = await sb.from('project_templates').select('name').eq('id', input.template_id).maybeSingle();
 
   const { data: created, error } = await sb.rpc('create_project_from_template', {

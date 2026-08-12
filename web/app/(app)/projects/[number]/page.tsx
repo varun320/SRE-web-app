@@ -4,10 +4,10 @@ import { ArrowLeft, MapPin, Mail, User, Users } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatDate } from '@/lib/dates';
-import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates } from '@/lib/projects/queries';
-import { EditJobPanel } from '@/components/projects/EditJobPanel';
-import { PHASE_LABEL, type ProjectPhase } from '@/lib/projects/types';
-import { TasksSection } from '@/components/projects/TasksSection';
+import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates } from '@/features/projects/queries';
+import { EditJobPanel } from '@/features/projects/components/EditJobPanel';
+import { PHASE_LABEL, type ProjectPhase } from '@/features/projects/types';
+import { TasksSection } from '@/features/projects/components/TasksSection';
 
 function phaseTone(p: ProjectPhase): 'neutral' | 'info' | 'success' {
   return p === 'pre' ? 'neutral' : p === 'during' ? 'info' : 'success';

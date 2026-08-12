@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { updateTask } from '@/app/(app)/projects/actions';
+import { updateTask } from '@/features/projects/actions/tasks';
 import { friendlyError } from '@/lib/errors';
 import { formatDate } from '@/lib/dates';
 import { TaskDrawer, type Assignable } from './TaskDrawer';
-import type { MyTaskRow } from '@/lib/projects/queries';
-import type { TaskPriority } from '@/lib/projects/types';
+import type { MyTaskRow } from '@/features/projects/queries';
+import type { TaskPriority } from '@/features/projects/types';
 
 interface Buckets {
   overdue: MyTaskRow[];

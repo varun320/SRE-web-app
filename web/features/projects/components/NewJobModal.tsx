@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { createProject } from '@/app/(app)/projects/actions';
+import { createProject } from '@/features/projects/actions/projects';
 
 export interface ClientOpt {
   id: string;

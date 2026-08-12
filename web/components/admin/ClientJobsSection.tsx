@@ -5,7 +5,7 @@ import { Briefcase, ExternalLink } from 'lucide-react';
 import { ShowMore } from '@/components/ui/show-more';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatDate } from '@/lib/dates';
-import { PHASE_LABEL, type ProjectPhase } from '@/lib/projects/types';
+import { PHASE_LABEL, type ProjectPhase } from '@/features/projects/types';
 
 interface JobRow {
   id: string;
