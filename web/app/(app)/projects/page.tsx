@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks, Package, Calendar as CalendarIcon } from 'lucide-react';
+import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks, Package, Calendar as CalendarIcon, Users } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -94,6 +94,12 @@ export default async function ProjectsDashboard() {
               className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
             >
               <CalendarIcon className="h-3.5 w-3.5" /> Calendar
+            </Link>
+            <Link
+              href="/projects/workload"
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <Users className="h-3.5 w-3.5" /> Workload
             </Link>
             {clients.length > 0 && templates.length > 0 && users.length > 0 ? (
               <NewJobModal clients={clients} templates={templates} users={users} suggestedNumber={nextNumber} />

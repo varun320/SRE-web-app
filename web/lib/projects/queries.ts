@@ -180,6 +180,54 @@ export interface MyTaskRow extends TaskRow {
   project_name: string;
 }
 
+export interface WorkloadRow {
+  user_id: string;
+  full_name: string;
+  open_count: number;
+  overdue_count: number;
+  due_this_week_count: number;
+}
+
+/** Per-user open-task workload — only counts tasks on adopted projects. */
+export async function fetchTeamWorkload(sb: SupabaseClient): Promise<WorkloadRow[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  const in7 = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const [tasksRes, users] = await Promise.all([
+    sb
+      .from('tasks')
+      .select('assignee_id, due_date, status, projects!inner(template_id)')
+      .neq('status', 'done'),
+    fetchTeamRoster(sb),
+  ]);
+
+  type Row = { assignee_id: string | null; due_date: string | null; status: string; projects: { template_id: string | null } };
+  const rows = ((tasksRes.data ?? []) as unknown as Row[]).filter((r) => r.projects.template_id != null);
+
+  const openBy = new Map<string, number>();
+  const overdueBy = new Map<string, number>();
+  const weekBy = new Map<string, number>();
+  for (const r of rows) {
+    if (!r.assignee_id) continue;
+    openBy.set(r.assignee_id, (openBy.get(r.assignee_id) ?? 0) + 1);
+    if (r.due_date && r.due_date < today) {
+      overdueBy.set(r.assignee_id, (overdueBy.get(r.assignee_id) ?? 0) + 1);
+    } else if (r.due_date && r.due_date >= today && r.due_date <= in7) {
+      weekBy.set(r.assignee_id, (weekBy.get(r.assignee_id) ?? 0) + 1);
+    }
+  }
+
+  return users
+    .map((u) => ({
+      user_id: u.id,
+      full_name: u.full_name,
+      open_count: openBy.get(u.id) ?? 0,
+      overdue_count: overdueBy.get(u.id) ?? 0,
+      due_this_week_count: weekBy.get(u.id) ?? 0,
+    }))
+    .sort((a, b) => b.open_count - a.open_count);
+}
+
 /** All tasks with a due_date in [from, to], across active PM-flow projects. */
 export async function fetchTasksInRange(sb: SupabaseClient, from: string, to: string): Promise<MyTaskRow[]> {
   const { data, error } = await sb
