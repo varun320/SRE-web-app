@@ -109,6 +109,11 @@ export async function fetchActiveProjects(sb: SupabaseClient): Promise<ActivePro
     .from('projects')
     .select('id, org_id, project_number, name, status, client_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, clients ( name )')
     .eq('status', 'active')
+    // Only surface projects that have been adopted into the PM flow. Legacy
+    // timesheet-only projects (52 rows with no template/lead/deadline) stay
+    // hidden until they're backfilled or manually edited. ponytail: revisit
+    // once Phase-2 Edit Job UI ships and someone starts adopting old rows.
+    .not('template_id', 'is', null)
     .order('deadline', { ascending: true, nullsFirst: false });
   if (error) throw new Error(error.message);
   const rows = (projects ?? []) as unknown as Array<ProjectRow & { clients: { name: string } | null }>;
@@ -154,7 +159,7 @@ export async function fetchDashboardKpis(sb: SupabaseClient): Promise<DashboardK
   const [overdue, week, active, done] = await Promise.all([
     sb.from('tasks').select('id', { count: 'exact', head: true }).lt('due_date', today).neq('status', 'done'),
     sb.from('tasks').select('id', { count: 'exact', head: true }).gte('due_date', today).lte('due_date', in7).neq('status', 'done'),
-    sb.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    sb.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'active').not('template_id', 'is', null),
     sb.from('tasks').select('id', { count: 'exact', head: true }).eq('status', 'done'),
   ]);
   return {
