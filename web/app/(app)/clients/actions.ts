@@ -40,6 +40,57 @@ export async function createClient(formData: FormData) {
   revalidatePath('/clients');
 }
 
+export async function createContact(formData: FormData) {
+  const sb = await getSupabaseServer();
+  const client_id = String(formData.get('client_id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const role = String(formData.get('role') ?? '').trim() || null;
+  const email = String(formData.get('email') ?? '').trim() || null;
+  const phone = String(formData.get('phone') ?? '').trim() || null;
+  if (!client_id) return { error: 'missing client_id' };
+  if (!name) return { error: 'name required' };
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) return { error: 'invalid email' };
+  const { error } = await sb.from('contacts').insert({
+    org_id: '00000000-0000-0000-0000-000000000001', client_id, name, role, email, phone,
+  });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/clients/${client_id}`);
+}
+
+export async function deleteContact(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '');
+  const client_id = String(formData.get('client_id') ?? '');
+  const { error } = await sb.from('contacts').delete().eq('id', id);
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/clients/${client_id}`);
+}
+
+export async function createSite(formData: FormData) {
+  const sb = await getSupabaseServer();
+  const client_id = String(formData.get('client_id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const address = String(formData.get('address') ?? '').trim() || null;
+  if (!client_id) return { error: 'missing client_id' };
+  if (!name) return { error: 'name required' };
+  const { error } = await sb.from('sites').insert({
+    org_id: '00000000-0000-0000-0000-000000000001', client_id, name, address,
+  });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/clients/${client_id}`);
+}
+
+export async function deleteSite(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '');
+  const client_id = String(formData.get('client_id') ?? '');
+  const { error } = await sb.from('sites').delete().eq('id', id);
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/clients/${client_id}`);
+}
+
 export async function deleteClient(formData: FormData) {
   const sb = await getSupabaseServer();
   if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
