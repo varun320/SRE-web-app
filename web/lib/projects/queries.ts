@@ -96,6 +96,58 @@ export async function fetchTeamRoster(sb: SupabaseClient): Promise<UserOption[]>
   return (data ?? []) as UserOption[];
 }
 
+export interface TemplateWithTasks {
+  id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+  sections: Array<{
+    id: string;
+    phase: 'pre' | 'during' | 'post';
+    name: string;
+    sort_order: number;
+    tasks: Array<{ id: string; title: string; default_priority: 'low' | 'med' | 'high'; sort_order: number }>;
+  }>;
+  task_count: number;
+  usage_count: number;
+}
+
+export async function fetchTemplatesWithTasks(sb: SupabaseClient): Promise<TemplateWithTasks[]> {
+  const [tplsRes, secsRes, tasksRes, projectsRes] = await Promise.all([
+    sb.from('project_templates').select('id, name, description, slug').eq('is_active', true).order('name'),
+    sb.from('template_sections').select('id, template_id, phase, name, sort_order').order('phase').order('sort_order'),
+    sb.from('template_tasks').select('id, section_id, title, default_priority, sort_order').order('sort_order'),
+    sb.from('projects').select('template_id').not('template_id', 'is', null),
+  ]);
+  const tpls = tplsRes.data ?? [];
+  const secs = secsRes.data ?? [];
+  const tasks = tasksRes.data ?? [];
+  const projects = projectsRes.data ?? [];
+
+  const usageBy = new Map<string, number>();
+  for (const p of projects) usageBy.set(p.template_id, (usageBy.get(p.template_id) ?? 0) + 1);
+
+  const tasksBy = new Map<string, TemplateWithTasks['sections'][number]['tasks']>();
+  for (const t of tasks) {
+    const arr = tasksBy.get(t.section_id) ?? [];
+    arr.push({ id: t.id, title: t.title, default_priority: t.default_priority, sort_order: t.sort_order });
+    tasksBy.set(t.section_id, arr);
+  }
+
+  const secsBy = new Map<string, TemplateWithTasks['sections']>();
+  for (const s of secs) {
+    const arr = secsBy.get(s.template_id) ?? [];
+    arr.push({ id: s.id, phase: s.phase, name: s.name, sort_order: s.sort_order, tasks: tasksBy.get(s.id) ?? [] });
+    secsBy.set(s.template_id, arr);
+  }
+
+  return tpls.map((t) => {
+    const sections = secsBy.get(t.id) ?? [];
+    const task_count = sections.reduce((n, s) => n + s.tasks.length, 0);
+    return { ...t, sections, task_count, usage_count: usageBy.get(t.id) ?? 0 };
+  });
+}
+
 export interface ActiveProjectSummary extends ProjectRow {
   client_name: string | null;
   progress_pct: number;
