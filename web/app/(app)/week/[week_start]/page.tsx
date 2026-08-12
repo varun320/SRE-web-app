@@ -1,11 +1,11 @@
 ﻿import { getSupabaseServer } from '@/lib/supabase/server';
-import { EntryTable } from '@/components/timesheet/EntryTable';
-import { WeekPicker } from '@/components/timesheet/WeekPicker';
+import { EntryTable } from '@/features/timesheet/components/EntryTable';
+import { WeekPicker } from '@/features/timesheet/components/WeekPicker';
 import { currentMonday, isMondayISO, formatDate } from '@/lib/dates';
 import { notFound } from 'next/navigation';
 import type { MainCategory, Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib/types';
 import { InfoHint } from '@/components/ui/info-hint';
-import { CopyLastWeekButton } from '@/components/timesheet/CopyLastWeekButton';
+import { CopyLastWeekButton } from '@/features/timesheet/components/CopyLastWeekButton';
 
 interface PageProps { params: Promise<{ week_start: string }> }
 

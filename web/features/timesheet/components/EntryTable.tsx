@@ -9,7 +9,7 @@ import { Check, CircleDashed, Plus } from 'lucide-react';
 import { computeTotals } from '@/lib/totals';
 import { DAY_KEYS } from '@/lib/dates';
 import { useSaveEntries, useSubmit } from '@/lib/hooks';
-import { filterPersistable } from '@/lib/timesheet/persistable';
+import { filterPersistable } from '@/features/timesheet/persistable';
 import { toast } from 'sonner';
 import { fireConfetti } from '@/components/ui/confetti';
 

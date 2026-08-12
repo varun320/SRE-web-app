@@ -52,7 +52,7 @@ import {
   submitTimesheet,
   unlockTimesheet,
   weekInput,
-} from '../../timesheet/mcp/tools.js';
+} from '@/features/timesheet/mcp/tools';
 
 export interface ToolDef {
   name: string;
