@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft, Users } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { fetchTeamWorkload } from '@/features/projects/queries';
 
 function initials(name: string): string {

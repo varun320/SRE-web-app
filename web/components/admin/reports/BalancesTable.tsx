@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ArrowUpDown, Snowflake } from 'lucide-react';
 import type { BalanceRow } from '@/lib/admin/reports/balances';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 
 type SortKey = 'employee_code' | 'full_name' | 'til_closing' | 'vacation_closing';
 

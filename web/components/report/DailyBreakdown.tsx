@@ -1,4 +1,4 @@
-import { DAY_KEYS } from '@/lib/dates';
+import { DAY_KEYS } from '@/shared/lib/dates';
 
 interface Row {
   mon_hrs: number; tue_hrs: number; wed_hrs: number; thu_hrs: number;

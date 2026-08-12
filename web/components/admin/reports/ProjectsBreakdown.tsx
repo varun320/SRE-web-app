@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronRight, FolderKanban } from 'lucide-react';
 import type { ProjectBreakdown } from '@/lib/admin/reports/projects';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 
 interface Props {
   rows: ProjectBreakdown[];

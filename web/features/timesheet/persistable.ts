@@ -1,4 +1,4 @@
-import type { SubCategory, TimesheetEntryDraft } from '@/lib/types';
+import type { SubCategory, TimesheetEntryDraft } from '@/shared/lib/types';
 
 /**
  * A row is persistable when it will pass every DB constraint on

@@ -1,10 +1,10 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchPeriodSummary } from '@/lib/admin/reports/period';
 import { aggregatePayroll } from '@/lib/admin/reports/payroll';
 import { DateRangePicker } from '@/components/admin/reports/DateRangePicker';
 import { EmployeePicker } from '@/components/admin/reports/EmployeePicker';
 import { PayrollPreview } from '@/components/admin/reports/PayrollPreview';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader } from '@/shared/ui/page-header';
 
 const DEFAULT_EPOCH = '2026-01-05'; // Monday — TODO: read from organizations.payroll_epoch
 

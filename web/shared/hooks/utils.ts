@@ -1,8 +1,8 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSupabaseBrowser } from './supabase/client';
-import { fetchSubCategories, fetchProjects, fetchTimesheet, replaceEntries, submitTimesheet } from './queries';
-import type { TimesheetEntryDraft } from './types';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
+import { fetchSubCategories, fetchProjects, fetchTimesheet, replaceEntries, submitTimesheet } from '@/shared/lib/queries';
+import type { TimesheetEntryDraft } from '@/shared/lib/types';
 
 export function useSubCategories() {
   const sb = getSupabaseBrowser();

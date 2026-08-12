@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, CheckCheck, Check } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { fetchRecent, type NotificationRow } from '@/features/notifications/queries';
 import { markRead, markAllRead } from '@/features/notifications/mutations';
 import { formatNotification } from '@/features/notifications/format';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 
 const TONE_DOT: Record<string, string> = {
   info:    'dot-info',

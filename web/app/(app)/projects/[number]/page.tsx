@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Mail, User, Users } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDate } from '@/lib/dates';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { formatDate } from '@/shared/lib/dates';
 import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates } from '@/features/projects/queries';
 import { EditJobPanel } from '@/features/projects/components/EditJobPanel';
 import { PHASE_LABEL, type ProjectPhase } from '@/features/projects/types';

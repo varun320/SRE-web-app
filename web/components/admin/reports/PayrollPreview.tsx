@@ -1,5 +1,5 @@
 import type { PayrollRow } from '@/lib/admin/reports/payroll';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Wallet, Download, Clock4, Plane, Users, CalendarRange } from 'lucide-react';
 
 interface Props {

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { getSupabaseServiceRole } from '@/lib/supabase/service';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { getSupabaseServiceRole } from '@/shared/supabase/service';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { runDryRun, sha256, type ImportMode } from '@/lib/admin/import-runner';
 
 export const runtime = 'nodejs'; // need fs + child_process; not Edge

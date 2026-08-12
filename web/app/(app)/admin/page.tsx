@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchSubmittedQueue } from '@/lib/admin/queries';
 import { ApprovalsInbox, type PanelPayload, type PanelLine } from '@/components/admin/ApprovalsInbox';
 import {

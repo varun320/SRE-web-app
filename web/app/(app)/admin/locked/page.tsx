@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { LockOpen, Lock } from 'lucide-react';
 import { UnlockDialog } from '@/components/admin/UnlockDialog';
 import { formatDistanceToNow } from 'date-fns';

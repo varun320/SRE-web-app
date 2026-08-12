@@ -1,9 +1,9 @@
 'use server';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { ensureWeek, replaceEntries } from '@/lib/queries';
-import { friendlyError } from '@/lib/errors';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { ensureWeek, replaceEntries } from '@/shared/lib/queries';
+import { friendlyError } from '@/shared/lib/errors';
 import { revalidatePath } from 'next/cache';
-import type { MainCategory, TimesheetEntryDraft } from '@/lib/types';
+import type { MainCategory, TimesheetEntryDraft } from '@/shared/lib/types';
 
 interface CopyResult {
   ok?: true;

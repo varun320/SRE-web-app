@@ -1,6 +1,6 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
-import { PageHeader } from '@/components/ui/page-header';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
+import { PageHeader } from '@/shared/ui/page-header';
 import { ClientsMap } from '@/features/clients/components/ClientsMap';
 import { ClientForm } from '@/features/clients/components/ClientForm';
 import { ClientsTable } from '@/features/clients/components/ClientsTable';

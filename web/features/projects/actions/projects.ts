@@ -1,8 +1,8 @@
 'use server';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { friendlyError } from '@/lib/errors';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { friendlyError } from '@/shared/lib/errors';
 
 const ORG_ID = '00000000-0000-0000-0000-000000000001';
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ClipboardList } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { fetchTemplatesWithTasks } from '@/features/projects/queries';
 import { TemplatesList } from '@/features/projects/components/TemplatesList';
 

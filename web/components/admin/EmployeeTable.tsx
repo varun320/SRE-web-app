@@ -2,9 +2,9 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { UserPlus } from 'lucide-react';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { SearchInput } from '@/components/ui/search-input';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { SearchInput } from '@/shared/ui/search-input';
 
 interface Row {
   id: string;

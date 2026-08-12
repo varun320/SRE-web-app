@@ -11,12 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+} from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { deletePayout, upsertPayout } from '@/features/expenses/mutations';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 
 export interface PayoutRow {
   id: string;

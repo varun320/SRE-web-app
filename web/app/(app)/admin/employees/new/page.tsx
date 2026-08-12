@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ChevronLeftIcon } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { EmployeeForm } from '@/components/admin/EmployeeForm';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader } from '@/shared/ui/page-header';
 
 export default async function NewEmployeePage() {
   const sb = await getSupabaseServer();

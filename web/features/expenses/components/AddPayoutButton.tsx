@@ -11,11 +11,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+} from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { upsertPayout } from '@/features/expenses/mutations';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 
 interface Props {
   userId: string;

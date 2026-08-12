@@ -2,9 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { Undo2 } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { unsubmitExpense } from '@/features/expenses/mutations';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 
 interface Props {
   expenseId: string;

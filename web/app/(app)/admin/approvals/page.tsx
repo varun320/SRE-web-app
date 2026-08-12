@@ -1,6 +1,6 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { ApprovalLogClient, type ApprovalLogRow } from '@/components/admin/ApprovalLogClient';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader } from '@/shared/ui/page-header';
 
 export default async function ApprovalLogPage() {
   const sb = await getSupabaseServer();

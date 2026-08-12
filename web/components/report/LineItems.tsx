@@ -1,5 +1,5 @@
-import type { MainCategory } from '@/lib/types';
-import { subCategoryLabel } from '@/lib/categoryDescriptions';
+import type { MainCategory } from '@/shared/lib/types';
+import { subCategoryLabel } from '@/shared/lib/categoryDescriptions';
 
 interface Row {
   main_category: MainCategory;

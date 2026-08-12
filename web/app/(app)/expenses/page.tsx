@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { Receipt, Plus, Copy } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchMyExpenses, fetchSummary } from '@/features/expenses/queries';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { InfoHint } from '@/components/ui/info-hint';
-import { formatDate } from '@/lib/dates';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { InfoHint } from '@/shared/ui/info-hint';
+import { formatDate } from '@/shared/lib/dates';
 import { unifiedStatus } from '@/features/expenses/payment-status';
 
 function money(n: number): string {

@@ -4,9 +4,9 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Pencil, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 import { updateProject } from '@/features/projects/actions/projects';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 import type { ClientWithDirectory, TemplateSummary, UserOption } from '@/features/projects/queries';
 import type { ProjectPhase } from '@/features/projects/types';
 

@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { ArrowLeft, Info } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchBalanceForUser, fetchSummary } from '@/features/expenses/queries';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

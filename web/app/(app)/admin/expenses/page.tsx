@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { Receipt, AlertTriangle } from 'lucide-react';
 import { AdminExpensesTableBody } from '@/features/expenses/components/AdminExpensesTableBody';
 

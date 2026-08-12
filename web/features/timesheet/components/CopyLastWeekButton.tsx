@@ -2,7 +2,7 @@
 import { Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { copyLastWeek } from '@/app/(app)/week/[week_start]/actions';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 
 interface Props {
   weekStart: string;

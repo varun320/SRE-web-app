@@ -1,4 +1,4 @@
-import { DAY_KEYS } from '@/lib/dates';
+import { DAY_KEYS } from '@/shared/lib/dates';
 
 interface Row {
   project_number: number | null;

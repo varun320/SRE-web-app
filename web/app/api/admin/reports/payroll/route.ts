@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { fetchPeriodSummary } from '@/lib/admin/reports/period';
 import { aggregatePayroll, type PayrollRow } from '@/lib/admin/reports/payroll';
 import { csvResponse } from '@/lib/admin/reports/csv';

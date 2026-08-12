@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, MapPin, Mail, Phone, Users, Building2, ExternalLink, Briefcase } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { ClientDirectorySection } from '@/features/clients/components/ClientDirectorySection';
 import { ClientJobsSection } from '@/features/clients/components/ClientJobsSection';
-import { formatDate } from '@/lib/dates';
+import { formatDate } from '@/shared/lib/dates';
 
 interface Client {
   id: string;

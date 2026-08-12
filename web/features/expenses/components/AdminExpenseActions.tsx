@@ -11,11 +11,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { friendlyError } from '@/lib/errors';
+} from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
+import { friendlyError } from '@/shared/lib/errors';
 import {
   adminDeleteExpense,
   approveExpense,

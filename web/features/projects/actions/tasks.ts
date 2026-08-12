@@ -1,8 +1,8 @@
 'use server';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { friendlyError } from '@/lib/errors';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { friendlyError } from '@/shared/lib/errors';
 
 const updateTaskSchema = z.object({
   id: z.string().uuid(),

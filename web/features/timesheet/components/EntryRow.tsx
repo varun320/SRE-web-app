@@ -1,10 +1,10 @@
 'use client';
-import type { Project, SubCategory, TimesheetEntryDraft, MainCategory } from '@/lib/types';
-import { DAY_KEYS } from '@/lib/dates';
+import type { Project, SubCategory, TimesheetEntryDraft, MainCategory } from '@/shared/lib/types';
+import { DAY_KEYS } from '@/shared/lib/dates';
 import { CategoryCell } from './CategoryCell';
 import { ProjectCell } from './ProjectCell';
 import { HourCell } from './HourCell';
-import { subCategoryHint } from '@/lib/categoryDescriptions';
+import { subCategoryHint } from '@/shared/lib/categoryDescriptions';
 import { Trash2 } from 'lucide-react';
 
 interface Props {

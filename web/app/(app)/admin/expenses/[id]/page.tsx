@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { AdminExpenseActions } from '@/features/expenses/components/AdminExpenseActions';
 import { PayoutRowActions } from '@/features/expenses/components/PayoutRowActions';
 import { AddPayoutButton } from '@/features/expenses/components/AddPayoutButton';

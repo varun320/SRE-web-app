@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { creditCardSchema } from '@/features/expenses/schemas';
 import { deleteCreditCard, upsertCreditCard } from '@/features/expenses/mutations';
 import type { CreditCard } from '@/features/expenses/types';

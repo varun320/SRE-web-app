@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft, Package, ExternalLink } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { EmptyState } from '@/components/ui/empty-state';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { EmptyState } from '@/shared/ui/empty-state';
 
 interface LegacyRow {
   id: string;

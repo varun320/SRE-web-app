@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { addDays, format, parseISO, startOfWeek } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 
 interface Props {
   weekStart: string;

@@ -7,10 +7,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
 import { toast } from 'sonner';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 
 interface ConfirmDialogProps {
   triggerLabel: ReactNode;

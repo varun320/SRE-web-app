@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronRight, Layers } from 'lucide-react';
 import type { CategoryBreakdown } from '@/lib/admin/reports/categories';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 
 interface Props {
   rows: CategoryBreakdown[];

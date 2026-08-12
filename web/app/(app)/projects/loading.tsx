@@ -1,2 +1,2 @@
-import { ProjectsRouteSkeleton } from '@/components/ui/skeleton';
+import { ProjectsRouteSkeleton } from '@/shared/ui/skeleton';
 export default function Loading() { return <ProjectsRouteSkeleton />; }

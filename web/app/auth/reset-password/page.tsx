@@ -3,10 +3,10 @@
 import { Suspense, useEffect, useState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 import { Lock, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { updatePassword } from './actions';
 

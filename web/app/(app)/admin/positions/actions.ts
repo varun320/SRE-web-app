@@ -1,8 +1,8 @@
 'use server';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { revalidatePath } from 'next/cache';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 
 export async function createPosition(formData: FormData) {
   const sb = await getSupabaseServer();

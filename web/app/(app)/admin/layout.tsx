@@ -1,5 +1,5 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { redirect } from 'next/navigation';
 import { AdminSubnav } from '@/components/shell/AdminSubnav';
 

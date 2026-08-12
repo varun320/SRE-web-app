@@ -3,8 +3,8 @@
 import { useState, useTransition } from 'react';
 import { Plus, X, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { Button } from '@/shared/ui/button';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import {
   createTemplate, deleteTemplate,
   createTemplateSection, deleteTemplateSection,

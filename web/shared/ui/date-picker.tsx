@@ -5,7 +5,7 @@ import { Popover } from '@base-ui/react/popover';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 
 interface Props {
   value?: string;              // ISO YYYY-MM-DD

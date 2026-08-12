@@ -1,6 +1,6 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { ImportClient } from './ImportClient';
-import { flags } from '@/lib/flags';
+import { flags } from '@/shared/lib/flags';
 import { notFound } from 'next/navigation';
 
 export default async function AdminImportPage() {

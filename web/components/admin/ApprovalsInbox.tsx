@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Inbox, X, Check, ArrowLeftCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/empty-state';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { Button } from '@/shared/ui/button';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { approveTimesheet, declineTimesheet } from '@/lib/admin/mutations';
 import type { QueueRow } from '@/lib/admin/queries';
-import type { MainCategory } from '@/lib/types';
+import type { MainCategory } from '@/shared/lib/types';
 
 // The right-pane payload the server pre-fetches when a row is picked (?panel=<id>).
 export interface PanelPayload {

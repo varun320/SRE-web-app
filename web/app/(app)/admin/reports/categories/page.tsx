@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { aggregateByCategory, fetchCategoryHours } from '@/lib/admin/reports/categories';
 import { DateRangePicker } from '@/components/admin/reports/DateRangePicker';
 import { CategoriesBreakdown } from '@/components/admin/reports/CategoriesBreakdown';

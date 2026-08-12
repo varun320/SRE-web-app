@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { currentMonday, isMondayISO, weekDays } from '@/lib/dates';
+import { currentMonday, isMondayISO, weekDays } from '@/shared/lib/dates';
 
 describe('dates', () => {
   it('currentMonday returns a Monday', () => {

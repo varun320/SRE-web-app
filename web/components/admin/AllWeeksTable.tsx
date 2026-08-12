@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, X } from 'lucide-react';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/shared/ui/status-badge';
 
 export type WeekStatus = 'draft' | 'submitted' | 'approved' | 'declined';
 

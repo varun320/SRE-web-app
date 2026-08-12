@@ -1,8 +1,8 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { Palmtree } from 'lucide-react';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { InfoHint } from '@/components/ui/info-hint';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { InfoHint } from '@/shared/ui/info-hint';
 
 export default async function VacationPage() {
   const supabase = await getSupabaseServer();

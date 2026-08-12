@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ExpenseEditor } from '@/features/expenses/components/ExpenseEditor';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites } from '@/features/expenses/queries';
-import { fetchProjects } from '@/lib/queries';
+import { fetchProjects } from '@/shared/lib/queries';
 import type { ExpenseLineItem } from '@/features/expenses/types';
 
 function suggestNextInvoice(last: string | null | undefined): string {

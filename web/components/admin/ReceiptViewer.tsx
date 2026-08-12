@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Paperclip, ExternalLink, Download } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/dialog';
 
 interface Props {
   url: string;

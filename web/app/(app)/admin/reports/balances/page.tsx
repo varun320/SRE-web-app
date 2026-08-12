@@ -1,4 +1,4 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchCurrentBalances } from '@/lib/admin/reports/balances';
 import { BalancesTable } from '@/components/admin/reports/BalancesTable';
 

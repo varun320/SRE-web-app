@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
  * auto-unmounts after the animation. Respects prefers-reduced-motion.
  *
  * Usage:
- *   import { fireConfetti } from '@/components/ui/confetti';
+ *   import { fireConfetti } from '@/shared/ui/confetti';
  *   onSuccess() { fireConfetti(); }
  *
  * Plus mount <ConfettiHost /> once in the root layout.

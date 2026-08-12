@@ -1,7 +1,7 @@
 'use client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { MainCategory, SubCategory } from '@/lib/types';
-import { subCategoryLabel } from '@/lib/categoryDescriptions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import type { MainCategory, SubCategory } from '@/shared/lib/types';
+import { subCategoryLabel } from '@/shared/lib/categoryDescriptions';
 import { useMemo } from 'react';
 
 interface Props {

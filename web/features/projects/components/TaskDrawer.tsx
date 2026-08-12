@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { updateTask } from '@/features/projects/actions/tasks';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 import type { TaskRow, TaskPriority, TaskStatus } from '@/features/projects/types';
 import { PHASE_LABEL } from '@/features/projects/types';
 

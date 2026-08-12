@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCheck } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { upsertPayout } from '@/features/expenses/mutations';
-import { DatePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '@/shared/ui/date-picker';
 
 interface OutstandingReport {
   id: string;

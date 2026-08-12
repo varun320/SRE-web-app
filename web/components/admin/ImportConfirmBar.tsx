@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 import type { ImportPlanSummary } from '@/lib/admin/import';
 
 interface Props {

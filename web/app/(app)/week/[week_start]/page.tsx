@@ -1,10 +1,10 @@
-﻿import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/shared/supabase/server';
 import { EntryTable } from '@/features/timesheet/components/EntryTable';
 import { WeekPicker } from '@/features/timesheet/components/WeekPicker';
-import { currentMonday, isMondayISO, formatDate } from '@/lib/dates';
+import { currentMonday, isMondayISO, formatDate } from '@/shared/lib/dates';
 import { notFound } from 'next/navigation';
-import type { MainCategory, Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib/types';
-import { InfoHint } from '@/components/ui/info-hint';
+import type { MainCategory, Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/shared/lib/types';
+import { InfoHint } from '@/shared/ui/info-hint';
 import { CopyLastWeekButton } from '@/features/timesheet/components/CopyLastWeekButton';
 
 interface PageProps { params: Promise<{ week_start: string }> }

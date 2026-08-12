@@ -1,8 +1,8 @@
 'use client';
 import { useTransition, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
 import { createClient } from '@/features/clients/actions';
 import { toast } from 'sonner';
 

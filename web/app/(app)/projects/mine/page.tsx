@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, ListChecks } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { fetchMyTasks, fetchTeamRoster, type MyTaskRow } from '@/features/projects/queries';
 import { MyTasksList } from '@/features/projects/components/MyTasksList';
 

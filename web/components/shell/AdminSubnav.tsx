@@ -11,8 +11,8 @@ import {
   BarChart3,
   Upload,
 } from 'lucide-react';
-import { flags } from '@/lib/flags';
-import { SectionTabs, type SectionTab } from '@/components/ui/section-tabs';
+import { flags } from '@/shared/lib/flags';
+import { SectionTabs, type SectionTab } from '@/shared/ui/section-tabs';
 
 const BASE_ITEMS: SectionTab[] = [
   { href: '/admin',           label: 'Approvals',    icon: Inbox,        match: (p) => p === '/admin' },

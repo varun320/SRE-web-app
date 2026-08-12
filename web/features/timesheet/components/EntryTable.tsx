@@ -1,17 +1,17 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/lib/types';
+import type { Project, SubCategory, Timesheet, TimesheetEntryDraft } from '@/shared/lib/types';
 import { EntryRow } from './EntryRow';
 import { KpiStrip } from './KpiStrip';
 import { StatusBanner } from './StatusBanner';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 import { Check, CircleDashed, Plus } from 'lucide-react';
-import { computeTotals } from '@/lib/totals';
-import { DAY_KEYS } from '@/lib/dates';
-import { useSaveEntries, useSubmit } from '@/lib/hooks';
+import { computeTotals } from '@/shared/lib/totals';
+import { DAY_KEYS } from '@/shared/lib/dates';
+import { useSaveEntries, useSubmit } from '@/shared/hooks/utils';
 import { filterPersistable } from '@/features/timesheet/persistable';
 import { toast } from 'sonner';
-import { fireConfetti } from '@/components/ui/confetti';
+import { fireConfetti } from '@/shared/ui/confetti';
 
 const SUBMIT_CHEERS = [
   '🎉 Submitted — your future self thanks you.',

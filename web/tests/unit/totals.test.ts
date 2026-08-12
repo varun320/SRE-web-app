@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeTotals } from '@/lib/totals';
-import type { TimesheetEntryDraft, SubCategory } from '@/lib/types';
+import { computeTotals } from '@/shared/lib/totals';
+import type { TimesheetEntryDraft, SubCategory } from '@/shared/lib/types';
 
 const subs = {
   admin_regular:  { id: 'a1', main_category: 'Admin' as const, name: 'Administrative', requires_project: false, consumes_til: false, consumes_vacation: false, is_overtime_taken: false, sort_order: 60 },

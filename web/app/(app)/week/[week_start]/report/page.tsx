@@ -1,10 +1,10 @@
-﻿import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/shared/supabase/server';
 import { DailyBreakdown } from '@/components/report/DailyBreakdown';
 import { CategoryTable } from '@/components/report/CategoryTable';
 import { SubCategoryTable } from '@/components/report/SubCategoryTable';
 import { ProjectTable } from '@/components/report/ProjectTable';
 import { LineItems } from '@/components/report/LineItems';
-import { isMondayISO, formatDate } from '@/lib/dates';
+import { isMondayISO, formatDate } from '@/shared/lib/dates';
 import { notFound } from 'next/navigation';
 
 interface Props { params: Promise<{ week_start: string }> }

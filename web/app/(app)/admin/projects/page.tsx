@@ -1,7 +1,7 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { ProjectsTable } from '@/components/admin/ProjectsTable';
 import { ProjectForm } from '@/components/admin/ProjectForm';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader } from '@/shared/ui/page-header';
 
 export default async function ProjectsPage() {
   const sb = await getSupabaseServer();

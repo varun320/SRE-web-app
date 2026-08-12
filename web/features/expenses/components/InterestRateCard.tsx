@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 
 interface Props {
   apr: number;      // e.g. 0.2199 = 21.99%

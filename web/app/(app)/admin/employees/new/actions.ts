@@ -1,9 +1,9 @@
 'use server';
 import { createClient } from '@supabase/supabase-js';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchIsAdmin } from '@/lib/role';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { redirect } from 'next/navigation';
-import { friendlyError } from '@/lib/errors';
+import { friendlyError } from '@/shared/lib/errors';
 
 export async function createEmployee(formData: FormData) {
   const sbServer = await getSupabaseServer();

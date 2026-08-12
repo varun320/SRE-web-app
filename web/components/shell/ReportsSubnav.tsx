@@ -1,6 +1,6 @@
 'use client';
 
-import { SectionTabs } from '@/components/ui/section-tabs';
+import { SectionTabs } from '@/shared/ui/section-tabs';
 import { REPORT_ITEMS } from '@/lib/reports/items';
 
 export function ReportsSubnav() {

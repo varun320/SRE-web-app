@@ -1,7 +1,7 @@
 'use client';
-import type { TimesheetTotals } from '@/lib/totals';
+import type { TimesheetTotals } from '@/shared/lib/totals';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { InfoHint } from '@/components/ui/info-hint';
+import { InfoHint } from '@/shared/ui/info-hint';
 
 interface Props {
   totals: TimesheetTotals;

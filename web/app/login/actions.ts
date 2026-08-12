@@ -1,5 +1,5 @@
 'use server';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 

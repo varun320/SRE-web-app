@@ -1,5 +1,5 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { CreditCard } from 'lucide-react';
 import { PayoutBatchForm } from '@/features/expenses/components/PayoutBatchForm';
 import { PayoutRowActions } from '@/features/expenses/components/PayoutRowActions';

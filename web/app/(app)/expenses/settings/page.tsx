@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchMyCreditCards, fetchMyFavourites } from '@/features/expenses/queries';
-import { fetchProjects } from '@/lib/queries';
+import { fetchProjects } from '@/shared/lib/queries';
 import { CreditCardsEditor } from '@/features/expenses/components/CreditCardsEditor';
 import { FavouritesEditor } from '@/features/expenses/components/FavouritesEditor';
 import { InterestRateCard } from '@/features/expenses/components/InterestRateCard';

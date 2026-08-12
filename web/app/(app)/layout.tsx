@@ -1,6 +1,6 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { Header } from '@/components/shell/Header';
-import { fetchIsAdmin } from '@/lib/role';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { redirect } from 'next/navigation';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

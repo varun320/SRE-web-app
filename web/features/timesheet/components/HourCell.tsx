@@ -1,5 +1,5 @@
 'use client';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/shared/ui/input';
 
 interface Props {
   value: number;

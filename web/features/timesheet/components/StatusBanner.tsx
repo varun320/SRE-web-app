@@ -1,4 +1,4 @@
-import type { TimesheetStatus } from '@/lib/types';
+import type { TimesheetStatus } from '@/shared/lib/types';
 import { CheckCircle2, Clock, AlertTriangle, PencilLine } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 

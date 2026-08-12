@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchTasksInRange, fetchTeamRoster } from '@/features/projects/queries';
 import { CalendarGrid } from '@/features/projects/components/CalendarGrid';
 

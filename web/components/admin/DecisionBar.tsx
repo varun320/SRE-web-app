@@ -1,13 +1,13 @@
 'use client';
-import type { TimesheetStatus } from '@/lib/types';
-import { Button } from '@/components/ui/button';
+import type { TimesheetStatus } from '@/shared/lib/types';
+import { Button } from '@/shared/ui/button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { approveTimesheet } from '@/lib/admin/mutations';
 import { DeclineDialog } from './DeclineDialog';
 import { UnlockDialog } from './UnlockDialog';
 import { ForceSubmitDialog } from './ForceSubmitDialog';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 

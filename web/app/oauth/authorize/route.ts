@@ -6,7 +6,7 @@
 // redirect_uri. If not, we bounce through /login first.
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { issueCode } from '@/features/expenses/mcp/oauth-code';
 
 export const runtime = 'nodejs';

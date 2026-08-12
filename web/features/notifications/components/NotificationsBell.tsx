@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, CheckCheck } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { fetchRecent, fetchUnreadCount } from '@/features/notifications/queries';
 import { markAllRead, markRead } from '@/features/notifications/mutations';
 import { formatNotification } from '@/features/notifications/format';
@@ -18,7 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 
 const TONE_DOT: Record<string, string> = {
   info:    'dot-info',

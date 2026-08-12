@@ -4,9 +4,9 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCheck, ArrowDown, ArrowUp } from 'lucide-react';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { AdminExpenseActions } from '@/features/expenses/components/AdminExpenseActions';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
 import { approveExpense } from '@/features/expenses/mutations';
 import { paymentStatus } from '@/features/expenses/payment-status';
 

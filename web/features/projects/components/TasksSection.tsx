@@ -3,12 +3,12 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { Users } from 'lucide-react';
 import { updateTask } from '@/features/projects/actions/tasks';
-import { friendlyError } from '@/lib/errors';
-import { formatDate } from '@/lib/dates';
+import { friendlyError } from '@/shared/lib/errors';
+import { formatDate } from '@/shared/lib/dates';
 import { PHASE_LABEL, type TaskRow, type TaskStatus, type ProjectPhase, type TaskPriority } from '@/features/projects/types';
 import { TaskDrawer, type Assignable } from './TaskDrawer';
 

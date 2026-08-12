@@ -1,7 +1,7 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { PositionsTable } from '@/components/admin/PositionsTable';
 import { PositionForm } from '@/components/admin/PositionForm';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader } from '@/shared/ui/page-header';
 
 export default async function PositionsPage() {
   const sb = await getSupabaseServer();

@@ -3,7 +3,7 @@
 // server (/.well-known/oauth-authorization-server) — the user only needs to
 // paste the URL.
 
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 

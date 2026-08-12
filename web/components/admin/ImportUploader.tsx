@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/shared/ui/button';
+import { Label } from '@/shared/ui/label';
 import type { ImportMode } from '@/lib/admin/import';
 
 interface Employee {

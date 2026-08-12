@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { InfoHint } from '@/components/ui/info-hint';
+import { InfoHint } from '@/shared/ui/info-hint';
 
 interface PageHeaderProps {
   title: string;

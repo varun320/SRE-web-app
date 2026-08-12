@@ -25,7 +25,7 @@ import { NotificationsBell } from '@/features/notifications/components/Notificat
 import { FirstVisitHint } from './FirstVisitHint';
 import { ThemeToggle } from './ThemeToggle';
 import { SnakeGame } from '@/components/fun/SnakeGame';
-import { useIdle } from '@/lib/hooks/useIdle';
+import { useIdle } from '@/shared/hooks/useIdle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 
 interface NavItem {
   href: string;

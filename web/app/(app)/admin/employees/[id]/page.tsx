@@ -1,10 +1,10 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeftIcon } from 'lucide-react';
 import { EmployeeEditForm, type EmployeeEditValues } from '@/components/admin/EmployeeEditForm';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDate } from '@/lib/dates';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { formatDate } from '@/shared/lib/dates';
 
 interface Props { params: Promise<{ id: string }> }
 

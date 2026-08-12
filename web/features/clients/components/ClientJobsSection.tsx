@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { Briefcase, ExternalLink } from 'lucide-react';
-import { ShowMore } from '@/components/ui/show-more';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDate } from '@/lib/dates';
+import { ShowMore } from '@/shared/ui/show-more';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { formatDate } from '@/shared/lib/dates';
 import { PHASE_LABEL, type ProjectPhase } from '@/features/projects/types';
 
 interface JobRow {

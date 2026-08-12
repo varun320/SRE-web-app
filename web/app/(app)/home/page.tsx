@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { currentMonday, DAY_KEYS } from '@/lib/dates';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { currentMonday, DAY_KEYS } from '@/shared/lib/dates';
 import { fetchSummary } from '@/features/expenses/queries';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { HoursSparkline } from '@/components/home/HoursSparkline';
-import type { TimesheetStatus } from '@/lib/types';
+import type { TimesheetStatus } from '@/shared/lib/types';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

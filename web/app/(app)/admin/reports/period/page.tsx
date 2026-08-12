@@ -1,10 +1,10 @@
-import { getSupabaseServer } from '@/lib/supabase/server';
+import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchPeriodSummary } from '@/lib/admin/reports/period';
 import { DateRangePicker } from '@/components/admin/reports/DateRangePicker';
 import { EmployeePicker } from '@/components/admin/reports/EmployeePicker';
 import { PeriodSummary } from '@/components/admin/reports/PeriodSummary';
 import { PrintButton } from '@/components/admin/reports/PrintButton';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/shared/ui/empty-state';
 import { FileText } from 'lucide-react';
 
 interface SearchParams {

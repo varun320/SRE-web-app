@@ -1,4 +1,4 @@
-import type { MainCategory } from '@/lib/types';
+import type { MainCategory } from '@/shared/lib/types';
 
 interface Row { main_category: MainCategory; row_total: number; }
 

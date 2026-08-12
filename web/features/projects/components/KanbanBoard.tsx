@@ -4,10 +4,10 @@ import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { StatusBadge } from '@/shared/ui/status-badge';
 import { updateTask } from '@/features/projects/actions/tasks';
-import { friendlyError } from '@/lib/errors';
-import { formatDate } from '@/lib/dates';
+import { friendlyError } from '@/shared/lib/errors';
+import { formatDate } from '@/shared/lib/dates';
 import { TaskDrawer, type Assignable } from './TaskDrawer';
 import type { TaskRow, TaskStatus, TaskPriority } from '@/features/projects/types';
 

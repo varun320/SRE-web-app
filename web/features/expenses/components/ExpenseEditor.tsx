@@ -3,14 +3,14 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Paperclip, Plus, Trash2 } from 'lucide-react';
-import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { DatePicker } from '@/components/ui/date-picker';
-import { InfoHint } from '@/components/ui/info-hint';
+import { getSupabaseBrowser } from '@/shared/supabase/client';
+import { DatePicker } from '@/shared/ui/date-picker';
+import { InfoHint } from '@/shared/ui/info-hint';
 import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/features/expenses/schemas';
 import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/features/expenses/mutations';
 import { uploadReceipt } from '@/features/expenses/receipts';
 import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineFavourite, type ExpenseLineItem, type ExpenseReport } from '@/features/expenses/types';
-import type { Project } from '@/lib/types';
+import type { Project } from '@/shared/lib/types';
 import { ExpenseLineCardMobile } from './ExpenseLineCardMobile';
 
 interface Props {

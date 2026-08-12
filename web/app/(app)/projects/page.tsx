@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks, Package, Calendar as CalendarIcon, Users, ClipboardList } from 'lucide-react';
-import { getSupabaseServer } from '@/lib/supabase/server';
-import { EmptyState } from '@/components/ui/empty-state';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDate } from '@/lib/dates';
+import { getSupabaseServer } from '@/shared/supabase/server';
+import { EmptyState } from '@/shared/ui/empty-state';
+import { StatusBadge } from '@/shared/ui/status-badge';
+import { formatDate } from '@/shared/lib/dates';
 import {
   fetchActiveProjects,
   fetchDashboardKpis,

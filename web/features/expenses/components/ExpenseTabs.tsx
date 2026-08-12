@@ -1,7 +1,7 @@
 'use client';
 
 import { Receipt, List, Scale, Settings, BadgeDollarSign } from 'lucide-react';
-import { SectionTabs, type SectionTab } from '@/components/ui/section-tabs';
+import { SectionTabs, type SectionTab } from '@/shared/ui/section-tabs';
 
 export const EMPLOYEE_EXPENSE_TABS: SectionTab[] = [
   {

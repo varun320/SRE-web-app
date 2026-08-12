@@ -1,4 +1,4 @@
-﻿import { getSupabaseServer } from '@/lib/supabase/server';
+﻿import { getSupabaseServer } from '@/shared/supabase/server';
 import { DecisionBar } from '@/components/admin/DecisionBar';
 import { DailyBreakdown } from '@/components/report/DailyBreakdown';
 import { CategoryTable } from '@/components/report/CategoryTable';
@@ -6,7 +6,7 @@ import { SubCategoryTable } from '@/components/report/SubCategoryTable';
 import { ProjectTable } from '@/components/report/ProjectTable';
 import { LineItems } from '@/components/report/LineItems';
 import { notFound } from 'next/navigation';
-import type { TimesheetStatus, MainCategory } from '@/lib/types';
+import type { TimesheetStatus, MainCategory } from '@/shared/lib/types';
 
 interface Props {
   params: Promise<{ id: string; ws: string }>;

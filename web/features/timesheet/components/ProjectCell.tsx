@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Project } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import type { Project } from '@/shared/lib/types';
 
 interface Props {
   projectId: string | null;
