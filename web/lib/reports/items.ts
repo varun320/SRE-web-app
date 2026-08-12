@@ -1,5 +1,5 @@
 import { DollarSign, UserRound, Tag, FolderKanban, CalendarClock } from 'lucide-react';
-import type { SectionTab } from '@/components/ui/section-tabs';
+import type { SectionTab } from '@/shared/ui/section-tabs';
 
 export const REPORT_ITEMS: SectionTab[] = [
   {
