@@ -175,6 +175,25 @@ export interface MyPriorityTask extends TaskRow {
   project_name: string;
 }
 
+export interface MyTaskRow extends TaskRow {
+  project_number: number;
+  project_name: string;
+}
+
+/** Every open + recently-completed task assigned to the current user. */
+export async function fetchMyTasks(sb: SupabaseClient, userId: string): Promise<MyTaskRow[]> {
+  const { data, error } = await sb
+    .from('tasks')
+    .select('id, project_id, section_name, phase, title, assignee_id, due_date, priority, status, sort_order, projects!inner(project_number, name, template_id)')
+    .eq('assignee_id', userId)
+    .order('due_date', { ascending: true, nullsFirst: false });
+  if (error) throw new Error(error.message);
+  type Row = TaskRow & { projects: { project_number: number; name: string; template_id: string | null } };
+  return ((data ?? []) as unknown as Row[])
+    .filter((r) => r.projects.template_id != null)  // skip legacy/unadopted
+    .map((r) => ({ ...r, project_number: r.projects.project_number, project_name: r.projects.name }));
+}
+
 export async function fetchMyPriorities(sb: SupabaseClient, userId: string, limit = 5): Promise<MyPriorityTask[]> {
   const { data, error } = await sb
     .from('tasks')

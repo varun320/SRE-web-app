@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns } from 'lucide-react';
+import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -75,6 +75,12 @@ export default async function ProjectsDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/projects/mine"
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <ListChecks className="h-3.5 w-3.5" /> My tasks
+            </Link>
             <Link
               href="/projects/board"
               className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
