@@ -26,13 +26,19 @@ function daysUntil(iso: string): number {
   return Math.round((d - now) / (24 * 60 * 60 * 1000));
 }
 
-function dueLabel(due: string | null): string {
-  if (!due) return '—';
+function dueLabel(due: string | null): string | null {
+  if (!due) return null;
   const days = daysUntil(due);
   if (days < 0) return `${Math.abs(days)}d overdue`;
   if (days === 0) return 'Today';
   if (days === 1) return 'Tomorrow';
-  return formatDate(due);
+  if (days <= 14) return `in ${days}d`;
+  return null;  // far out — the absolute date already tells the story
+}
+
+function taskDueLabel(due: string | null): string {
+  if (!due) return '—';
+  return dueLabel(due) ?? formatDate(due);
 }
 
 function initials(name: string): string {
@@ -88,11 +94,19 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
         </div>
 
         <div className="border-t border-[var(--color-border-soft)] grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-[var(--color-border-soft)]">
-          <Meta icon={MapPin} label="Client">{project.client_name ?? '—'}</Meta>
+          <Meta icon={MapPin} label={project.site_name ? 'Client · Site' : 'Client'}>
+            <div>{project.client_name ?? '—'}</div>
+            {project.site_name ? <div className="text-[11px] text-[var(--color-text-muted)]">{project.site_name}</div> : null}
+          </Meta>
           <Meta icon={Mail} label="Contact">
-            {project.contact_email ? (
-              <a href={`mailto:${project.contact_email}`} className="hover:underline">{project.contact_name ?? project.contact_email}</a>
-            ) : project.contact_name ?? '—'}
+            {project.contact ? (
+              <div>
+                {project.contact.email ? (
+                  <a href={`mailto:${project.contact.email}`} className="hover:underline">{project.contact.name}</a>
+                ) : project.contact.name}
+                {project.contact.role ? <div className="text-[11px] text-[var(--color-text-muted)]">{project.contact.role}</div> : null}
+              </div>
+            ) : '—'}
           </Meta>
           <Meta icon={User} label="Lead">{project.lead?.full_name ?? '—'}</Meta>
           <Meta icon={Users} label={`Team · ${project.team.length}`}>
@@ -115,7 +129,12 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
           </Meta>
           <Meta icon={MapPin} label="Deadline">
             {project.deadline ? (
-              <span>{formatDate(project.deadline)} <span className="text-[var(--color-text-muted)]">· {dueLabel(project.deadline)}</span></span>
+              <span>
+                {formatDate(project.deadline)}
+                {dueLabel(project.deadline) ? (
+                  <span className="text-[var(--color-text-muted)]"> · {dueLabel(project.deadline)}</span>
+                ) : null}
+              </span>
             ) : '—'}
           </Meta>
         </div>
@@ -169,7 +188,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
                         <div className="flex items-center gap-1.5 shrink-0">
                           <StatusBadge tone={priorityTone(t.priority)}>{t.priority}</StatusBadge>
                           <StatusBadge tone={statusTone(t.status)}>{t.status}</StatusBadge>
-                          <span className="text-[11px] text-[var(--color-text-muted)] w-20 text-right">{dueLabel(t.due_date)}</span>
+                          <span className="text-[11px] text-[var(--color-text-muted)] w-20 text-right">{taskDueLabel(t.due_date)}</span>
                         </div>
                       </li>
                     ))}

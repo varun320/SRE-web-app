@@ -1,6 +1,101 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ProjectRow, TaskRow } from './types';
 
+export async function fetchNextProjectNumber(sb: SupabaseClient): Promise<number> {
+  const year = new Date().getFullYear();
+  const min = year * 1000;
+  const max = min + 999;
+  const { data } = await sb
+    .from('projects')
+    .select('project_number')
+    .gte('project_number', min)
+    .lte('project_number', max)
+    .order('project_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const latest = (data?.project_number as number | undefined) ?? min;
+  return Math.max(latest + 1, min + 1);
+}
+
+export interface ClientWithDirectory {
+  id: string;
+  name: string;
+  sites: Array<{ id: string; name: string }>;
+  contacts: Array<{ id: string; name: string; email: string | null; role: string | null }>;
+}
+
+export async function fetchClientsWithDirectory(sb: SupabaseClient): Promise<ClientWithDirectory[]> {
+  const [clientsRes, sitesRes, contactsRes] = await Promise.all([
+    sb.from('clients').select('id, name').order('name'),
+    sb.from('sites').select('id, client_id, name').order('name'),
+    sb.from('contacts').select('id, client_id, name, email, role').order('name'),
+  ]);
+  const sitesBy = new Map<string, ClientWithDirectory['sites']>();
+  for (const s of sitesRes.data ?? []) {
+    const arr = sitesBy.get(s.client_id) ?? [];
+    arr.push({ id: s.id, name: s.name });
+    sitesBy.set(s.client_id, arr);
+  }
+  const contactsBy = new Map<string, ClientWithDirectory['contacts']>();
+  for (const c of contactsRes.data ?? []) {
+    const arr = contactsBy.get(c.client_id) ?? [];
+    arr.push({ id: c.id, name: c.name, email: c.email, role: c.role });
+    contactsBy.set(c.client_id, arr);
+  }
+  return (clientsRes.data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    sites: sitesBy.get(c.id) ?? [],
+    contacts: contactsBy.get(c.id) ?? [],
+  }));
+}
+
+export interface TemplateSummary {
+  id: string;
+  name: string;
+  description: string | null;
+  task_count: number;
+}
+
+export async function fetchTemplates(sb: SupabaseClient): Promise<TemplateSummary[]> {
+  const { data: tpls } = await sb
+    .from('project_templates')
+    .select('id, name, description')
+    .eq('is_active', true)
+    .order('name');
+  if (!tpls?.length) return [];
+  const { data: sections } = await sb
+    .from('template_sections')
+    .select('id, template_id')
+    .in('template_id', tpls.map((t) => t.id));
+  const secIds = (sections ?? []).map((s) => s.id);
+  const { data: tasks } = secIds.length
+    ? await sb.from('template_tasks').select('section_id').in('section_id', secIds)
+    : { data: [] as Array<{ section_id: string }> };
+  const secToTpl = new Map((sections ?? []).map((s) => [s.id as string, s.template_id as string]));
+  const countBy = new Map<string, number>();
+  for (const t of tasks ?? []) {
+    const tid = secToTpl.get(t.section_id);
+    if (tid) countBy.set(tid, (countBy.get(tid) ?? 0) + 1);
+  }
+  return tpls.map((t) => ({
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    task_count: countBy.get(t.id) ?? 0,
+  }));
+}
+
+export interface UserOption {
+  id: string;
+  full_name: string;
+}
+
+export async function fetchTeamRoster(sb: SupabaseClient): Promise<UserOption[]> {
+  const { data } = await sb.from('users').select('id, full_name').order('full_name');
+  return (data ?? []) as UserOption[];
+}
+
 export interface ActiveProjectSummary extends ProjectRow {
   client_name: string | null;
   progress_pct: number;
@@ -94,21 +189,30 @@ export async function fetchMyPriorities(sb: SupabaseClient, userId: string, limi
 
 export interface ProjectDetail extends ProjectRow {
   client_name: string | null;
+  site_name: string | null;
   progress_pct: number;
   team: Array<{ id: string; full_name: string; email: string }>;
   lead: { id: string; full_name: string; email: string } | null;
+  contact: { name: string; email: string | null; role: string | null; phone: string | null } | null;
   tasks: TaskRow[];
 }
 
 export async function fetchProjectByNumber(sb: SupabaseClient, projectNumber: number): Promise<ProjectDetail | null> {
   const { data: project, error } = await sb
     .from('projects')
-    .select('id, org_id, project_number, name, status, client_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, clients ( name )')
+    .select(`id, org_id, project_number, name, status, client_id, site_id, contact_id,
+             scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email,
+             clients ( name ), sites ( name ), contacts ( name, email, role, phone )`)
     .eq('project_number', projectNumber)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!project) return null;
-  const row = project as unknown as ProjectRow & { clients: { name: string } | null };
+  type Joined = ProjectRow & {
+    clients: { name: string } | null;
+    sites: { name: string } | null;
+    contacts: { name: string; email: string | null; role: string | null; phone: string | null } | null;
+  };
+  const row = project as unknown as Joined;
 
   const [progressRes, teamRes, tasksRes] = await Promise.all([
     sb.from('v_project_progress').select('progress_pct').eq('project_id', row.id).maybeSingle(),
@@ -125,12 +229,21 @@ export async function fetchProjectByNumber(sb: SupabaseClient, projectNumber: nu
     lead = (leadRow as ProjectDetail['lead']) ?? null;
   }
 
+  // Prefer FK contact record; fall back to inline contact_name/email on projects.
+  const contact = row.contacts
+    ? row.contacts
+    : row.contact_name
+      ? { name: row.contact_name, email: row.contact_email, role: null, phone: null }
+      : null;
+
   return {
     ...row,
     client_name: row.clients?.name ?? null,
+    site_name: row.sites?.name ?? null,
     progress_pct: Number(progressRes.data?.progress_pct ?? 0),
     team,
     lead,
+    contact,
     tasks: (tasksRes.data ?? []) as TaskRow[],
   };
 }

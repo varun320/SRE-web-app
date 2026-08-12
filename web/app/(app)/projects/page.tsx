@@ -8,8 +8,13 @@ import {
   fetchActiveProjects,
   fetchDashboardKpis,
   fetchMyPriorities,
+  fetchNextProjectNumber,
+  fetchClientsWithDirectory,
+  fetchTemplates,
+  fetchTeamRoster,
 } from '@/lib/projects/queries';
 import { PHASE_LABEL, type ProjectPhase, type TaskPriority } from '@/lib/projects/types';
+import { NewJobModal } from '@/components/projects/NewJobModal';
 
 function phaseTone(p: ProjectPhase): 'neutral' | 'info' | 'success' {
   return p === 'pre' ? 'neutral' : p === 'during' ? 'info' : 'success';
@@ -41,10 +46,14 @@ export default async function ProjectsDashboard() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [kpis, projects, priorities] = await Promise.all([
+  const [kpis, projects, priorities, clients, templates, users, nextNumber] = await Promise.all([
     fetchDashboardKpis(sb),
     fetchActiveProjects(sb),
     fetchMyPriorities(sb, userId),
+    fetchClientsWithDirectory(sb),
+    fetchTemplates(sb),
+    fetchTeamRoster(sb),
+    fetchNextProjectNumber(sb),
   ]);
 
   return (
@@ -55,13 +64,20 @@ export default async function ProjectsDashboard() {
           className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full opacity-70"
           style={{ background: 'radial-gradient(circle, var(--color-accent-tint) 0%, transparent 70%)' }}
         />
-        <div className="relative flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
-          <Briefcase className="h-3.5 w-3.5" /> Projects
+        <div className="relative flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
+              <Briefcase className="h-3.5 w-3.5" /> Projects
+            </div>
+            <h1 className="text-h1 mt-1">On top of every job</h1>
+            <p className="mt-2 text-body-sm text-[var(--color-text-muted)] max-w-xl">
+              Overdue, due-this-week, active jobs, and your priorities — at a glance.
+            </p>
+          </div>
+          {clients.length > 0 && templates.length > 0 && users.length > 0 ? (
+            <NewJobModal clients={clients} templates={templates} users={users} suggestedNumber={nextNumber} />
+          ) : null}
         </div>
-        <h1 className="relative text-h1 mt-1">On top of every job</h1>
-        <p className="relative mt-2 text-body-sm text-[var(--color-text-muted)] max-w-xl">
-          Overdue, due-this-week, active jobs, and your priorities — at a glance.
-        </p>
       </section>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
