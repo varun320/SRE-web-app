@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks } from 'lucide-react';
+import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns, ListChecks, Package, Calendar as CalendarIcon } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -46,7 +46,7 @@ export default async function ProjectsDashboard() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [kpis, projects, priorities, clients, templates, users, nextNumber] = await Promise.all([
+  const [kpis, projects, priorities, clients, templates, users, nextNumber, legacyRes] = await Promise.all([
     fetchDashboardKpis(sb),
     fetchActiveProjects(sb),
     fetchMyPriorities(sb, userId),
@@ -54,7 +54,9 @@ export default async function ProjectsDashboard() {
     fetchTemplates(sb),
     fetchTeamRoster(sb),
     fetchNextProjectNumber(sb),
+    sb.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'active').is('template_id', null),
   ]);
+  const legacyCount = legacyRes.count ?? 0;
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
@@ -74,7 +76,7 @@ export default async function ProjectsDashboard() {
               Overdue, due-this-week, active jobs, and your priorities — at a glance.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Link
               href="/projects/mine"
               className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
@@ -87,12 +89,32 @@ export default async function ProjectsDashboard() {
             >
               <Columns className="h-3.5 w-3.5" /> Board
             </Link>
+            <Link
+              href="/projects/calendar"
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <CalendarIcon className="h-3.5 w-3.5" /> Calendar
+            </Link>
             {clients.length > 0 && templates.length > 0 && users.length > 0 ? (
               <NewJobModal clients={clients} templates={templates} users={users} suggestedNumber={nextNumber} />
             ) : null}
           </div>
         </div>
       </section>
+
+      {legacyCount > 0 ? (
+        <Link
+          href="/projects/legacy"
+          className="flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-status-submitted-fg)]/40 bg-[var(--color-status-submitted-bg)]/40 px-4 py-2.5 hover:bg-[var(--color-status-submitted-bg)]/70 transition-colors"
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Package className="h-4 w-4 text-[var(--color-status-submitted-fg)]" />
+            <span className="font-medium">{legacyCount} unadopted projects</span>
+            <span className="text-[var(--color-text-muted)]">— click through to pick a template and enable task tracking</span>
+          </div>
+          <span className="text-xs text-[var(--color-accent)]">Review →</span>
+        </Link>
+      ) : null}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Kpi

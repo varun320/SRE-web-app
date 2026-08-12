@@ -180,6 +180,21 @@ export interface MyTaskRow extends TaskRow {
   project_name: string;
 }
 
+/** All tasks with a due_date in [from, to], across active PM-flow projects. */
+export async function fetchTasksInRange(sb: SupabaseClient, from: string, to: string): Promise<MyTaskRow[]> {
+  const { data, error } = await sb
+    .from('tasks')
+    .select('id, project_id, section_name, phase, title, assignee_id, due_date, priority, status, sort_order, projects!inner(project_number, name, template_id)')
+    .gte('due_date', from)
+    .lte('due_date', to)
+    .order('due_date');
+  if (error) throw new Error(error.message);
+  type Row = TaskRow & { projects: { project_number: number; name: string; template_id: string | null } };
+  return ((data ?? []) as unknown as Row[])
+    .filter((r) => r.projects.template_id != null)
+    .map((r) => ({ ...r, project_number: r.projects.project_number, project_name: r.projects.name }));
+}
+
 /** Every open + recently-completed task assigned to the current user. */
 export async function fetchMyTasks(sb: SupabaseClient, userId: string): Promise<MyTaskRow[]> {
   const { data, error } = await sb
