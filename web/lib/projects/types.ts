@@ -9,6 +9,9 @@ export interface ProjectRow {
   name: string;
   status: 'active' | 'closed';
   client_id: string | null;
+  site_id: string | null;
+  contact_id: string | null;
+  template_id: string | null;
   scope_title: string | null;
   phase: ProjectPhase;
   deadline: string | null;

@@ -4,7 +4,8 @@ import { ArrowLeft, MapPin, Mail, User, Users } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatDate } from '@/lib/dates';
-import { fetchProjectByNumber, fetchTeamRoster } from '@/lib/projects/queries';
+import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates } from '@/lib/projects/queries';
+import { EditJobPanel } from '@/components/projects/EditJobPanel';
 import { PHASE_LABEL, type ProjectPhase } from '@/lib/projects/types';
 import { TasksSection } from '@/components/projects/TasksSection';
 
@@ -38,7 +39,12 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
   if (!Number.isFinite(n)) notFound();
 
   const sb = await getSupabaseServer();
-  const [project, users] = await Promise.all([fetchProjectByNumber(sb, n), fetchTeamRoster(sb)]);
+  const [project, users, clients, templates] = await Promise.all([
+    fetchProjectByNumber(sb, n),
+    fetchTeamRoster(sb),
+    fetchClientsWithDirectory(sb),
+    fetchTemplates(sb),
+  ]);
   if (!project) notFound();
 
   const accent = project.accent_color ?? 'var(--color-accent)';
@@ -66,10 +72,31 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
             </div>
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
-              <span className="font-mono">{project.project_number}</span>
-              <StatusBadge tone={phaseTone(project.phase)}>{PHASE_LABEL[project.phase]}</StatusBadge>
-              {project.status === 'closed' ? <StatusBadge tone="muted">closed</StatusBadge> : null}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
+                <span className="font-mono">{project.project_number}</span>
+                <StatusBadge tone={phaseTone(project.phase)}>{PHASE_LABEL[project.phase]}</StatusBadge>
+                {project.status === 'closed' ? <StatusBadge tone="muted">closed</StatusBadge> : null}
+                {!project.template_id ? <StatusBadge tone="warning">unadopted</StatusBadge> : null}
+              </div>
+              <EditJobPanel
+                projectId={project.id}
+                isLegacy={!project.template_id}
+                initial={{
+                  scope_title: project.scope_title,
+                  client_id: project.client_id,
+                  site_id: project.site_id ?? null,
+                  contact_id: project.contact_id ?? null,
+                  template_id: project.template_id ?? null,
+                  lead_id: project.lead_id,
+                  deadline: project.deadline,
+                  phase: project.phase,
+                  team_ids: project.team.map((m) => m.id),
+                }}
+                clients={clients}
+                templates={templates}
+                users={users}
+              />
             </div>
             <h1 className="mt-1 text-h1">{project.scope_title ?? project.name}</h1>
             <p className="mt-1 text-body-sm text-[var(--color-text-muted)]">{project.client_name ?? 'Unassigned client'}</p>

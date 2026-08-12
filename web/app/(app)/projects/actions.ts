@@ -12,6 +12,108 @@ const updateTaskSchema = z.object({
   status: z.enum(['todo', 'doing', 'done']).optional(),
 });
 
+const updateProjectSchema = z.object({
+  id: z.string().uuid(),
+  scope_title: z.string().trim().min(1).max(200).optional(),
+  client_id: z.string().uuid().nullable().optional(),
+  site_id: z.string().uuid().nullable().optional(),
+  contact_id: z.string().uuid().nullable().optional(),
+  lead_id: z.string().uuid().optional(),
+  deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  template_id: z.string().uuid().nullable().optional(),
+  phase: z.enum(['pre', 'during', 'post']).optional(),
+  team_ids: z.array(z.string().uuid()).optional(),
+  // New site/contact created inline
+  new_site_name: z.string().trim().max(120).optional(),
+  new_contact_name: z.string().trim().max(120).optional(),
+  new_contact_email: z.string().email().max(200).optional().or(z.literal('')),
+  new_contact_role: z.string().trim().max(120).optional(),
+  new_contact_phone: z.string().trim().max(60).optional(),
+});
+
+export async function updateProject(input: z.infer<typeof updateProjectSchema>) {
+  const parsed = updateProjectSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'invalid input' };
+  const {
+    id, team_ids,
+    new_site_name, new_contact_name, new_contact_email, new_contact_role, new_contact_phone,
+    ...patch
+  } = parsed.data;
+
+  const sb = await getSupabaseServer();
+
+  // Read the current row so we can detect a template_id transition null → set
+  // (adoption of a legacy project) and know whether to run task generation.
+  const { data: before, error: readErr } = await sb
+    .from('projects').select('template_id, client_id, project_number').eq('id', id).maybeSingle();
+  if (readErr) return { error: friendlyError(readErr) };
+  if (!before) return { error: 'project not found' };
+
+  const clientId = patch.client_id ?? (before as { client_id: string | null }).client_id;
+
+  // Inline site create
+  if (new_site_name && !patch.site_id) {
+    if (!clientId) return { error: 'pick a client before adding a new site' };
+    const { data: s, error: sErr } = await sb
+      .from('sites')
+      .insert({ org_id: ORG_ID, client_id: clientId, name: new_site_name })
+      .select('id').single();
+    if (sErr) return { error: friendlyError(sErr) };
+    patch.site_id = s.id;
+  }
+
+  // Inline contact create
+  if (new_contact_name && !patch.contact_id) {
+    if (!clientId) return { error: 'pick a client before adding a new contact' };
+    const { data: c, error: cErr } = await sb
+      .from('contacts')
+      .insert({
+        org_id: ORG_ID, client_id: clientId, name: new_contact_name,
+        email: new_contact_email || null, role: new_contact_role || null,
+        phone: new_contact_phone || null,
+      })
+      .select('id').single();
+    if (cErr) return { error: friendlyError(cErr) };
+    patch.contact_id = c.id;
+  }
+
+  if (Object.keys(patch).length > 0) {
+    const { error: uErr } = await sb.from('projects').update(patch).eq('id', id);
+    if (uErr) return { error: friendlyError(uErr) };
+  }
+
+  // Replace team membership if provided. Lead is always on the team.
+  if (team_ids) {
+    const leadId = patch.lead_id ?? (await sb.from('projects').select('lead_id').eq('id', id).single()).data?.lead_id as string | undefined;
+    const finalTeam = leadId ? Array.from(new Set([...team_ids, leadId])) : team_ids;
+    const { error: delErr } = await sb.from('project_team_members').delete().eq('project_id', id);
+    if (delErr) return { error: friendlyError(delErr) };
+    if (finalTeam.length > 0) {
+      const rows = finalTeam.map((uid) => ({ project_id: id, user_id: uid }));
+      const { error: insErr } = await sb.from('project_team_members').insert(rows);
+      if (insErr) return { error: friendlyError(insErr) };
+    }
+  }
+
+  // Adoption: template_id going from null → set means "apply template to
+  // this legacy project" — call the RPC to generate tasks. The RPC is idempotent
+  // (no-op if tasks already exist), so it's safe on repeat edits too.
+  const wasEmpty = (before as { template_id: string | null }).template_id == null;
+  const nowSet   = patch.template_id != null;
+  if (wasEmpty && nowSet) {
+    const { error: rpcErr } = await sb.rpc('apply_template_to_project', {
+      p_project_id: id,
+      p_template_id: patch.template_id!,
+    });
+    if (rpcErr) return { error: friendlyError(rpcErr) };
+  }
+
+  revalidatePath('/projects');
+  const projectNumber = (before as { project_number: number }).project_number;
+  revalidatePath(`/projects/${projectNumber}`);
+  return { ok: true, project_number: projectNumber };
+}
+
 export async function updateTask(input: z.infer<typeof updateTaskSchema>) {
   const parsed = updateTaskSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'invalid input' };

@@ -107,7 +107,7 @@ export interface ActiveProjectSummary extends ProjectRow {
 export async function fetchActiveProjects(sb: SupabaseClient): Promise<ActiveProjectSummary[]> {
   const { data: projects, error } = await sb
     .from('projects')
-    .select('id, org_id, project_number, name, status, client_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, clients ( name )')
+    .select('id, org_id, project_number, name, status, client_id, site_id, contact_id, template_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, clients ( name )')
     .eq('status', 'active')
     // Only surface projects that have been adopted into the PM flow. Legacy
     // timesheet-only projects (52 rows with no template/lead/deadline) stay
@@ -205,7 +205,7 @@ export interface ProjectDetail extends ProjectRow {
 export async function fetchProjectByNumber(sb: SupabaseClient, projectNumber: number): Promise<ProjectDetail | null> {
   const { data: project, error } = await sb
     .from('projects')
-    .select(`id, org_id, project_number, name, status, client_id, site_id, contact_id,
+    .select(`id, org_id, project_number, name, status, client_id, site_id, contact_id, template_id,
              scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email,
              clients ( name ), sites ( name ), contacts ( name, email, role, phone )`)
     .eq('project_number', projectNumber)
