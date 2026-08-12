@@ -130,7 +130,7 @@ export function buildToolRegistry(ctx: RegistryContext): ToolDef[] {
     {
       name: 'upload_receipt',
       description:
-        'Upload a receipt image (jpg/png/webp/heic) or PDF for an expense report. Pass raw bytes as content_base64 (max 5 MB decoded). Returns storage_key — pass that as receipt_url on the matching line in replace_expense_lines.',
+        'Upload a receipt image (jpg/png/webp/heic) or PDF for an expense report. Pass raw bytes as content_base64 (max 15 MB decoded). Returns storage_key — pass that as receipt_url on the matching line in replace_expense_lines.',
       input: uploadReceiptInput,
       handler: (a) => uploadReceiptTool(sb, userId, uploadReceiptInput.parse(a)),
     },

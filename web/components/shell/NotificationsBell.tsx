@@ -1,13 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, CheckCheck } from 'lucide-react';
+import { Bell, BellRing, CheckCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { fetchRecent, fetchUnreadCount } from '@/lib/notifications/queries';
 import { markAllRead, markRead } from '@/lib/notifications/mutations';
 import { formatNotification } from '@/lib/notifications/format';
+import {
+  desktopSupported,
+  desktopPermission,
+  enableDesktopNotifications,
+  fireDesktopNotification,
+} from '@/lib/notifications/desktop';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,8 +43,38 @@ export function NotificationsBell() {
   const recentQ = useQuery({
     queryKey: ['notifications', 'recent'],
     queryFn: () => fetchRecent(sb, 10),
-    enabled: open,
+    // Poll silently so desktop toasts fire even when dropdown is closed.
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   });
+
+  // Fire a desktop toast when a new unread notification arrives. Tracks the
+  // set of ids we've already toasted so a single arrival doesn't double-fire.
+  const toastedIds = useRef<Set<string>>(new Set());
+  const primed = useRef(false);
+  useEffect(() => {
+    const list = recentQ.data ?? [];
+    // First render: prime the set so we don't toast historical items.
+    if (!primed.current) {
+      for (const n of list) toastedIds.current.add(n.id);
+      primed.current = true;
+      return;
+    }
+    for (const n of list) {
+      if (n.read_at) continue;
+      if (toastedIds.current.has(n.id)) continue;
+      toastedIds.current.add(n.id);
+      fireDesktopNotification(n);
+    }
+  }, [recentQ.data]);
+
+  const [permission, setPermission] = useState<NotificationPermission>('default');
+  useEffect(() => setPermission(desktopPermission()), []);
+  const showEnablePrompt = desktopSupported() && permission === 'default';
+  async function enable() {
+    const p = await enableDesktopNotifications();
+    setPermission(p);
+  }
 
   const markOne = useMutation({
     mutationFn: (id: string) => markRead(sb, id),
@@ -88,6 +124,22 @@ export function NotificationsBell() {
             </button>
           ) : null}
         </header>
+
+        {showEnablePrompt ? (
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40">
+            <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)]">
+              <BellRing className="h-3 w-3" />
+              Enable desktop pop-ups?
+            </span>
+            <button
+              type="button"
+              onClick={enable}
+              className="text-[11px] font-medium text-[var(--color-accent)] hover:underline"
+            >
+              Turn on
+            </button>
+          </div>
+        ) : null}
 
         <div className="max-h-80 overflow-y-auto">
           {recentQ.isLoading ? (

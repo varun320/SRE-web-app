@@ -71,7 +71,7 @@ export const replaceLinesInput = z.object({
 });
 export const listLinesInput = z.object({ invoice_no: z.string().min(3) });
 
-const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+const MAX_RECEIPT_BYTES = 15 * 1024 * 1024;
 
 export const uploadReceiptInput = z.object({
   invoice_no: z.string().min(3),

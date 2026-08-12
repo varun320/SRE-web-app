@@ -5,6 +5,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
 import { PayoutRowActions } from '@/components/admin/PayoutRowActions';
+import { AddPayoutButton } from '@/components/admin/AddPayoutButton';
 import { ReceiptViewer } from '@/components/admin/ReceiptViewer';
 import type { ExpenseLineItem, ExpenseReport, ExpensePayout, CreditCard } from '@/lib/expenses/types';
 
@@ -280,7 +281,19 @@ export default async function AdminExpenseDetail({ params }: { params: Promise<{
       ) : null}
 
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
-        <h2 className="text-sm font-medium">Payments received</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium">Payments received</h2>
+          {report.status === 'approved' || report.status === 'paid' ? (
+            <AddPayoutButton
+              userId={report.user_id}
+              invoiceNo={report.invoice_no}
+              suggestedAmount={Math.max(
+                0,
+                Number(totalAmount) + Number(totalGst) - payouts.reduce((s, p) => s + Number(p.amount_cad), 0),
+              )}
+            />
+          ) : null}
+        </div>
         {payouts.length === 0 ? (
           <p className="mt-2 text-sm text-[var(--color-text-muted)]">No payments recorded yet.</p>
         ) : (

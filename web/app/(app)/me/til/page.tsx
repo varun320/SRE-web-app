@@ -13,7 +13,9 @@ export default async function TilPage() {
 
   const live = (rows ?? []).filter((r) => !r.stale);
   const current = live[0];
+  const oldest = live[live.length - 1];
   const balance = Number(current?.closing_balance ?? 0);
+  const openingSeed = Number(oldest?.opening_balance ?? 0);
   const earnedYtd = live.reduce((sum, r) => sum + Number(r.overtime_earned ?? 0), 0);
   const usedYtd = live.reduce((sum, r) => sum + Number(r.til_used ?? 0), 0);
 
@@ -35,13 +37,14 @@ export default async function TilPage() {
         </header>
       </section>
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
+      <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
+        <StatCell label="Opening seed"         value={`${openingSeed.toFixed(2)} h`} />
+        <StatCell label="+ OT earned (lifetime)" value={`${earnedYtd.toFixed(2)} h`} />
+        <StatCell label="− TIL used (lifetime)"  value={`${usedYtd.toFixed(2)} h`} />
         <StatCell
-          label={`Current balance${current ? ` · ${current.week_start}` : ''}`}
+          label={`= Current balance${current ? ` · ${current.week_start}` : ''}`}
           value={`${balance.toFixed(2)} h`}
         />
-        <StatCell label="OT earned (lifetime)" value={`${earnedYtd.toFixed(2)} h`} />
-        <StatCell label="TIL used (lifetime)"  value={`${usedYtd.toFixed(2)} h`} />
       </div>
 
       <section className="space-y-3">

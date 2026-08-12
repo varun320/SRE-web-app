@@ -6,20 +6,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { InfoHint } from '@/components/ui/info-hint';
 import { formatDate } from '@/lib/dates';
-import { paymentStatus } from '@/lib/expenses/payment-status';
+import { unifiedStatus } from '@/lib/expenses/payment-status';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
-}
-
-function statusTone(s: string): 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'muted' {
-  switch (s) {
-    case 'approved': return 'info';
-    case 'paid':     return 'success';
-    case 'submitted': return 'warning';
-    case 'declined': return 'danger';
-    default:         return 'muted';
-  }
 }
 
 export default async function ExpensesPage() {
@@ -113,13 +103,12 @@ export default async function ExpensesPage() {
                   <th className="num">GST</th>
                   <th className="num">Total</th>
                   <th>Status</th>
-                  <th>Payment</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => {
-                  const pay = paymentStatus(r.status, Number(r.total_cad), paidByInvoice.get(r.invoice_no) ?? 0);
+                  const st = unifiedStatus(r.status, Number(r.total_cad), paidByInvoice.get(r.invoice_no) ?? 0);
                   return (
                   <tr key={r.id}>
                     <td>
@@ -132,8 +121,7 @@ export default async function ExpensesPage() {
                     <td className="num">{money(Number(r.amount_cad))}</td>
                     <td className="num">{money(Number(r.gst_cad))}</td>
                     <td className="num font-medium">{money(Number(r.total_cad))}</td>
-                    <td><StatusBadge tone={statusTone(r.status)}>{r.status}</StatusBadge></td>
-                    <td><StatusBadge tone={pay.tone}>{pay.label}</StatusBadge></td>
+                    <td><StatusBadge tone={st.tone}>{st.label}</StatusBadge></td>
                     <td className="text-right">
                       <Link
                         href={`/expenses/new?dup=${encodeURIComponent(r.invoice_no)}`}
