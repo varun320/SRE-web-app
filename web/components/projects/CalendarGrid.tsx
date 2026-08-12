@@ -87,7 +87,7 @@ export function CalendarGrid({ year, month, tasks, assignableUsers }: Props) {
                   <span
                     className={[
                       'inline-flex h-5 min-w-5 items-center justify-center rounded-full text-[11px] font-mono',
-                      isToday ? 'bg-[var(--color-accent)] text-white font-semibold' : '',
+                      isToday ? 'bg-[var(--color-accent)] text-[var(--color-accent-fg)] font-semibold' : '',
                     ].join(' ')}
                   >
                     {c.day}

@@ -196,7 +196,7 @@ export function EditJobPanel({ projectId, isLegacy, initial, clients, templates,
                   className={[
                     'px-2 py-1 rounded-full text-xs border transition-colors',
                     on
-                      ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]'
+                      ? 'bg-[var(--color-accent)] text-[var(--color-accent-fg)] border-[var(--color-accent)]'
                       : 'bg-transparent text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-surface-2)]',
                     isLead ? 'opacity-80 cursor-default' : '',
                   ].join(' ')}
