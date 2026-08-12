@@ -14,6 +14,9 @@ export default async function WeekPage({ params }: PageProps) {
   if (!isMondayISO(week_start)) notFound();
 
   const supabase = await getSupabaseServer();
+  const { data: userRow } = await supabase.auth.getUser();
+  const uid = userRow.user?.id;
+  if (!uid) throw new Error('unauthenticated');
   const { data: tsId, error: ensureErr } = await supabase.rpc('create_or_get_week', { p_week_start: week_start });
   if (ensureErr) throw new Error(ensureErr.message);
 
@@ -22,8 +25,11 @@ export default async function WeekPage({ params }: PageProps) {
     supabase.from('timesheet_entries').select('id,main_category,sub_category_id,project_id,mon_hrs,tue_hrs,wed_hrs,thu_hrs,fri_hrs,sat_hrs,sun_hrs,description,position').eq('timesheet_id', tsId).order('position'),
     supabase.from('sub_categories').select('id,main_category,name,requires_project,consumes_til,consumes_vacation,is_overtime_taken,sort_order').eq('is_active', true).order('main_category').order('sort_order'),
     supabase.from('projects').select('id,project_number,name,status').eq('status', 'active').order('project_number'),
-    supabase.from('v_til_balance').select('closing_balance').maybeSingle(),
-    supabase.from('v_vacation_balance').select('closing_balance').maybeSingle(),
+    // Defensive explicit user_id filter — the security_invoker view already
+    // scopes this via RLS, but if the view is ever recreated without it, this
+    // keeps the KPI strip showing correct numbers instead of 0.
+    supabase.from('v_til_balance').select('closing_balance').eq('user_id', uid).maybeSingle(),
+    supabase.from('v_vacation_balance').select('closing_balance').eq('user_id', uid).maybeSingle(),
     // Pending (draft/submitted) *other* weeks — their OT/TIL/vacation must
     // reflect in this week's opening before admin approves. RLS scopes to the
     // current user.
