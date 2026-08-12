@@ -1,0 +1,197 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, MapPin, Mail, User, Users } from 'lucide-react';
+import { getSupabaseServer } from '@/lib/supabase/server';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { formatDate } from '@/lib/dates';
+import { fetchProjectByNumber } from '@/lib/projects/queries';
+import { PHASE_LABEL, type ProjectPhase, type TaskPriority, type TaskStatus, type TaskRow } from '@/lib/projects/types';
+
+function phaseTone(p: ProjectPhase): 'neutral' | 'info' | 'success' {
+  return p === 'pre' ? 'neutral' : p === 'during' ? 'info' : 'success';
+}
+
+function priorityTone(p: TaskPriority): 'neutral' | 'warning' | 'danger' {
+  return p === 'high' ? 'danger' : p === 'med' ? 'warning' : 'neutral';
+}
+
+function statusTone(s: TaskStatus): 'neutral' | 'info' | 'success' {
+  return s === 'done' ? 'success' : s === 'doing' ? 'info' : 'neutral';
+}
+
+function daysUntil(iso: string): number {
+  const d = new Date(iso).getTime();
+  const now = new Date().setHours(0, 0, 0, 0);
+  return Math.round((d - now) / (24 * 60 * 60 * 1000));
+}
+
+function dueLabel(due: string | null): string {
+  if (!due) return '—';
+  const days = daysUntil(due);
+  if (days < 0) return `${Math.abs(days)}d overdue`;
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Tomorrow';
+  return formatDate(due);
+}
+
+function initials(name: string): string {
+  return name.trim().split(/\s+/).map((p) => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');
+}
+
+export default async function ProjectDetail({ params }: { params: Promise<{ number: string }> }) {
+  const { number } = await params;
+  const n = Number(number);
+  if (!Number.isFinite(n)) notFound();
+
+  const sb = await getSupabaseServer();
+  const project = await fetchProjectByNumber(sb, n);
+  if (!project) notFound();
+
+  const openTasks = project.tasks.filter((t) => t.status !== 'done').length;
+  const tasksByPhase = new Map<ProjectPhase, TaskRow[]>([['pre', []], ['during', []], ['post', []]]);
+  for (const t of project.tasks) tasksByPhase.get(t.phase)?.push(t);
+
+  const accent = project.accent_color ?? 'var(--color-accent)';
+  const progressColor = project.progress_pct >= 90 ? 'var(--color-status-approved-fg)' : 'var(--color-accent)';
+
+  return (
+    <main className="w-full px-3 md:px-4 py-5 space-y-6">
+      <div>
+        <Link href="/projects" className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+          <ArrowLeft className="h-3.5 w-3.5" /> All jobs
+        </Link>
+      </div>
+
+      <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)]">
+        <div aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
+        <div className="p-5 md:p-6 flex items-start gap-6">
+          <div
+            className="relative h-20 w-20 shrink-0 rounded-full grid place-items-center font-mono tabular-nums font-semibold"
+            style={{
+              background: `conic-gradient(${progressColor} ${project.progress_pct * 3.6}deg, var(--color-surface-2) 0)`,
+            }}
+          >
+            <div className="h-16 w-16 rounded-full bg-[var(--color-surface)] grid place-items-center">
+              <span className="text-lg">{project.progress_pct}%</span>
+            </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
+              <span className="font-mono">{project.project_number}</span>
+              <StatusBadge tone={phaseTone(project.phase)}>{PHASE_LABEL[project.phase]}</StatusBadge>
+              {project.status === 'closed' ? <StatusBadge tone="muted">closed</StatusBadge> : null}
+            </div>
+            <h1 className="mt-1 text-h1">{project.scope_title ?? project.name}</h1>
+            <p className="mt-1 text-body-sm text-[var(--color-text-muted)]">{project.client_name ?? 'Unassigned client'}</p>
+          </div>
+        </div>
+
+        <div className="border-t border-[var(--color-border-soft)] grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-[var(--color-border-soft)]">
+          <Meta icon={MapPin} label="Client">{project.client_name ?? '—'}</Meta>
+          <Meta icon={Mail} label="Contact">
+            {project.contact_email ? (
+              <a href={`mailto:${project.contact_email}`} className="hover:underline">{project.contact_name ?? project.contact_email}</a>
+            ) : project.contact_name ?? '—'}
+          </Meta>
+          <Meta icon={User} label="Lead">{project.lead?.full_name ?? '—'}</Meta>
+          <Meta icon={Users} label={`Team · ${project.team.length}`}>
+            <div className="flex -space-x-1.5">
+              {project.team.slice(0, 5).map((m) => (
+                <span
+                  key={m.id}
+                  title={m.full_name}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-surface-2)] text-[10px] font-medium"
+                >
+                  {initials(m.full_name)}
+                </span>
+              ))}
+              {project.team.length > 5 ? (
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-surface-2)] text-[10px] px-1">
+                  +{project.team.length - 5}
+                </span>
+              ) : null}
+            </div>
+          </Meta>
+          <Meta icon={MapPin} label="Deadline">
+            {project.deadline ? (
+              <span>{formatDate(project.deadline)} <span className="text-[var(--color-text-muted)]">· {dueLabel(project.deadline)}</span></span>
+            ) : '—'}
+          </Meta>
+        </div>
+      </section>
+
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-h3">Tasks</h2>
+          <span className="text-xs text-[var(--color-text-muted)]">
+            {openTasks} open · {project.tasks.length} total
+          </span>
+        </div>
+
+        {project.tasks.length === 0 ? (
+          <div className="mt-3">
+            <EmptyState
+              icon={Users}
+              title="No tasks yet"
+              description="Tasks will populate when a project template is applied to this job."
+            />
+          </div>
+        ) : (
+          <div className="mt-4 space-y-6">
+            {(['pre', 'during', 'post'] as ProjectPhase[]).map((phase) => {
+              const rows = tasksByPhase.get(phase) ?? [];
+              if (rows.length === 0) return null;
+              return (
+                <div key={phase}>
+                  <div className="flex items-center gap-2 pb-1.5 border-b-2 border-[var(--color-accent)]">
+                    <span className="text-[11px] uppercase tracking-wider font-semibold">{PHASE_LABEL[phase]}</span>
+                    <span className="text-[11px] text-[var(--color-text-muted)]">{rows.length}</span>
+                  </div>
+                  <ul className="divide-y divide-[var(--color-border-soft)]">
+                    {rows.map((t) => (
+                      <li key={t.id} className="flex items-center gap-3 py-2">
+                        <input
+                          type="checkbox"
+                          checked={t.status === 'done'}
+                          readOnly
+                          className="h-4 w-4 rounded border-[var(--color-border)]"
+                          aria-label={`${t.title} — read-only, editing available in Phase 2`}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-sm ${t.status === 'done' ? 'line-through text-[var(--color-text-muted)]' : ''}`}>
+                            {t.title}
+                          </div>
+                          {t.section_name ? (
+                            <div className="text-[11px] text-[var(--color-text-muted)]">{t.section_name}</div>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <StatusBadge tone={priorityTone(t.priority)}>{t.priority}</StatusBadge>
+                          <StatusBadge tone={statusTone(t.status)}>{t.status}</StatusBadge>
+                          <span className="text-[11px] text-[var(--color-text-muted)] w-20 text-right">{dueLabel(t.due_date)}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function Meta({ icon: Icon, label, children }: { icon: React.ComponentType<{ className?: string }>; label: string; children: React.ReactNode }) {
+  return (
+    <div className="px-4 py-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+        <Icon className="h-3 w-3" />
+        {label}
+      </div>
+      <div className="mt-0.5 text-sm">{children}</div>
+    </div>
+  );
+}
