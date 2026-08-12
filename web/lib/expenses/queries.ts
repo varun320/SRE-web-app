@@ -47,13 +47,15 @@ export async function fetchExpenseById(sb: SupabaseClient, id: string): Promise<
 
 export async function fetchExpenseByInvoice(
   sb: SupabaseClient,
-  userId: string,
+  _userId: string,
   invoiceNo: string,
 ): Promise<ExpenseReport | null> {
+  // RLS already scopes reads: employees see own rows; admins see any row in
+  // their org. An extra user_id filter here would 404 an admin viewing an
+  // employee's invoice via the shared /expenses/[invoice_no] URL.
   const { data, error } = await sb
     .from('expense_reports')
     .select('*')
-    .eq('user_id', userId)
     .eq('invoice_no', invoiceNo)
     .maybeSingle();
   if (error) throw new Error(error.message);
