@@ -11,9 +11,16 @@ export async function fetchMyFavourites(sb: SupabaseClient): Promise<ExpenseLine
 }
 
 export async function fetchMyCreditCards(sb: SupabaseClient): Promise<CreditCard[]> {
+  // Explicit user_id filter — RLS allows admins to read every user's cards
+  // (needed for admin views), so without this filter the personal Settings
+  // page would show an admin every employee's cards.
+  const { data: userRow } = await sb.auth.getUser();
+  const uid = userRow.user?.id;
+  if (!uid) return [];
   const { data, error } = await sb
     .from('user_credit_cards')
     .select('*')
+    .eq('user_id', uid)
     .order('is_default', { ascending: false })
     .order('label', { ascending: true });
   if (error) throw new Error(error.message);
