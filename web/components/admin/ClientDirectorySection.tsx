@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, X, Mail, Phone } from 'lucide-react';
+import { Plus, X, Mail, Phone, Users, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ShowMore } from '@/components/ui/show-more';
@@ -17,14 +17,17 @@ export interface DirectoryItem {
 
 interface Props {
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
   clientId: string;
   isAdmin: boolean;
   items: DirectoryItem[];
   kind: 'contact' | 'site';
 }
 
-export function ClientDirectorySection({ title, icon: Icon, clientId, isAdmin, items, kind }: Props) {
+// Server → Client boundary can't carry component refs — pick icon by `kind`.
+const KIND_ICON = { contact: Users, site: MapPin } as const;
+
+export function ClientDirectorySection({ title, clientId, isAdmin, items, kind }: Props) {
+  const Icon = KIND_ICON[kind];
   const [adding, setAdding] = useState(false);
   const [pending, start] = useTransition();
 

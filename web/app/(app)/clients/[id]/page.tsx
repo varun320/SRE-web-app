@@ -102,7 +102,6 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ClientDirectorySection
           title="Contacts"
-          icon={Users}
           clientId={client.id}
           isAdmin={isAdmin}
           items={contacts.map((c) => ({
@@ -110,15 +109,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             primary: c.name,
             secondary: c.role,
             lines: [
-              c.email ? { icon: 'mail', text: c.email, href: `mailto:${c.email}` } : null,
-              c.phone ? { icon: 'phone', text: c.phone, href: `tel:${c.phone}` } : null,
-            ].filter((x) => x !== null) as { icon: 'mail' | 'phone'; text: string; href: string }[],
+              c.email ? { icon: 'mail' as const, text: c.email, href: `mailto:${c.email}` } : null,
+              c.phone ? { icon: 'phone' as const, text: c.phone, href: `tel:${c.phone}` } : null,
+            ].filter((x) => x !== null),
           }))}
           kind="contact"
         />
         <ClientDirectorySection
           title="Sites / Locations"
-          icon={MapPin}
           clientId={client.id}
           isAdmin={isAdmin}
           items={sites.map((s) => ({
