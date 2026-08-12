@@ -4,8 +4,8 @@ import { ArrowLeft, MapPin, Mail, Phone, Users, Building2, ExternalLink, Briefca
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ClientDirectorySection } from '@/components/admin/ClientDirectorySection';
-import { ClientJobsSection } from '@/components/admin/ClientJobsSection';
+import { ClientDirectorySection } from '@/features/clients/components/ClientDirectorySection';
+import { ClientJobsSection } from '@/features/clients/components/ClientJobsSection';
 import { formatDate } from '@/lib/dates';
 
 interface Client {

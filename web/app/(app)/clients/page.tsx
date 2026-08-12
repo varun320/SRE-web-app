@@ -1,10 +1,10 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { fetchIsAdmin } from '@/lib/role';
 import { PageHeader } from '@/components/ui/page-header';
-import { ClientsMap } from '@/components/admin/ClientsMap';
-import { ClientForm } from '@/components/admin/ClientForm';
-import { ClientsTable } from '@/components/admin/ClientsTable';
-import type { ClientRow } from '@/lib/clients';
+import { ClientsMap } from '@/features/clients/components/ClientsMap';
+import { ClientForm } from '@/features/clients/components/ClientForm';
+import { ClientsTable } from '@/features/clients/components/ClientsTable';
+import type { ClientRow } from '@/features/clients/types';
 
 export default async function ClientsPage() {
   const sb = await getSupabaseServer();

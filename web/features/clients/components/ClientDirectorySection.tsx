@@ -5,7 +5,7 @@ import { Plus, X, Mail, Phone, Users, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ShowMore } from '@/components/ui/show-more';
-import { createContact, createSite, deleteContact, deleteSite } from '@/app/(app)/clients/actions';
+import { createContact, createSite, deleteContact, deleteSite } from '@/features/clients/actions';
 
 type Line = { icon: 'mail' | 'phone'; text: string; href: string };
 export interface DirectoryItem {

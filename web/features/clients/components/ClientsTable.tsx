@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { deleteClient } from '@/app/(app)/clients/actions';
+import { deleteClient } from '@/features/clients/actions';
 import { toast } from 'sonner';
-import type { ClientRow } from '@/lib/clients';
+import type { ClientRow } from '@/features/clients/types';
 
 const INITIAL = 15;
 const STEP = 20;

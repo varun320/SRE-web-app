@@ -3,7 +3,7 @@ import { useTransition, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { createClient } from '@/app/(app)/clients/actions';
+import { createClient } from '@/features/clients/actions';
 import { toast } from 'sonner';
 
 export function ClientForm() {
