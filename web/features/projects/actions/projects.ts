@@ -16,6 +16,9 @@ const updateProjectSchema = z.object({
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   template_id: z.string().uuid().nullable().optional(),
   phase: z.enum(['pre', 'during', 'post']).optional(),
+  has_onsite: z.boolean().optional(),
+  onsite_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  onsite_end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   team_ids: z.array(z.string().uuid()).optional(),
   // New site/contact created inline
   new_site_name: z.string().trim().max(120).optional(),
@@ -69,6 +72,16 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
     patch.contact_id = c.id;
   }
 
+  // Normalize on-site fields to satisfy the projects_onsite_window_valid check.
+  if (patch.has_onsite === false) {
+    patch.onsite_start = null;
+    patch.onsite_end = null;
+  }
+  if (patch.has_onsite === true) {
+    if (!patch.onsite_start || !patch.onsite_end) return { error: 'on-site start and end required' };
+    if (patch.onsite_start > patch.onsite_end) return { error: 'on-site start must be on/before end' };
+  }
+
   if (Object.keys(patch).length > 0) {
     const { error: uErr } = await sb.from('projects').update(patch).eq('id', id);
     if (uErr) return { error: friendlyError(uErr) };
@@ -112,6 +125,10 @@ const createProjectSchema = z.object({
   team_ids: z.array(z.string().uuid()).default([]),
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   accent_color: z.string().trim().max(30).nullable().optional(),
+
+  has_onsite: z.coerce.boolean().default(false),
+  onsite_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  onsite_end:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 
   // Client must exist — add via /clients admin first (needs map coordinates).
   client_id: z.string().uuid(),
@@ -182,6 +199,12 @@ export async function createProject(formData: FormData) {
 
   const { data: tpl } = await sb.from('project_templates').select('name').eq('id', input.template_id).maybeSingle();
 
+  // Guard on-site window before RPC — clearer error than the check constraint.
+  if (input.has_onsite) {
+    if (!input.onsite_start || !input.onsite_end) return { error: 'on-site start and end required' };
+    if (input.onsite_start > input.onsite_end) return { error: 'on-site start must be on/before end' };
+  }
+
   const { data: created, error } = await sb.rpc('create_project_from_template', {
     p_project_number: input.project_number,
     p_name: tpl?.name ?? 'Project',
@@ -194,6 +217,9 @@ export async function createProject(formData: FormData) {
     p_deadline: input.deadline,
     p_team_ids: input.team_ids,
     p_accent_color: input.accent_color || null,
+    p_has_onsite: input.has_onsite,
+    p_onsite_start: input.has_onsite ? input.onsite_start : null,
+    p_onsite_end:   input.has_onsite ? input.onsite_end   : null,
   });
   if (error) return { error: friendlyError(error) };
 

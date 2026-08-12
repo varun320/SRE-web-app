@@ -91,6 +91,9 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
                   lead_id: project.lead_id,
                   deadline: project.deadline,
                   phase: project.phase,
+                  has_onsite: project.has_onsite,
+                  onsite_start: project.onsite_start,
+                  onsite_end: project.onsite_end,
                   team_ids: project.team.map((m) => m.id),
                 }}
                 clients={clients}
@@ -103,7 +106,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
           </div>
         </div>
 
-        <div className="border-t border-[var(--color-border-soft)] grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-[var(--color-border-soft)]">
+        <div className="border-t border-[var(--color-border-soft)] grid grid-cols-2 md:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-[var(--color-border-soft)]">
           <Meta icon={MapPin} label={project.site_name ? 'Client · Site' : 'Client'}>
             <div>{project.client_name ?? '—'}</div>
             {project.site_name ? <div className="text-[11px] text-[var(--color-text-muted)]">{project.site_name}</div> : null}
@@ -137,7 +140,19 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
               ) : null}
             </div>
           </Meta>
-          <Meta icon={MapPin} label="Deadline">
+          <Meta icon={MapPin} label="On-site">
+            {project.has_onsite && project.onsite_start && project.onsite_end ? (
+              <div>
+                <div>{formatDate(project.onsite_start)} → {formatDate(project.onsite_end)}</div>
+                <div className="text-[11px] text-[var(--color-text-muted)]">
+                  {Math.round((new Date(project.onsite_end).getTime() - new Date(project.onsite_start).getTime()) / 86_400_000) + 1} days
+                </div>
+              </div>
+            ) : (
+              <span className="text-[var(--color-text-muted)]">desktop-only</span>
+            )}
+          </Meta>
+          <Meta icon={MapPin} label="Report due">
             {project.deadline ? (
               <span>
                 {formatDate(project.deadline)}

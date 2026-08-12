@@ -61,6 +61,9 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
   const [leadId, setLeadId] = useState(users[0]?.id ?? '');
   const [teamIds, setTeamIds] = useState<Set<string>>(new Set());
   const [deadline, setDeadline] = useState('');
+  const [hasOnsite, setHasOnsite] = useState(false);
+  const [onsiteStart, setOnsiteStart] = useState('');
+  const [onsiteEnd, setOnsiteEnd] = useState('');
 
   const client = useMemo(() => clients.find((c) => c.id === clientId), [clientId, clients]);
   const template = useMemo(() => templates.find((t) => t.id === templateId), [templateId, templates]);
@@ -78,8 +81,12 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
     if (!clientId) return toast.error('Pick a client');
     if (!templateId) return toast.error('Pick a project type');
     if (!leadId) return toast.error('Pick a project lead');
-    if (!deadline) return toast.error('Pick a deadline');
+    if (!deadline) return toast.error('Pick a report submission date');
     if (!scopeTitle.trim()) return toast.error('Enter a scope title');
+    if (hasOnsite) {
+      if (!onsiteStart || !onsiteEnd) return toast.error('Fill on-site start + end');
+      if (onsiteStart > onsiteEnd) return toast.error('On-site start must be on/before end');
+    }
     const n = Number(number);
     if (!Number.isFinite(n) || n < 2020000 || n > 2099999) return toast.error('Project # must be 7 digits (e.g. 2026101)');
 
@@ -101,6 +108,11 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
       fd.set('lead_id', leadId);
       for (const id of teamIds) fd.append('team_ids', id);
       fd.set('deadline', deadline);
+      fd.set('has_onsite', String(hasOnsite));
+      if (hasOnsite) {
+        fd.set('onsite_start', onsiteStart);
+        fd.set('onsite_end', onsiteEnd);
+      }
 
       const res = await createProject(fd);
       if (res?.error) {
@@ -201,8 +213,32 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
               ))}
             </select>
           </Field>
-          <Field label="Target deadline">
+          <Field label="Report submission date">
             <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputCls} />
+          </Field>
+
+          <Field label="On-site activity" className="md:col-span-2">
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={hasOnsite}
+                onChange={(e) => setHasOnsite(e.target.checked)}
+                className="h-4 w-4"
+              />
+              This job includes on-site work
+            </label>
+            {hasOnsite ? (
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label className="block">
+                  <span className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">On-site start</span>
+                  <input type="date" value={onsiteStart} onChange={(e) => setOnsiteStart(e.target.value)} className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">On-site end</span>
+                  <input type="date" value={onsiteEnd} onChange={(e) => setOnsiteEnd(e.target.value)} className={inputCls} />
+                </label>
+              </div>
+            ) : null}
           </Field>
 
           <Field label="Team members" className="md:col-span-2">
@@ -232,7 +268,7 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
         </div>
 
         <p className="text-[11px] text-[var(--color-text-muted)]">
-          Tasks auto-generate from the template. Due dates stagger by phase (Pre −14d · During −6d · Post −1d) relative to the deadline.
+          Tasks auto-generate from the template. Pre-Job dates anchor 14 days before the on-site start (or before the report deadline if no on-site). During-Job anchors 6 days before on-site start. Post-Job anchors 1 day before the report submission date.
         </p>
 
         <DialogFooter>

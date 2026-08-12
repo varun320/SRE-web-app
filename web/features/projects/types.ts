@@ -19,6 +19,9 @@ export interface ProjectRow {
   accent_color: string | null;
   contact_name: string | null;
   contact_email: string | null;
+  has_onsite: boolean;
+  onsite_start: string | null;
+  onsite_end: string | null;
 }
 
 export interface TaskRow {

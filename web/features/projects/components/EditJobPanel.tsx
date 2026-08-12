@@ -23,6 +23,9 @@ interface Props {
     deadline: string | null;
     phase: ProjectPhase;
     team_ids: string[];
+    has_onsite: boolean;
+    onsite_start: string | null;
+    onsite_end: string | null;
   };
   clients: ClientWithDirectory[];
   templates: TemplateSummary[];
@@ -50,6 +53,9 @@ export function EditJobPanel({ projectId, isLegacy, initial, clients, templates,
   const [leadId, setLeadId] = useState(initial.lead_id ?? '');
   const [deadline, setDeadline] = useState(initial.deadline ?? '');
   const [phase, setPhase] = useState<ProjectPhase>(initial.phase);
+  const [hasOnsite, setHasOnsite] = useState(initial.has_onsite);
+  const [onsiteStart, setOnsiteStart] = useState(initial.onsite_start ?? '');
+  const [onsiteEnd, setOnsiteEnd] = useState(initial.onsite_end ?? '');
   const [teamIds, setTeamIds] = useState<Set<string>>(new Set(initial.team_ids));
 
   const client = useMemo(() => clients.find((c) => c.id === clientId), [clientId, clients]);
@@ -82,6 +88,13 @@ export function EditJobPanel({ projectId, isLegacy, initial, clients, templates,
       if (leadId) payload.lead_id = leadId;
       payload.deadline = deadline || null;
       payload.phase = phase;
+      payload.has_onsite = hasOnsite;
+      payload.onsite_start = hasOnsite ? (onsiteStart || null) : null;
+      payload.onsite_end   = hasOnsite ? (onsiteEnd   || null) : null;
+      if (hasOnsite && onsiteStart && onsiteEnd && onsiteStart > onsiteEnd) {
+        toast.error('On-site start must be on/before end');
+        return;
+      }
       payload.team_ids = Array.from(teamIds);
 
       const res = await updateProject(payload);
@@ -178,8 +191,27 @@ export function EditJobPanel({ projectId, isLegacy, initial, clients, templates,
             {users.map((u) => <option key={u.id} value={u.id}>{u.full_name}</option>)}
           </select>
         </Field>
-        <Field label="Deadline">
+        <Field label="Report submission date">
           <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputCls} />
+        </Field>
+
+        <Field label="On-site activity" className="md:col-span-2">
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={hasOnsite} onChange={(e) => setHasOnsite(e.target.checked)} className="h-4 w-4" />
+            This job includes on-site work
+          </label>
+          {hasOnsite ? (
+            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+              <label className="block">
+                <span className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">On-site start</span>
+                <input type="date" value={onsiteStart} onChange={(e) => setOnsiteStart(e.target.value)} className={inputCls} />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">On-site end</span>
+                <input type="date" value={onsiteEnd} onChange={(e) => setOnsiteEnd(e.target.value)} className={inputCls} />
+              </label>
+            </div>
+          ) : null}
         </Field>
 
         <Field label="Team members" className="md:col-span-2">
