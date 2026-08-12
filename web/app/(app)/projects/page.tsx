@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2 } from 'lucide-react';
+import { Briefcase, AlertTriangle, CalendarDays, PlayCircle, CheckCircle2, Columns } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -74,9 +74,17 @@ export default async function ProjectsDashboard() {
               Overdue, due-this-week, active jobs, and your priorities — at a glance.
             </p>
           </div>
-          {clients.length > 0 && templates.length > 0 && users.length > 0 ? (
-            <NewJobModal clients={clients} templates={templates} users={users} suggestedNumber={nextNumber} />
-          ) : null}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/projects/board"
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <Columns className="h-3.5 w-3.5" /> Board
+            </Link>
+            {clients.length > 0 && templates.length > 0 && users.length > 0 ? (
+              <NewJobModal clients={clients} templates={templates} users={users} suggestedNumber={nextNumber} />
+            ) : null}
+          </div>
         </div>
       </section>
 
