@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Receipt, AlertTriangle } from 'lucide-react';
-import { AdminExpensesTableBody } from '@/components/admin/AdminExpensesTableBody';
+import { AdminExpensesTableBody } from '@/features/expenses/components/AdminExpensesTableBody';
 
 type SortKey = 'submission_date' | 'invoice_no' | 'total_cad' | 'status' | 'employee';
 const SORT_KEYS: readonly SortKey[] = ['submission_date', 'invoice_no', 'total_cad', 'status', 'employee'];

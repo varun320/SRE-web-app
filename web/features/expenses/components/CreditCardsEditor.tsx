@@ -4,9 +4,9 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { creditCardSchema } from '@/lib/expenses/schemas';
-import { deleteCreditCard, upsertCreditCard } from '@/lib/expenses/mutations';
-import type { CreditCard } from '@/lib/expenses/types';
+import { creditCardSchema } from '@/features/expenses/schemas';
+import { deleteCreditCard, upsertCreditCard } from '@/features/expenses/mutations';
+import type { CreditCard } from '@/features/expenses/types';
 
 interface Props {
   initial: CreditCard[];

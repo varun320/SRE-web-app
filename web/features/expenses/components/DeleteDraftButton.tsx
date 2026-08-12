@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { deleteExpenseDraft } from '@/lib/expenses/mutations';
+import { deleteExpenseDraft } from '@/features/expenses/mutations';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface Props {

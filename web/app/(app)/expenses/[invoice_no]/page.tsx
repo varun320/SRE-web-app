@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites, fetchPayouts } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites, fetchPayouts } from '@/features/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
-import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
-import { UnsubmitButton } from '@/components/expenses/UnsubmitButton';
-import { DeleteDraftButton } from '@/components/expenses/DeleteDraftButton';
+import { ExpenseEditor } from '@/features/expenses/components/ExpenseEditor';
+import { UnsubmitButton } from '@/features/expenses/components/UnsubmitButton';
+import { DeleteDraftButton } from '@/features/expenses/components/DeleteDraftButton';
 import { StatusBadge } from '@/components/ui/status-badge';
 
 function money(n: number): string {

@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchMyCreditCards, fetchMyFavourites } from '@/lib/expenses/queries';
+import { fetchMyCreditCards, fetchMyFavourites } from '@/features/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
-import { CreditCardsEditor } from '@/components/expenses/CreditCardsEditor';
-import { FavouritesEditor } from '@/components/expenses/FavouritesEditor';
-import { InterestRateCard } from '@/components/expenses/InterestRateCard';
+import { CreditCardsEditor } from '@/features/expenses/components/CreditCardsEditor';
+import { FavouritesEditor } from '@/features/expenses/components/FavouritesEditor';
+import { InterestRateCard } from '@/features/expenses/components/InterestRateCard';
 
 export default async function ExpenseSettingsPage() {
   const sb = await getSupabaseServer();

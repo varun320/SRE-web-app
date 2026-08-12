@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { upsertPayout } from '@/lib/expenses/mutations';
+import { upsertPayout } from '@/features/expenses/mutations';
 import { DatePicker } from '@/components/ui/date-picker';
 
 interface OutstandingReport {

@@ -8,7 +8,7 @@
 // access_token is a Supabase JWT — /mcp accepts it directly.
 
 import type { NextRequest } from 'next/server';
-import { verifyCode, verifyPkce } from '@/lib/expenses/mcp/oauth-code';
+import { verifyCode, verifyPkce } from '@/features/expenses/mcp/oauth-code';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

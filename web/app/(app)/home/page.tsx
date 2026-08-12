@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { currentMonday, DAY_KEYS } from '@/lib/dates';
-import { fetchSummary } from '@/lib/expenses/queries';
+import { fetchSummary } from '@/features/expenses/queries';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { HoursSparkline } from '@/components/home/HoursSparkline';
 import type { TimesheetStatus } from '@/lib/types';

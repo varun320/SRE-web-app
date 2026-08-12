@@ -8,9 +8,9 @@
 // file is transport-only.
 
 import type { NextRequest } from 'next/server';
-import { extractBearer, sessionFromBearer } from '@/lib/expenses/mcp/auth';
-import { buildToolRegistry } from '@/lib/expenses/mcp/registry';
-import { zodToMcpJsonSchema } from '@/lib/expenses/mcp/schema';
+import { extractBearer, sessionFromBearer } from '@/features/expenses/mcp/auth';
+import { buildToolRegistry } from '@/features/expenses/mcp/registry';
+import { zodToMcpJsonSchema } from '@/features/expenses/mcp/schema';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;

@@ -1,7 +1,7 @@
 'use client';
 import { Loader2, Paperclip, Trash2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
-import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory } from '@/lib/expenses/types';
+import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory } from '@/features/expenses/types';
 import type { Project } from '@/lib/types';
 
 export interface LineCardValue {

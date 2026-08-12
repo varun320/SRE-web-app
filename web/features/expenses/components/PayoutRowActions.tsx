@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { deletePayout, upsertPayout } from '@/lib/expenses/mutations';
+import { deletePayout, upsertPayout } from '@/features/expenses/mutations';
 import { friendlyError } from '@/lib/errors';
 
 export interface PayoutRow {

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { upsertPayout } from '@/lib/expenses/mutations';
+import { upsertPayout } from '@/features/expenses/mutations';
 import { friendlyError } from '@/lib/errors';
 
 interface Props {

@@ -1,8 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CreditCard } from 'lucide-react';
-import { PayoutBatchForm } from '@/components/admin/PayoutBatchForm';
-import { PayoutRowActions } from '@/components/admin/PayoutRowActions';
+import { PayoutBatchForm } from '@/features/expenses/components/PayoutBatchForm';
+import { PayoutRowActions } from '@/features/expenses/components/PayoutRowActions';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

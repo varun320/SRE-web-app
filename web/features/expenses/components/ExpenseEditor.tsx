@@ -6,10 +6,10 @@ import { Loader2, Paperclip, Plus, Trash2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
 import { DatePicker } from '@/components/ui/date-picker';
 import { InfoHint } from '@/components/ui/info-hint';
-import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/lib/expenses/schemas';
-import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/lib/expenses/mutations';
-import { uploadReceipt } from '@/lib/expenses/receipts';
-import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineFavourite, type ExpenseLineItem, type ExpenseReport } from '@/lib/expenses/types';
+import { expenseDraftSchema, expenseLineSchema, type ExpenseLineInput } from '@/features/expenses/schemas';
+import { replaceExpenseLines, submitExpense, upsertExpenseDraft } from '@/features/expenses/mutations';
+import { uploadReceipt } from '@/features/expenses/receipts';
+import { EXPENSE_CATEGORIES, type CreditCard, type ExpenseCategory, type ExpenseLineFavourite, type ExpenseLineItem, type ExpenseReport } from '@/features/expenses/types';
 import type { Project } from '@/lib/types';
 import { ExpenseLineCardMobile } from './ExpenseLineCardMobile';
 

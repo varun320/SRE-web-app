@@ -7,7 +7,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { issueCode } from '@/lib/expenses/mcp/oauth-code';
+import { issueCode } from '@/features/expenses/mcp/oauth-code';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

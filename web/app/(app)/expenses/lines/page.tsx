@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Receipt, ArrowLeft, ArrowDown, ArrowUp } from 'lucide-react';
-import { EXPENSE_CATEGORIES } from '@/lib/expenses/types';
+import { EXPENSE_CATEGORIES } from '@/features/expenses/types';
 
 function money(n: number): string {
   return Number(n).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

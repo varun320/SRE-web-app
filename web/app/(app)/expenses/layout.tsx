@@ -1,4 +1,4 @@
-import { ExpenseTabs, EMPLOYEE_EXPENSE_TABS } from '@/components/expenses/ExpenseTabs';
+import { ExpenseTabs, EMPLOYEE_EXPENSE_TABS } from '@/features/expenses/components/ExpenseTabs';
 
 export default function ExpensesLayout({ children }: { children: React.ReactNode }) {
   return (

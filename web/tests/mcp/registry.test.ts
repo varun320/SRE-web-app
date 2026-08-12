@@ -6,7 +6,7 @@
 // It does NOT hit Postgres — handlers are constructed but never called.
 
 import { describe, expect, test } from 'vitest';
-import { buildToolRegistry } from '@/lib/expenses/mcp/registry';
+import { buildToolRegistry } from '@/features/expenses/mcp/registry';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const fakeSb = {} as SupabaseClient;

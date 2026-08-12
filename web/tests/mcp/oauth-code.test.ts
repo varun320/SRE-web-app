@@ -17,7 +17,7 @@ function b64url(buf: Buffer): string {
 
 describe('oauth-code', () => {
   it('issues and verifies a code round-trip', async () => {
-    const { issueCode, verifyCode } = await import('@/lib/expenses/mcp/oauth-code');
+    const { issueCode, verifyCode } = await import('@/features/expenses/mcp/oauth-code');
     const code = issueCode({
       sub: 'user-1',
       email: 'user@example.com',
@@ -35,7 +35,7 @@ describe('oauth-code', () => {
   });
 
   it('rejects a code with a tampered signature', async () => {
-    const { issueCode, verifyCode } = await import('@/lib/expenses/mcp/oauth-code');
+    const { issueCode, verifyCode } = await import('@/features/expenses/mcp/oauth-code');
     const code = issueCode({
       sub: 'u',
       email: null,
@@ -52,7 +52,7 @@ describe('oauth-code', () => {
   });
 
   it('rejects a code with a mutated body', async () => {
-    const { issueCode, verifyCode } = await import('@/lib/expenses/mcp/oauth-code');
+    const { issueCode, verifyCode } = await import('@/features/expenses/mcp/oauth-code');
     const code = issueCode({
       sub: 'u',
       email: null,
@@ -70,7 +70,7 @@ describe('oauth-code', () => {
   });
 
   it('verifies PKCE S256', async () => {
-    const { verifyPkce } = await import('@/lib/expenses/mcp/oauth-code');
+    const { verifyPkce } = await import('@/features/expenses/mcp/oauth-code');
     const verifier = 'test-verifier-abcdef1234567890abcdef1234567890abcdef';
     const challenge = b64url(createHash('sha256').update(verifier).digest());
     expect(verifyPkce(verifier, challenge, 'S256')).toBe(true);
@@ -78,7 +78,7 @@ describe('oauth-code', () => {
   });
 
   it('verifies PKCE plain', async () => {
-    const { verifyPkce } = await import('@/lib/expenses/mcp/oauth-code');
+    const { verifyPkce } = await import('@/features/expenses/mcp/oauth-code');
     expect(verifyPkce('same', 'same', 'plain')).toBe(true);
     expect(verifyPkce('a', 'b', 'plain')).toBe(false);
   });

@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCheck, ArrowDown, ArrowUp } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
+import { AdminExpenseActions } from '@/features/expenses/components/AdminExpenseActions';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { approveExpense } from '@/lib/expenses/mutations';
-import { paymentStatus } from '@/lib/expenses/payment-status';
+import { approveExpense } from '@/features/expenses/mutations';
+import { paymentStatus } from '@/features/expenses/payment-status';
 
 export type SortKey = 'submission_date' | 'invoice_no' | 'total_cad' | 'status' | 'employee';
 

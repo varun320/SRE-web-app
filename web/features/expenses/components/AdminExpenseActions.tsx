@@ -22,7 +22,7 @@ import {
   declineExpense,
   unlockExpense,
   upsertPayout,
-} from '@/lib/expenses/mutations';
+} from '@/features/expenses/mutations';
 
 interface Props {
   expenseId: string;

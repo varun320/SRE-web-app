@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { ExpenseEditor } from '@/components/expenses/ExpenseEditor';
+import { ExpenseEditor } from '@/features/expenses/components/ExpenseEditor';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites } from '@/lib/expenses/queries';
+import { fetchExpenseByInvoice, fetchExpenseLines, fetchMyCreditCards, fetchMyFavourites } from '@/features/expenses/queries';
 import { fetchProjects } from '@/lib/queries';
-import type { ExpenseLineItem } from '@/lib/expenses/types';
+import type { ExpenseLineItem } from '@/features/expenses/types';
 
 function suggestNextInvoice(last: string | null | undefined): string {
   // Increment the trailing integer of the previous invoice #, keeping the

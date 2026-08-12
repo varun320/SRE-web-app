@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { EXPENSE_CATEGORIES, type ExpenseCategory, type ExpenseLineFavourite } from '@/lib/expenses/types';
+import { EXPENSE_CATEGORIES, type ExpenseCategory, type ExpenseLineFavourite } from '@/features/expenses/types';
 import type { Project } from '@/lib/types';
 
 interface Props {

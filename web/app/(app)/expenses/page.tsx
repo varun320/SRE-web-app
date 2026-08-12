@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { Receipt, Plus, Copy } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchMyExpenses, fetchSummary } from '@/lib/expenses/queries';
+import { fetchMyExpenses, fetchSummary } from '@/features/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { InfoHint } from '@/components/ui/info-hint';
 import { formatDate } from '@/lib/dates';
-import { unifiedStatus } from '@/lib/expenses/payment-status';
+import { unifiedStatus } from '@/features/expenses/payment-status';
 
 function money(n: number): string {
   return n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

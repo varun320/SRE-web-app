@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { AdminExpenseActions } from '@/components/admin/AdminExpenseActions';
-import { PayoutRowActions } from '@/components/admin/PayoutRowActions';
-import { AddPayoutButton } from '@/components/admin/AddPayoutButton';
+import { AdminExpenseActions } from '@/features/expenses/components/AdminExpenseActions';
+import { PayoutRowActions } from '@/features/expenses/components/PayoutRowActions';
+import { AddPayoutButton } from '@/features/expenses/components/AddPayoutButton';
 import { ReceiptViewer } from '@/components/admin/ReceiptViewer';
-import type { ExpenseLineItem, ExpenseReport, ExpensePayout, CreditCard } from '@/lib/expenses/types';
+import type { ExpenseLineItem, ExpenseReport, ExpensePayout, CreditCard } from '@/features/expenses/types';
 
 function money(n: number): string {
   return Number(n).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Info } from 'lucide-react';
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { fetchBalanceForUser, fetchSummary } from '@/lib/expenses/queries';
+import { fetchBalanceForUser, fetchSummary } from '@/features/expenses/queries';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 
