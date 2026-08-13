@@ -19,7 +19,9 @@ import {
   User,
   MapPin,
   Briefcase,
+  Search,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { HelpButton } from './HelpButton';
 import { NotificationsBell } from '@/features/notifications/components/NotificationsBell';
 import { FirstVisitHint } from './FirstVisitHint';
@@ -119,13 +121,16 @@ export function Header({ email, isAdmin }: HeaderProps) {
           <span className="hidden sm:inline text-sm">SRE</span>
         </Link>
 
-        {/* Center — tabs */}
-        <nav className="hidden md:flex items-center justify-center gap-0.5">
-          {topItems.map((it) => (
-            <NavLink key={it.href} item={it} active={it.match(pathname)} />
-          ))}
-          <MeDropdown items={ME_NAV} active={meActive} pathname={pathname} />
-        </nav>
+        {/* Center — tabs + search */}
+        <div className="hidden md:flex items-center justify-center gap-3">
+          <nav className="flex items-center gap-0.5">
+            {topItems.map((it) => (
+              <NavLink key={it.href} item={it} active={it.match(pathname)} />
+            ))}
+            <MeDropdown items={ME_NAV} active={meActive} pathname={pathname} />
+          </nav>
+          <GlobalSearch />
+        </div>
         <div className="md:hidden" />
 
         {/* Right — chrome */}
@@ -166,6 +171,32 @@ export function Header({ email, isAdmin }: HeaderProps) {
         isAdmin={isAdmin}
       />
     </header>
+  );
+}
+
+function GlobalSearch() {
+  const router = useRouter();
+  const [q, setQ] = useState('');
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const query = q.trim();
+        if (!query) return;
+        router.push(`/search?q=${encodeURIComponent(query)}`);
+      }}
+      className="relative"
+    >
+      <Search className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+      <input
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Search jobs, tasks, people…"
+        aria-label="Search"
+        className="w-56 lg:w-72 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)]/60 pl-7 pr-2 py-1 text-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+      />
+    </form>
   );
 }
 
