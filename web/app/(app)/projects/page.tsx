@@ -12,6 +12,7 @@ import {
   fetchClientsWithDirectory,
   fetchTemplates,
   fetchTeamRoster,
+  fetchTeamWorkload,
 } from '@/features/projects/queries';
 import { PHASE_LABEL, type ProjectPhase, type TaskPriority } from '@/features/projects/types';
 import { NewJobModal } from '@/features/projects/components/NewJobModal';
@@ -22,6 +23,17 @@ function phaseTone(p: ProjectPhase): 'neutral' | 'info' | 'success' {
 
 function priorityTone(p: TaskPriority): 'neutral' | 'info' | 'warning' | 'danger' {
   return p === 'high' ? 'danger' : p === 'med' ? 'warning' : 'neutral';
+}
+
+function initials(name: string): string {
+  return name.trim().split(/\s+/).map((p) => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');
+}
+
+function workloadTone(n: number): { label: string; tone: 'muted' | 'success' | 'warning' | 'danger' } {
+  if (n === 0) return { label: 'Available',  tone: 'muted' };
+  if (n <= 3) return { label: 'Steady',      tone: 'success' };
+  if (n <= 7) return { label: 'Busy',        tone: 'warning' };
+  return       { label: 'Overloaded', tone: 'danger' };
 }
 
 function daysUntil(iso: string): number {
@@ -46,7 +58,7 @@ export default async function ProjectsDashboard() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [kpis, projects, priorities, clients, templates, users, nextNumber, legacyRes] = await Promise.all([
+  const [kpis, projects, priorities, clients, templates, users, nextNumber, legacyRes, workload] = await Promise.all([
     fetchDashboardKpis(sb),
     fetchActiveProjects(sb),
     fetchMyPriorities(sb, userId),
@@ -55,8 +67,11 @@ export default async function ProjectsDashboard() {
     fetchTeamRoster(sb),
     fetchNextProjectNumber(sb),
     sb.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'active').is('template_id', null),
+    fetchTeamWorkload(sb),
   ]);
   const legacyCount = legacyRes.count ?? 0;
+  const workloadTop = workload.filter((w) => w.open_count > 0).slice(0, 6);
+  const maxWorkload = Math.max(1, ...workloadTop.map((w) => w.open_count));
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
@@ -235,6 +250,58 @@ export default async function ProjectsDashboard() {
           </ul>
         </div>
       </section>
+
+      {workloadTop.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-h3 flex items-center gap-2"><Users className="h-4 w-4" /> Team workload</h2>
+              <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">Most-loaded members right now. Full view →</p>
+            </div>
+            <Link href="/projects/workload" className="text-xs text-[var(--color-accent)] hover:underline">All members →</Link>
+          </div>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {workloadTop.map((w) => {
+              const t = workloadTone(w.open_count);
+              const barPct = Math.max(6, Math.round((w.open_count / maxWorkload) * 100));
+              const barColor =
+                t.tone === 'danger'  ? 'var(--color-status-declined-fg)' :
+                t.tone === 'warning' ? 'var(--color-status-declined-fg)' :
+                t.tone === 'success' ? 'var(--color-status-approved-fg)' :
+                                       'var(--color-text-muted)';
+              return (
+                <Link
+                  key={w.user_id}
+                  href="/projects/workload"
+                  className="block rounded-[var(--radius-md)] border border-[var(--color-border-soft)] p-3 hover:bg-[var(--color-surface-2)] transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-[11px] font-medium"
+                      title={w.full_name}
+                    >
+                      {initials(w.full_name)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm truncate">{w.full_name}</div>
+                      <div className="text-[10px] text-[var(--color-text-muted)]">{w.open_count} open · {w.due_this_week_count} this wk</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 h-1 rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${barPct}%`, background: barColor }} />
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <StatusBadge tone={t.tone}>{t.label}</StatusBadge>
+                    {w.overdue_count > 0 ? (
+                      <span className="text-[10px] text-[var(--color-status-declined-fg)] font-medium">{w.overdue_count} overdue</span>
+                    ) : null}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
