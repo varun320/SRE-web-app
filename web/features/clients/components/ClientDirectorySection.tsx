@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, X, Mail, Phone, Users, MapPin } from 'lucide-react';
+import { Plus, X, Mail, Phone, Users, MapPin, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
 import { ShowMore } from '@/shared/ui/show-more';
-import { createContact, createSite, deleteContact, deleteSite } from '@/features/clients/actions';
+import { createContact, createSite, deleteContact, deleteSite, updateContact, updateSite } from '@/features/clients/actions';
 
 type Line = { icon: 'mail' | 'phone'; text: string; href: string };
 export interface DirectoryItem {
@@ -13,6 +13,14 @@ export interface DirectoryItem {
   primary: string;
   secondary: string | null;
   lines: Line[];
+  /** Raw fields required to edit — kept optional so non-admin views can omit. */
+  raw?: {
+    name: string;
+    role?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+  };
 }
 
 interface Props {
@@ -29,6 +37,7 @@ const KIND_ICON = { contact: Users, site: MapPin } as const;
 export function ClientDirectorySection({ title, clientId, isAdmin, items, kind }: Props) {
   const Icon = KIND_ICON[kind];
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   return (
@@ -69,41 +78,73 @@ export function ClientDirectorySection({ title, clientId, isAdmin, items, kind }
           step={10}
           emptyLabel={kind === 'contact' ? 'No contacts yet.' : 'No sites yet.'}
           render={(item) => (
-            <div key={item.id} className="py-2 border-t border-[var(--color-border-soft)] first:border-t-0 flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">{item.primary}</div>
-                {item.secondary ? (
-                  <div className="text-[11px] text-[var(--color-text-muted)]">{item.secondary}</div>
-                ) : null}
-                {item.lines.length > 0 ? (
-                  <div className="mt-1 flex flex-col gap-0.5">
-                    {item.lines.map((l, i) => (
-                      <a key={i} href={l.href} className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)]">
-                        {l.icon === 'mail' ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />}
-                        {l.text}
-                      </a>
-                    ))}
+            <div key={item.id} className="py-2 border-t border-[var(--color-border-soft)] first:border-t-0">
+              {editingId === item.id && isAdmin && item.raw ? (
+                <EditForm
+                  kind={kind}
+                  clientId={clientId}
+                  id={item.id}
+                  initial={item.raw}
+                  disabled={pending}
+                  onSubmit={(fd) => start(async () => {
+                    const action = kind === 'contact' ? updateContact : updateSite;
+                    const res = await action(fd);
+                    if (res?.error) toast.error(res.error);
+                    else { toast.success('Saved'); setEditingId(null); }
+                  })}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{item.primary}</div>
+                    {item.secondary ? (
+                      <div className="text-[11px] text-[var(--color-text-muted)]">{item.secondary}</div>
+                    ) : null}
+                    {item.lines.length > 0 ? (
+                      <div className="mt-1 flex flex-col gap-0.5">
+                        {item.lines.map((l, i) => (
+                          <a key={i} href={l.href} className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)]">
+                            {l.icon === 'mail' ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />}
+                            {l.text}
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-              </div>
-              {isAdmin ? (
-                <form action={(fd) => start(async () => {
-                  const action = kind === 'contact' ? deleteContact : deleteSite;
-                  const res = await action(fd);
-                  if (res?.error) toast.error(res.error);
-                })}>
-                  <input type="hidden" name="id" value={item.id} />
-                  <input type="hidden" name="client_id" value={clientId} />
-                  <button
-                    type="submit"
-                    aria-label="Remove"
-                    disabled={pending}
-                    className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </form>
-              ) : null}
+                  {isAdmin ? (
+                    <div className="flex items-center gap-0.5">
+                      {item.raw ? (
+                        <button
+                          type="button"
+                          aria-label="Edit"
+                          onClick={() => setEditingId(item.id)}
+                          disabled={pending}
+                          className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)] p-1"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      ) : null}
+                      <form action={(fd) => start(async () => {
+                        const action = kind === 'contact' ? deleteContact : deleteSite;
+                        const res = await action(fd);
+                        if (res?.error) toast.error(res.error);
+                      })}>
+                        <input type="hidden" name="id" value={item.id} />
+                        <input type="hidden" name="client_id" value={clientId} />
+                        <button
+                          type="submit"
+                          aria-label="Remove"
+                          disabled={pending}
+                          className="text-[var(--color-text-muted)] hover:text-[var(--color-status-declined-fg)] p-1"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </form>
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           )}
         />
@@ -147,3 +188,39 @@ function AddForm({ kind, clientId, disabled, onSubmit, onCancel }: AddFormProps)
 
 const inputCls =
   'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-sm';
+
+interface EditFormProps {
+  kind: 'contact' | 'site';
+  clientId: string;
+  id: string;
+  initial: NonNullable<DirectoryItem['raw']>;
+  disabled: boolean;
+  onSubmit: (fd: FormData) => void;
+  onCancel: () => void;
+}
+
+function EditForm({ kind, clientId, id, initial, disabled, onSubmit, onCancel }: EditFormProps) {
+  return (
+    <form
+      action={onSubmit}
+      className="rounded-md border border-[var(--color-accent)]/60 bg-[var(--color-surface-2)]/40 p-3 space-y-2"
+    >
+      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="client_id" value={clientId} />
+      <input name="name" defaultValue={initial.name} placeholder={kind === 'contact' ? 'Name' : 'Site name'} required className={inputCls} />
+      {kind === 'contact' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <input name="role"  defaultValue={initial.role  ?? ''} placeholder="Role"  className={inputCls} />
+          <input name="email" defaultValue={initial.email ?? ''} placeholder="Email" className={inputCls} />
+          <input name="phone" defaultValue={initial.phone ?? ''} placeholder="Phone" className={`${inputCls} md:col-span-2`} />
+        </div>
+      ) : (
+        <input name="address" defaultValue={initial.address ?? ''} placeholder="Address (optional)" className={inputCls} />
+      )}
+      <div className="flex gap-2 justify-end">
+        <Button type="button" variant="outline" size="xs" onClick={onCancel} disabled={disabled}>Cancel</Button>
+        <Button type="submit" size="xs" disabled={disabled}>Save</Button>
+      </div>
+    </form>
+  );
+}

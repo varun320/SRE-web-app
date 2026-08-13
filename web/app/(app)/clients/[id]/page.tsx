@@ -112,6 +112,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               c.email ? { icon: 'mail' as const, text: c.email, href: `mailto:${c.email}` } : null,
               c.phone ? { icon: 'phone' as const, text: c.phone, href: `tel:${c.phone}` } : null,
             ].filter((x) => x !== null),
+            raw: { name: c.name, role: c.role, email: c.email, phone: c.phone },
           }))}
           kind="contact"
         />
@@ -124,6 +125,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             primary: s.name,
             secondary: s.address,
             lines: [],
+            raw: { name: s.name, address: s.address },
           }))}
           kind="site"
         />

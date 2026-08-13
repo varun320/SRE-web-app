@@ -57,6 +57,23 @@ export async function createContact(formData: FormData) {
   revalidatePath(`/clients/${client_id}`);
 }
 
+export async function updateContact(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '');
+  const client_id = String(formData.get('client_id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const role = String(formData.get('role') ?? '').trim() || null;
+  const email = String(formData.get('email') ?? '').trim() || null;
+  const phone = String(formData.get('phone') ?? '').trim() || null;
+  if (!id) return { error: 'missing id' };
+  if (!name) return { error: 'name required' };
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) return { error: 'invalid email' };
+  const { error } = await sb.from('contacts').update({ name, role, email, phone }).eq('id', id);
+  if (error) return { error: friendlyError(error) };
+  if (client_id) revalidatePath(`/clients/${client_id}`);
+}
+
 export async function deleteContact(formData: FormData) {
   const sb = await getSupabaseServer();
   if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
@@ -79,6 +96,20 @@ export async function createSite(formData: FormData) {
   });
   if (error) return { error: friendlyError(error) };
   revalidatePath(`/clients/${client_id}`);
+}
+
+export async function updateSite(formData: FormData) {
+  const sb = await getSupabaseServer();
+  if (!(await fetchIsAdmin(sb))) return { error: 'admin only' };
+  const id = String(formData.get('id') ?? '');
+  const client_id = String(formData.get('client_id') ?? '');
+  const name = String(formData.get('name') ?? '').trim();
+  const address = String(formData.get('address') ?? '').trim() || null;
+  if (!id) return { error: 'missing id' };
+  if (!name) return { error: 'name required' };
+  const { error } = await sb.from('sites').update({ name, address }).eq('id', id);
+  if (error) return { error: friendlyError(error) };
+  if (client_id) revalidatePath(`/clients/${client_id}`);
 }
 
 export async function deleteSite(formData: FormData) {
