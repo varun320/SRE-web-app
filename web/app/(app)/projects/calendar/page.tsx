@@ -40,6 +40,32 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     fetchTeamRoster(sb),
   ]);
 
+  // When the visible month has no on-site engagements, offer a jump link to
+  // the next project that does — otherwise Utsav's on-site feature is silent
+  // and it's easy to think the feature is broken.
+  let nextOnsite: { month: string; label: string; project_number: number; scope: string } | null = null;
+  if (blocks.length === 0) {
+    const { data } = await sb
+      .from('projects')
+      .select('project_number, name, scope_title, onsite_start')
+      .eq('has_onsite', true)
+      .gt('onsite_start', to)
+      .order('onsite_start', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      const d = new Date(data.onsite_start);
+      const y = d.getFullYear();
+      const mo = d.getMonth() + 1;
+      nextOnsite = {
+        month: `${y}-${String(mo).padStart(2, '0')}`,
+        label: monthLabel(y, mo),
+        project_number: data.project_number,
+        scope: data.scope_title ?? data.name,
+      };
+    }
+  }
+
   const prev = shift(year, month, -1);
   const next = shift(year, month, +1);
   const label = monthLabel(year, month);
@@ -63,6 +89,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               {tasks.length} task{tasks.length === 1 ? '' : 's'} due · {blocks.length} on-site engagement{blocks.length === 1 ? '' : 's'} this month.
               Colored bars are on-site windows (click to jump to the job). Chips are task due dates.
             </p>
+            {nextOnsite ? (
+              <p className="mt-2 text-xs">
+                <Link href={`/projects/calendar?m=${nextOnsite.month}`} className="inline-flex items-center gap-1 text-[var(--color-accent)] hover:underline">
+                  Next on-site engagement: {nextOnsite.label} · {nextOnsite.project_number} · {nextOnsite.scope} →
+                </Link>
+              </p>
+            ) : null}
           </div>
           <div className="flex items-center gap-1">
             <Link
