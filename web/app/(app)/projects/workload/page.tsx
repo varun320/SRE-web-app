@@ -111,10 +111,10 @@ export default async function WorkloadPage() {
                 </div>
 
                 {r.tasks.length > 0 ? (
-                  <details className="group mt-3 border-t border-[var(--color-border-soft)] pt-3">
+                  <details open className="group mt-3 border-t border-[var(--color-border-soft)] pt-3">
                     <summary className="flex cursor-pointer items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] list-none [&::-webkit-details-marker]:hidden">
                       <ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
-                      Show tasks
+                      Tasks
                     </summary>
                     <ul className="mt-2 space-y-1.5">
                       {r.tasks.map((t) => {
