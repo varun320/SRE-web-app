@@ -3,8 +3,7 @@ import { fetchIsAdmin } from '@/shared/lib/role';
 import { PageHeader } from '@/shared/ui/page-header';
 import { ClientsMap } from '@/features/clients/components/ClientsMap';
 import { ClientForm } from '@/features/clients/components/ClientForm';
-import { ShowMore } from '@/shared/ui/show-more';
-import { DirectoryCard } from '@/features/clients/components/DirectoryCard';
+import { DirectoryList } from '@/features/clients/components/DirectoryList';
 import { fetchDirectoryCards } from '@/features/clients/queries';
 import type { ClientRow } from '@/features/clients/types';
 
@@ -36,15 +35,7 @@ export default async function ClientsPage() {
       />
       {isAdmin && <ClientForm />}
       <ClientsMap clients={rows} />
-      <div className="space-y-4">
-        <ShowMore
-          items={cards}
-          initial={8}
-          step={12}
-          emptyLabel="No clients yet."
-          render={(card) => <DirectoryCard key={card.id} card={card} />}
-        />
-      </div>
+      <DirectoryList cards={cards} initial={8} step={12} />
     </div>
   );
 }
