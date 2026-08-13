@@ -20,6 +20,14 @@ export interface ClientOpt {
   name: string;
   sites: Array<{ id: string; name: string }>;
   contacts: Array<{ id: string; name: string; email: string | null; role: string | null }>;
+  past_projects: Array<{
+    project_number: number;
+    name: string;
+    scope_title: string | null;
+    site_id: string | null;
+    deadline: string | null;
+    status: string;
+  }>;
 }
 export interface TemplateOpt {
   id: string;
@@ -67,6 +75,13 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
 
   const client = useMemo(() => clients.find((c) => c.id === clientId), [clientId, clients]);
   const template = useMemo(() => templates.find((t) => t.id === templateId), [templateId, templates]);
+  const pastProjects = useMemo(() => {
+    if (!client?.past_projects?.length) return [];
+    const selectedSite = siteChoice !== NONE && siteChoice !== NEW ? siteChoice : null;
+    return client.past_projects
+      .filter((p) => (selectedSite ? p.site_id === selectedSite : true))
+      .slice(0, 6);
+  }, [client, siteChoice]);
 
   function toggleTeam(id: string) {
     setTeamIds((prev) => {
@@ -187,6 +202,38 @@ export function NewJobModal({ clients, templates, users, suggestedNumber }: Prop
               />
             ) : null}
           </Field>
+
+          {pastProjects.length > 0 ? (
+            <div className="md:col-span-2 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/60 p-2.5">
+              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+                Past work for {client?.name}
+                {siteChoice !== NONE && siteChoice !== NEW ? ` · ${client?.sites.find((s) => s.id === siteChoice)?.name ?? ''}` : ''}
+              </div>
+              <ul className="space-y-1">
+                {pastProjects.map((p) => {
+                  const siteName = p.site_id ? client?.sites.find((s) => s.id === p.site_id)?.name : null;
+                  return (
+                    <li key={p.project_number} className="flex items-center justify-between gap-2 text-xs">
+                      <a
+                        href={`/projects/${p.project_number}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-[var(--color-accent)] hover:underline"
+                      >
+                        {p.project_number}
+                      </a>
+                      <span className="min-w-0 flex-1 truncate text-[var(--color-text)]">
+                        {p.scope_title ?? p.name}
+                      </span>
+                      <span className="shrink-0 text-[var(--color-text-muted)]">
+                        {siteName ? `${siteName} · ` : ''}{p.status}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : null}
 
           <Field label="Contact" className="md:col-span-2">
             <select value={contactChoice} onChange={(e) => setContactChoice(e.target.value)} className={inputCls}>

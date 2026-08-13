@@ -17,18 +17,33 @@ export async function fetchNextProjectNumber(sb: SupabaseClient): Promise<number
   return Math.max(latest + 1, min + 1);
 }
 
+export interface ClientPastProject {
+  project_number: number;
+  name: string;
+  scope_title: string | null;
+  site_id: string | null;
+  deadline: string | null;
+  status: string;
+}
+
 export interface ClientWithDirectory {
   id: string;
   name: string;
   sites: Array<{ id: string; name: string }>;
   contacts: Array<{ id: string; name: string; email: string | null; role: string | null }>;
+  past_projects: ClientPastProject[];
 }
 
 export async function fetchClientsWithDirectory(sb: SupabaseClient): Promise<ClientWithDirectory[]> {
-  const [clientsRes, sitesRes, contactsRes] = await Promise.all([
+  const [clientsRes, sitesRes, contactsRes, projectsRes] = await Promise.all([
     sb.from('clients').select('id, name').order('name'),
     sb.from('sites').select('id, client_id, name').order('name'),
     sb.from('contacts').select('id, client_id, name, email, role').order('name'),
+    sb
+      .from('projects')
+      .select('project_number, name, scope_title, client_id, site_id, deadline, status')
+      .not('client_id', 'is', null)
+      .order('project_number', { ascending: false }),
   ]);
   const sitesBy = new Map<string, ClientWithDirectory['sites']>();
   for (const s of sitesRes.data ?? []) {
@@ -42,11 +57,25 @@ export async function fetchClientsWithDirectory(sb: SupabaseClient): Promise<Cli
     arr.push({ id: c.id, name: c.name, email: c.email, role: c.role });
     contactsBy.set(c.client_id, arr);
   }
+  const pastBy = new Map<string, ClientPastProject[]>();
+  for (const p of projectsRes.data ?? []) {
+    const arr = pastBy.get(p.client_id) ?? [];
+    arr.push({
+      project_number: p.project_number,
+      name: p.name,
+      scope_title: p.scope_title,
+      site_id: p.site_id,
+      deadline: p.deadline,
+      status: p.status,
+    });
+    pastBy.set(p.client_id, arr);
+  }
   return (clientsRes.data ?? []).map((c) => ({
     id: c.id,
     name: c.name,
     sites: sitesBy.get(c.id) ?? [],
     contacts: contactsBy.get(c.id) ?? [],
+    past_projects: pastBy.get(c.id) ?? [],
   }));
 }
 
