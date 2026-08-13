@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, MapPin, Mail, User, Users } from 'lucide-react';
+import { ArrowLeft, MapPin, Mail, User, Users, History } from 'lucide-react';
 import { getSupabaseServer } from '@/shared/supabase/server';
 import { StatusBadge } from '@/shared/ui/status-badge';
 import { formatDate } from '@/shared/lib/dates';
-import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates } from '@/features/projects/queries';
+import { fetchProjectByNumber, fetchTeamRoster, fetchClientsWithDirectory, fetchTemplates, fetchPastProjectsForSite } from '@/features/projects/queries';
 import { EditJobPanel } from '@/features/projects/components/EditJobPanel';
 import { PHASE_LABEL, type ProjectPhase } from '@/features/projects/types';
 import { TasksSection } from '@/features/projects/components/TasksSection';
@@ -46,6 +46,14 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
     fetchTemplates(sb),
   ]);
   if (!project) notFound();
+
+  const pastAtSite = project.client_id
+    ? await fetchPastProjectsForSite(sb, {
+        clientId: project.client_id,
+        siteId: project.site_id ?? null,
+        excludeProjectId: project.id,
+      })
+    : [];
 
   const accent = project.accent_color ?? 'var(--color-accent)';
   const progressColor = project.progress_pct >= 90 ? 'var(--color-status-approved-fg)' : 'var(--color-accent)';
@@ -166,6 +174,56 @@ export default async function ProjectDetail({ params }: { params: Promise<{ numb
       </section>
 
       <TasksSection tasks={project.tasks} assignableUsers={users} />
+
+      {pastAtSite.length > 0 ? (
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-h3 flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Past work at {project.site_name ? project.site_name : project.client_name}
+            </h2>
+            <span className="text-xs text-[var(--color-text-muted)]">{pastAtSite.length} project{pastAtSite.length === 1 ? '' : 's'}</span>
+          </div>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            {project.site_name
+              ? 'Other jobs at this same site — context before you plan this one.'
+              : 'Other jobs for this client (no specific site) — context before you plan this one.'}
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Job #</th>
+                  <th>Scope</th>
+                  <th>Phase</th>
+                  <th>Lead</th>
+                  <th>Report due</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pastAtSite.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <Link href={`/projects/${p.project_number}`} className="font-mono hover:underline">
+                        {p.project_number}
+                      </Link>
+                    </td>
+                    <td>
+                      <div className="text-sm">{p.scope_title ?? p.name}</div>
+                      {p.status === 'closed' ? (
+                        <div className="text-[11px] text-[var(--color-text-muted)]">closed</div>
+                      ) : null}
+                    </td>
+                    <td><StatusBadge tone={phaseTone(p.phase)}>{PHASE_LABEL[p.phase]}</StatusBadge></td>
+                    <td className="text-xs col-muted">{p.lead_name ?? '—'}</td>
+                    <td className="text-xs col-muted">{p.deadline ? formatDate(p.deadline) : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }

@@ -115,6 +115,46 @@ export async function fetchTemplates(sb: SupabaseClient): Promise<TemplateSummar
   }));
 }
 
+export interface PastSiteProject {
+  id: string;
+  project_number: number;
+  name: string;
+  scope_title: string | null;
+  phase: 'pre' | 'during' | 'post';
+  status: string;
+  deadline: string | null;
+  lead_name: string | null;
+}
+
+export async function fetchPastProjectsForSite(
+  sb: SupabaseClient,
+  args: { clientId: string; siteId: string | null; excludeProjectId: string },
+): Promise<PastSiteProject[]> {
+  let q = sb
+    .from('projects')
+    .select('id, project_number, name, scope_title, phase, status, deadline, users:lead_id(full_name)')
+    .eq('client_id', args.clientId)
+    .neq('id', args.excludeProjectId)
+    .order('project_number', { ascending: false })
+    .limit(10);
+  q = args.siteId ? q.eq('site_id', args.siteId) : q.is('site_id', null);
+  const { data } = await q;
+  return (data ?? []).map((r) => {
+    const usersRel = r.users as unknown as { full_name: string } | { full_name: string }[] | null;
+    const lead = Array.isArray(usersRel) ? usersRel[0] : usersRel;
+    return {
+      id: r.id as string,
+      project_number: r.project_number as number,
+      name: r.name as string,
+      scope_title: r.scope_title as string | null,
+      phase: r.phase as 'pre' | 'during' | 'post',
+      status: r.status as string,
+      deadline: r.deadline as string | null,
+      lead_name: lead?.full_name ?? null,
+    };
+  });
+}
+
 export interface UserOption {
   id: string;
   full_name: string;
