@@ -311,6 +311,68 @@ export interface MyTaskRow extends TaskRow {
   project_name: string;
 }
 
+export interface AllTasksRow {
+  id: string;
+  title: string;
+  section_name: string | null;
+  phase: 'pre' | 'during' | 'post';
+  priority: 'high' | 'med' | 'low';
+  due_date: string | null;
+  status: 'todo' | 'in_progress' | 'done';
+  project_id: string;
+  project_number: number;
+  project_name: string;
+  client_id: string | null;
+  client_name: string | null;
+  assignee_id: string | null;
+  assignee_name: string | null;
+}
+
+/** Every open task on adopted projects. Grouped by phase in the UI, filterable
+ * by client via URL param. Excludes legacy (unadopted) projects. */
+export async function fetchAllTasks(
+  sb: SupabaseClient,
+  filters: { clientId?: string | null } = {},
+): Promise<AllTasksRow[]> {
+  let q = sb
+    .from('tasks')
+    .select('id, title, section_name, phase, priority, due_date, status, project_id, assignee_id, projects!inner(project_number, name, template_id, client_id, clients(name)), users:assignee_id(full_name)')
+    .neq('status', 'done')
+    .order('due_date', { ascending: true, nullsFirst: false });
+  if (filters.clientId) q = q.eq('projects.client_id', filters.clientId);
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  type Row = {
+    id: string; title: string; section_name: string | null;
+    phase: 'pre' | 'during' | 'post'; priority: 'high' | 'med' | 'low';
+    due_date: string | null; status: 'todo' | 'in_progress' | 'done';
+    project_id: string; assignee_id: string | null;
+    projects: { project_number: number; name: string; template_id: string | null; client_id: string | null; clients: { name: string } | null };
+    users: { full_name: string } | { full_name: string }[] | null;
+  };
+  return ((data ?? []) as unknown as Row[])
+    .filter((r) => r.projects.template_id != null)
+    .map((r) => {
+      const u = Array.isArray(r.users) ? r.users[0] : r.users;
+      return {
+        id: r.id,
+        title: r.title,
+        section_name: r.section_name,
+        phase: r.phase,
+        priority: r.priority,
+        due_date: r.due_date,
+        status: r.status,
+        project_id: r.project_id,
+        project_number: r.projects.project_number,
+        project_name: r.projects.name,
+        client_id: r.projects.client_id,
+        client_name: r.projects.clients?.name ?? null,
+        assignee_id: r.assignee_id,
+        assignee_name: u?.full_name ?? null,
+      };
+    });
+}
+
 export interface OnsiteBlock {
   project_id: string;
   project_number: number;

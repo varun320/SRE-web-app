@@ -131,6 +131,12 @@ export default async function ProjectsDashboard() {
               <ListChecks className="h-3.5 w-3.5" /> My tasks
             </Link>
             <Link
+              href="/projects/tasks"
+              className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
+            >
+              <ListChecks className="h-3.5 w-3.5" /> Task list
+            </Link>
+            <Link
               href="/projects/board"
               className="inline-flex items-center gap-1 rounded-md border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-surface-2)]"
             >
