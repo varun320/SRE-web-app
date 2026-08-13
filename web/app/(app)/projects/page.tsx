@@ -95,6 +95,13 @@ export default async function ProjectsDashboard() {
   const workloadTop = workload.filter((w) => w.open_count > 0).slice(0, 6);
   const maxWorkload = Math.max(1, ...workloadTop.map((w) => w.open_count));
 
+  const me = users.find((u) => u.id === userId);
+  const firstName = me?.full_name?.trim().split(/\s+/)[0] ?? 'there';
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const todayLabel = now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const deadlinesThisWeek = weekTasks.filter((t) => !!t.due_date && t.status !== 'done').length;
+
   // Bucket week tasks by ISO due date. Skip completed — dashboard is about
   // what's *outstanding* this week, not history.
   const weekByDay = new Map<string, typeof weekTasks>();
@@ -118,9 +125,9 @@ export default async function ProjectsDashboard() {
             <div className="flex items-center gap-2 text-caption text-[var(--color-text-muted)]">
               <Briefcase className="h-3.5 w-3.5" /> Projects
             </div>
-            <h1 className="text-h1 mt-1">On top of every job</h1>
+            <h1 className="text-h1 mt-1">{greeting}, {firstName}</h1>
             <p className="mt-2 text-body-sm text-[var(--color-text-muted)] max-w-xl">
-              Overdue, due-this-week, active jobs, and your priorities — at a glance.
+              {todayLabel} · {kpis.activeJobs} active {kpis.activeJobs === 1 ? 'job' : 'jobs'} · {deadlinesThisWeek} {deadlinesThisWeek === 1 ? 'deadline' : 'deadlines'} this week
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
