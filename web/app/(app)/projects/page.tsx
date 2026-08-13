@@ -176,6 +176,7 @@ export default async function ProjectsDashboard() {
                       <th>Job #</th>
                       <th>Client / Scope</th>
                       <th>Phase</th>
+                      <th>Lead</th>
                       <th className="num">Team</th>
                       <th className="num">Progress</th>
                       <th>Deadline</th>
@@ -196,6 +197,7 @@ export default async function ProjectsDashboard() {
                             <div className="col-muted text-xs">{p.scope_title ?? p.name}</div>
                           </td>
                           <td><StatusBadge tone={phaseTone(p.phase)}>{PHASE_LABEL[p.phase]}</StatusBadge></td>
+                          <td className="text-xs">{p.lead_name ?? <span className="col-muted">—</span>}</td>
                           <td className="num text-xs col-muted">{p.team_ids.length}</td>
                           <td className="num w-32">
                             <div className="flex items-center gap-2">

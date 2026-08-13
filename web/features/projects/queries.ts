@@ -219,6 +219,7 @@ export async function fetchTemplatesWithTasks(sb: SupabaseClient): Promise<Templ
 
 export interface ActiveProjectSummary extends ProjectRow {
   client_name: string | null;
+  lead_name: string | null;
   progress_pct: number;
   team_ids: string[];
   open_tasks: number;
@@ -228,7 +229,7 @@ export interface ActiveProjectSummary extends ProjectRow {
 export async function fetchActiveProjects(sb: SupabaseClient): Promise<ActiveProjectSummary[]> {
   const { data: projects, error } = await sb
     .from('projects')
-    .select('id, org_id, project_number, name, status, client_id, site_id, contact_id, template_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, has_onsite, onsite_start, onsite_end, clients ( name )')
+    .select('id, org_id, project_number, name, status, client_id, site_id, contact_id, template_id, scope_title, phase, deadline, lead_id, accent_color, contact_name, contact_email, has_onsite, onsite_start, onsite_end, clients ( name ), users:lead_id ( full_name )')
     .eq('status', 'active')
     // Only surface projects that have been adopted into the PM flow. Legacy
     // timesheet-only projects (52 rows with no template/lead/deadline) stay
@@ -237,7 +238,12 @@ export async function fetchActiveProjects(sb: SupabaseClient): Promise<ActivePro
     .not('template_id', 'is', null)
     .order('deadline', { ascending: true, nullsFirst: false });
   if (error) throw new Error(error.message);
-  const rows = (projects ?? []) as unknown as Array<ProjectRow & { clients: { name: string } | null }>;
+  const rows = (projects ?? []) as unknown as Array<
+    ProjectRow & {
+      clients: { name: string } | null;
+      users: { full_name: string } | { full_name: string }[] | null;
+    }
+  >;
   if (rows.length === 0) return [];
 
   const ids = rows.map((r) => r.id);
@@ -257,13 +263,17 @@ export async function fetchActiveProjects(sb: SupabaseClient): Promise<ActivePro
   for (const t of taskRes.data ?? []) {
     if (t.status !== 'done') openBy.set(t.project_id, (openBy.get(t.project_id) ?? 0) + 1);
   }
-  return rows.map((r) => ({
-    ...r,
-    client_name: r.clients?.name ?? null,
-    progress_pct: progressBy.get(r.id) ?? 0,
-    team_ids: teamBy.get(r.id) ?? [],
-    open_tasks: openBy.get(r.id) ?? 0,
-  }));
+  return rows.map((r) => {
+    const lead = Array.isArray(r.users) ? r.users[0] : r.users;
+    return {
+      ...r,
+      client_name: r.clients?.name ?? null,
+      lead_name: lead?.full_name ?? null,
+      progress_pct: progressBy.get(r.id) ?? 0,
+      team_ids: teamBy.get(r.id) ?? [],
+      open_tasks: openBy.get(r.id) ?? 0,
+    };
+  });
 }
 
 export interface DashboardKpis {
