@@ -13,6 +13,7 @@ import {
   fetchTemplates,
   fetchTeamRoster,
   fetchTeamWorkload,
+  fetchTasksInRange,
 } from '@/features/projects/queries';
 import { PHASE_LABEL, type ProjectPhase, type TaskPriority } from '@/features/projects/types';
 import { NewJobModal } from '@/features/projects/components/NewJobModal';
@@ -58,7 +59,27 @@ export default async function ProjectsDashboard() {
   const userId = userRow.user?.id;
   if (!userId) throw new Error('unauthenticated');
 
-  const [kpis, projects, priorities, clients, templates, users, nextNumber, legacyRes, workload] = await Promise.all([
+  // Mon-anchored ISO week window for the "This week's deadlines" strip.
+  const now = new Date();
+  const dow = now.getDay(); // 0=Sun … 6=Sat
+  const daysToMon = (dow + 6) % 7;
+  const weekStart = new Date(now); weekStart.setHours(0, 0, 0, 0); weekStart.setDate(weekStart.getDate() - daysToMon);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const weekDays: { date: Date; iso: string; short: string; num: number; isToday: boolean }[] = [];
+  const todayIso = fmt(now);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+    weekDays.push({
+      date: d,
+      iso: fmt(d),
+      short: d.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
+      num: d.getDate(),
+      isToday: fmt(d) === todayIso,
+    });
+  }
+
+  const [kpis, projects, priorities, clients, templates, users, nextNumber, legacyRes, workload, weekTasks] = await Promise.all([
     fetchDashboardKpis(sb),
     fetchActiveProjects(sb),
     fetchMyPriorities(sb, userId),
@@ -68,10 +89,21 @@ export default async function ProjectsDashboard() {
     fetchNextProjectNumber(sb),
     sb.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'active').is('template_id', null),
     fetchTeamWorkload(sb),
+    fetchTasksInRange(sb, fmt(weekStart), fmt(weekEnd)),
   ]);
   const legacyCount = legacyRes.count ?? 0;
   const workloadTop = workload.filter((w) => w.open_count > 0).slice(0, 6);
   const maxWorkload = Math.max(1, ...workloadTop.map((w) => w.open_count));
+
+  // Bucket week tasks by ISO due date. Skip completed — dashboard is about
+  // what's *outstanding* this week, not history.
+  const weekByDay = new Map<string, typeof weekTasks>();
+  for (const t of weekTasks) {
+    if (!t.due_date || t.status === 'done') continue;
+    const arr = weekByDay.get(t.due_date) ?? [];
+    arr.push(t);
+    weekByDay.set(t.due_date, arr);
+  }
 
   return (
     <main className="w-full px-3 md:px-4 py-5 space-y-6">
@@ -154,6 +186,53 @@ export default async function ProjectsDashboard() {
         <Kpi label="Active jobs"   value={kpis.activeJobs}   icon={PlayCircle}  tone="info" />
         <Kpi label="Done"          value={kpis.done}         icon={CheckCircle2} tone="success" />
       </div>
+
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-h3 flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" /> This week&apos;s deadlines
+          </h2>
+          <Link href="/projects/calendar" className="text-xs text-[var(--color-accent)] hover:underline">Open calendar →</Link>
+        </div>
+        <div className="mt-3 grid grid-cols-7 gap-2">
+          {weekDays.map((d) => {
+            const tasks = weekByDay.get(d.iso) ?? [];
+            return (
+              <div key={d.iso} className={`min-h-[9rem] rounded-md border ${d.isToday ? 'border-[var(--color-accent)] bg-[var(--color-accent-tint)]/30' : 'border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40'} p-1.5`}>
+                <div className={`mb-1 px-1 text-[10px] uppercase tracking-wider ${d.isToday ? 'font-semibold text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'}`}>
+                  {d.short} {d.num}
+                </div>
+                <div className="space-y-1">
+                  {tasks.length === 0 ? (
+                    <div className="text-[10px] text-[var(--color-text-muted)] px-1">—</div>
+                  ) : (
+                    tasks.slice(0, 4).map((t) => (
+                      <Link
+                        key={t.id}
+                        href={`/projects/${t.project_number}`}
+                        title={`${t.title} · ${t.project_number} ${t.project_name}`}
+                        className={`block rounded px-1.5 py-1 text-[11px] leading-tight border-l-2 hover:bg-[var(--color-surface)] transition-colors ${
+                          t.priority === 'high'
+                            ? 'border-l-[var(--color-status-declined-fg)] bg-[var(--color-status-declined-bg)]/60'
+                            : t.priority === 'med'
+                            ? 'border-l-[var(--color-accent)] bg-[var(--color-surface)]'
+                            : 'border-l-[var(--color-border)] bg-[var(--color-surface)]'
+                        }`}
+                      >
+                        <div className="line-clamp-2">{t.title}</div>
+                        <div className="mt-0.5 text-[9px] text-[var(--color-text-muted)] font-mono">{t.project_number}</div>
+                      </Link>
+                    ))
+                  )}
+                  {tasks.length > 4 ? (
+                    <div className="px-1 text-[10px] text-[var(--color-text-muted)]">+{tasks.length - 4} more</div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-5 lg:col-span-2">
