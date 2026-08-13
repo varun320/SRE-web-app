@@ -346,12 +346,22 @@ export async function fetchOnsiteBlocksInRange(
   }));
 }
 
+export interface WorkloadTask {
+  id: string;
+  title: string;
+  due_date: string | null;
+  priority: 'high' | 'med' | 'low';
+  project_number: number;
+  project_name: string;
+}
+
 export interface WorkloadRow {
   user_id: string;
   full_name: string;
   open_count: number;
   overdue_count: number;
   due_this_week_count: number;
+  tasks: WorkloadTask[];
 }
 
 /** Per-user open-task workload — only counts tasks on adopted projects. */
@@ -362,17 +372,27 @@ export async function fetchTeamWorkload(sb: SupabaseClient): Promise<WorkloadRow
   const [tasksRes, users] = await Promise.all([
     sb
       .from('tasks')
-      .select('assignee_id, due_date, status, projects!inner(template_id)')
-      .neq('status', 'done'),
+      .select('id, title, priority, assignee_id, due_date, status, projects!inner(project_number, name, template_id)')
+      .neq('status', 'done')
+      .order('due_date', { ascending: true, nullsFirst: false }),
     fetchTeamRoster(sb),
   ]);
 
-  type Row = { assignee_id: string | null; due_date: string | null; status: string; projects: { template_id: string | null } };
+  type Row = {
+    id: string;
+    title: string;
+    priority: 'high' | 'med' | 'low';
+    assignee_id: string | null;
+    due_date: string | null;
+    status: string;
+    projects: { project_number: number; name: string; template_id: string | null };
+  };
   const rows = ((tasksRes.data ?? []) as unknown as Row[]).filter((r) => r.projects.template_id != null);
 
   const openBy = new Map<string, number>();
   const overdueBy = new Map<string, number>();
   const weekBy = new Map<string, number>();
+  const tasksBy = new Map<string, WorkloadTask[]>();
   for (const r of rows) {
     if (!r.assignee_id) continue;
     openBy.set(r.assignee_id, (openBy.get(r.assignee_id) ?? 0) + 1);
@@ -381,6 +401,16 @@ export async function fetchTeamWorkload(sb: SupabaseClient): Promise<WorkloadRow
     } else if (r.due_date && r.due_date >= today && r.due_date <= in7) {
       weekBy.set(r.assignee_id, (weekBy.get(r.assignee_id) ?? 0) + 1);
     }
+    const arr = tasksBy.get(r.assignee_id) ?? [];
+    arr.push({
+      id: r.id,
+      title: r.title,
+      due_date: r.due_date,
+      priority: r.priority,
+      project_number: r.projects.project_number,
+      project_name: r.projects.name,
+    });
+    tasksBy.set(r.assignee_id, arr);
   }
 
   return users
@@ -390,6 +420,7 @@ export async function fetchTeamWorkload(sb: SupabaseClient): Promise<WorkloadRow
       open_count: openBy.get(u.id) ?? 0,
       overdue_count: overdueBy.get(u.id) ?? 0,
       due_this_week_count: weekBy.get(u.id) ?? 0,
+      tasks: tasksBy.get(u.id) ?? [],
     }))
     .sort((a, b) => b.open_count - a.open_count);
 }

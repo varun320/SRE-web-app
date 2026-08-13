@@ -1,9 +1,30 @@
 import Link from 'next/link';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, ChevronRight } from 'lucide-react';
 import { getSupabaseServer } from '@/shared/supabase/server';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { StatusBadge } from '@/shared/ui/status-badge';
+import { formatDate } from '@/shared/lib/dates';
 import { fetchTeamWorkload } from '@/features/projects/queries';
+
+function daysUntil(iso: string): number {
+  const d = new Date(iso).getTime();
+  const now = new Date().setHours(0, 0, 0, 0);
+  return Math.round((d - now) / (24 * 60 * 60 * 1000));
+}
+
+function dueTone(due: string | null): { label: string; tone: 'muted' | 'danger' | 'warning' | 'neutral' } {
+  if (!due) return { label: '—', tone: 'muted' };
+  const days = daysUntil(due);
+  if (days < 0) return { label: `${Math.abs(days)}d overdue`, tone: 'danger' };
+  if (days === 0) return { label: 'Today', tone: 'warning' };
+  if (days === 1) return { label: 'Tomorrow', tone: 'warning' };
+  if (days <= 7) return { label: `${days}d`, tone: 'warning' };
+  return { label: formatDate(due), tone: 'neutral' };
+}
+
+function priorityTone(p: 'high' | 'med' | 'low'): 'danger' | 'warning' | 'neutral' {
+  return p === 'high' ? 'danger' : p === 'med' ? 'warning' : 'neutral';
+}
 
 function initials(name: string): string {
   return name.trim().split(/\s+/).map((p) => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');
@@ -88,6 +109,39 @@ export default async function WorkloadPage() {
                   </span>
                   <span className="font-mono tabular-nums text-[var(--color-text-muted)]">{r.open_count} tasks</span>
                 </div>
+
+                {r.tasks.length > 0 ? (
+                  <details className="group mt-3 border-t border-[var(--color-border-soft)] pt-3">
+                    <summary className="flex cursor-pointer items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] list-none [&::-webkit-details-marker]:hidden">
+                      <ChevronRight className="h-3 w-3 transition-transform group-open:rotate-90" />
+                      Show tasks
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
+                      {r.tasks.map((t) => {
+                        const due = dueTone(t.due_date);
+                        return (
+                          <li key={t.id} className="rounded-md border border-[var(--color-border-soft)] p-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="text-[13px] leading-snug">{t.title}</div>
+                                <Link
+                                  href={`/projects/${t.project_number}`}
+                                  className="mt-0.5 block text-[10px] text-[var(--color-text-muted)] hover:underline"
+                                >
+                                  {t.project_number} · {t.project_name}
+                                </Link>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-1">
+                                <StatusBadge tone={priorityTone(t.priority)}>{t.priority}</StatusBadge>
+                                <StatusBadge tone={due.tone}>{due.label}</StatusBadge>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                ) : null}
               </div>
             );
           })}
