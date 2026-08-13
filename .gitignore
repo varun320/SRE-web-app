@@ -18,9 +18,14 @@ scripts/import/.pytest_cache/
 
 # Local dev artifacts at repo root (screenshots, source docs, MCP traces)
 /*.png
+/*.jpg
+/*.jpeg
 /*.docx
 /*.xlsx
 .playwright-mcp/
+
+# Design reference kept locally, not part of app source
+/design_handoff_sre_projects/
 
 # Alternative package manager lockfiles (this repo uses npm)
 web/pnpm-lock.yaml
