@@ -2,10 +2,10 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Pencil, Loader2 } from 'lucide-react';
+import { Pencil, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
-import { updateProject } from '@/features/projects/actions/projects';
+import { updateProject, deleteProject } from '@/features/projects/actions/projects';
 import { friendlyError } from '@/shared/lib/errors';
 import type { ClientWithDirectory, TemplateSummary, UserOption } from '@/features/projects/queries';
 import type { ProjectPhase } from '@/features/projects/types';
@@ -241,11 +241,29 @@ export function EditJobPanel({ projectId, isLegacy, initial, clients, templates,
         </Field>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border-soft)]">
-        <Button variant="outline" size="sm" onClick={() => setOpen(false)} disabled={pending}>Cancel</Button>
-        <Button size="sm" onClick={submit} disabled={pending}>
-          {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isLegacy && templateId ? 'Adopt & save' : 'Save')}
-        </Button>
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--color-border-soft)]">
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirm('Delete this job? Tasks, subitems, comments, and attachments will be removed. Timesheet entries stay put. This cannot be undone.')) return;
+            start(async () => {
+              const res = await deleteProject({ id: projectId });
+              if (res?.error) { toast.error(res.error); return; }
+              toast.success('Job deleted');
+              router.push('/projects');
+            });
+          }}
+          disabled={pending}
+          className="inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-1.5 text-xs text-[var(--color-status-declined-fg)] hover:bg-[var(--color-status-declined-bg)]/40 disabled:opacity-50"
+        >
+          <Trash2 className="h-3.5 w-3.5" /> Delete job
+        </button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setOpen(false)} disabled={pending}>Cancel</Button>
+          <Button size="sm" onClick={submit} disabled={pending}>
+            {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : (isLegacy && templateId ? 'Adopt & save' : 'Save')}
+          </Button>
+        </div>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { friendlyError } from '@/shared/lib/errors';
 
 const ORG_ID = '00000000-0000-0000-0000-000000000001';
@@ -115,6 +116,36 @@ export async function updateProject(input: z.infer<typeof updateProjectSchema>) 
   const projectNumber = (before as { project_number: number }).project_number;
   revalidatePath(`/projects/${projectNumber}`);
   return { ok: true, project_number: projectNumber };
+}
+
+/** Hard delete a project. Admin OR the project's lead can delete. Tasks are
+ * removed via ON DELETE CASCADE on tasks.project_id; team members likewise.
+ * Timesheet entries reference project_number (not the row), so they survive. */
+export async function deleteProject(input: { id: string }) {
+  const parsed = z.object({ id: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) return { error: 'invalid input' };
+
+  const sb = await getSupabaseServer();
+  const { data: userRow } = await sb.auth.getUser();
+  const uid = userRow.user?.id;
+  if (!uid) return { error: 'unauthenticated' };
+
+  const { data: row } = await sb
+    .from('projects')
+    .select('id, project_number, lead_id')
+    .eq('id', parsed.data.id)
+    .maybeSingle();
+  if (!row) return { error: 'not found' };
+
+  const isAdmin = await fetchIsAdmin(sb);
+  if (!isAdmin && row.lead_id !== uid) return { error: 'only the project lead or an admin can delete this job' };
+
+  const { error } = await sb.from('projects').delete().eq('id', parsed.data.id);
+  if (error) return { error: friendlyError(error) };
+
+  revalidatePath('/projects');
+  revalidatePath(`/projects/${row.project_number}`);
+  return { ok: true };
 }
 
 const createProjectSchema = z.object({
