@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, CheckCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/shared/supabase/client';
-import { fetchRecent, fetchUnreadCount } from '@/features/notifications/queries';
+import { fetchRecent, fetchUnreadCount, type NotificationRow } from '@/features/notifications/queries';
 import { markAllRead, markRead } from '@/features/notifications/mutations';
 import { formatNotification } from '@/features/notifications/format';
 import {
@@ -14,6 +14,19 @@ import {
   enableDesktopNotifications,
   fireDesktopNotification,
 } from '@/features/notifications/desktop';
+import {
+  fetchSalesRecent,
+  fetchSalesUnreadCount,
+} from '@/features/sales/notifications/queries';
+import {
+  markSalesAllRead,
+  markSalesRead,
+} from '@/features/sales/notifications/mutations';
+import {
+  CATEGORY_LABEL,
+  CATEGORY_TONE,
+  type SalesNotificationRow,
+} from '@/features/sales/notifications/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +41,46 @@ const TONE_DOT: Record<string, string> = {
   neutral: 'dot-neutral',
 };
 
+interface MergedItem {
+  key: string;
+  source: 'timesheet' | 'sales';
+  id: string;
+  title: string;
+  href: string;
+  tone: 'info' | 'success' | 'warning' | 'danger' | 'neutral';
+  createdAt: string;
+  readAt: string | null;
+  category?: string;
+}
+
+function fromTimesheet(n: NotificationRow): MergedItem {
+  const f = formatNotification(n);
+  return {
+    key: `t:${n.id}`,
+    source: 'timesheet',
+    id: n.id,
+    title: f.title,
+    href: f.href,
+    tone: f.tone,
+    createdAt: n.created_at,
+    readAt: n.read_at,
+  };
+}
+
+function fromSales(n: SalesNotificationRow): MergedItem {
+  return {
+    key: `s:${n.id}`,
+    source: 'sales',
+    id: n.id,
+    title: n.title,
+    href: n.action_url ?? `/admin/sales?opp=${n.opportunity_id}`,
+    tone: CATEGORY_TONE[n.category] ?? 'neutral',
+    createdAt: n.created_at,
+    readAt: n.read_at,
+    category: CATEGORY_LABEL[n.category] ?? n.category,
+  };
+}
+
 export function NotificationsBell() {
   const sb = useMemo(() => getSupabaseBrowser(), []);
   const qc = useQueryClient();
@@ -40,21 +93,42 @@ export function NotificationsBell() {
     refetchOnWindowFocus: true,
   });
 
-  const recentQ = useQuery({
-    queryKey: ['notifications', 'recent'],
-    queryFn: () => fetchRecent(sb, 10),
-    // Poll silently so desktop toasts fire even when dropdown is closed.
+  const salesCountQ = useQuery({
+    queryKey: ['sales-notifications', 'count'],
+    queryFn: () => fetchSalesUnreadCount(sb),
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
   });
 
-  // Fire a desktop toast when a new unread notification arrives. Tracks the
-  // set of ids we've already toasted so a single arrival doesn't double-fire.
+  const recentQ = useQuery({
+    queryKey: ['notifications', 'recent'],
+    queryFn: () => fetchRecent(sb, 10),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const salesRecentQ = useQuery({
+    queryKey: ['sales-notifications', 'recent'],
+    queryFn: () => fetchSalesRecent(sb, 10),
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const merged: MergedItem[] = useMemo(() => {
+    const t = (recentQ.data ?? []).map(fromTimesheet);
+    const s = (salesRecentQ.data ?? []).map(fromSales);
+    return [...t, ...s]
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+      .slice(0, 10);
+  }, [recentQ.data, salesRecentQ.data]);
+
+  // Fire desktop toasts on new unread arrivals. Track ids we've toasted so a
+  // single item doesn't double-fire. Only timesheet items get a desktop toast
+  // right now; sales sidecar can grow its own copy later if needed.
   const toastedIds = useRef<Set<string>>(new Set());
   const primed = useRef(false);
   useEffect(() => {
     const list = recentQ.data ?? [];
-    // First render: prime the set so we don't toast historical items.
     if (!primed.current) {
       for (const n of list) toastedIds.current.add(n.id);
       primed.current = true;
@@ -77,16 +151,26 @@ export function NotificationsBell() {
   }
 
   const markOne = useMutation({
-    mutationFn: (id: string) => markRead(sb, id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
+    mutationFn: (item: MergedItem) =>
+      item.source === 'sales' ? markSalesRead(sb, item.id) : markRead(sb, item.id),
+    onSuccess: (_, item) => {
+      qc.invalidateQueries({
+        queryKey: item.source === 'sales' ? ['sales-notifications'] : ['notifications'],
+      });
+    },
   });
 
   const markAll = useMutation({
-    mutationFn: () => markAllRead(sb),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
+    mutationFn: async () => {
+      await Promise.all([markAllRead(sb), markSalesAllRead(sb)]);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['sales-notifications'] });
+    },
   });
 
-  const unread = countQ.data ?? 0;
+  const unread = (countQ.data ?? 0) + (salesCountQ.data ?? 0);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -100,7 +184,7 @@ export function NotificationsBell() {
             aria-hidden
             className="notif-badge-pulse absolute top-1 right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-status-submitted-fg)] px-1 text-[10px] font-semibold text-white ring-2 ring-[var(--color-surface)]"
           >
-            {unread > 99 ? '99+' : unread}
+            {unread > 9 ? '9+' : unread}
           </span>
         ) : null}
       </DropdownMenuTrigger>
@@ -142,50 +226,52 @@ export function NotificationsBell() {
         ) : null}
 
         <div className="max-h-80 overflow-y-auto">
-          {recentQ.isLoading ? (
+          {recentQ.isLoading || salesRecentQ.isLoading ? (
             <div className="px-3 py-4 text-xs text-[var(--color-text-muted)]">Loading…</div>
-          ) : (recentQ.data ?? []).length === 0 ? (
+          ) : merged.length === 0 ? (
             <div className="px-3 py-6 text-center text-xs text-[var(--color-text-muted)]">
               You&apos;re all caught up.
             </div>
           ) : (
             <ul>
-              {(recentQ.data ?? []).map((n) => {
-                const f = formatNotification(n);
-                return (
-                  <li key={n.id}>
-                    <Link
-                      href={f.href}
-                      onClick={() => {
-                        if (!n.read_at) markOne.mutate(n.id);
-                        setOpen(false);
-                      }}
-                      className={[
-                        'flex items-start gap-2.5 px-3 py-2.5 border-b border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/60 transition-colors',
-                        n.read_at ? 'opacity-60' : '',
-                      ].join(' ')}
-                    >
-                      <span
-                        aria-hidden
-                        className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${TONE_DOT[f.tone]}`}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-[var(--color-text)] leading-snug">{f.title}</p>
-                        <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
-                          {relativeTime(new Date(n.created_at))}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
+              {merged.map((item) => (
+                <li key={item.key}>
+                  <Link
+                    href={item.href}
+                    onClick={() => {
+                      if (!item.readAt) markOne.mutate(item);
+                      setOpen(false);
+                    }}
+                    className={[
+                      'flex items-start gap-2.5 px-3 py-2.5 border-b border-[var(--color-border-soft)] hover:bg-[var(--color-surface-2)]/60 transition-colors',
+                      item.readAt ? 'opacity-60' : '',
+                    ].join(' ')}
+                  >
+                    <span
+                      aria-hidden
+                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${TONE_DOT[item.tone]}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-[var(--color-text)] leading-snug">{item.title}</p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+                        {item.category ? `${item.category} · ` : ''}
+                        {relativeTime(new Date(item.createdAt))}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
         </div>
 
-        <footer className="px-3 py-2 border-t border-[var(--color-border-soft)] text-center">
+        <footer className="px-3 py-2 border-t border-[var(--color-border-soft)] text-center flex items-center justify-center gap-3">
           <Link href="/me/notifications" className="text-xs text-[var(--color-accent)] hover:underline" onClick={() => setOpen(false)}>
-            View all notifications
+            My timesheet
+          </Link>
+          <span className="text-[var(--color-text-subtle)]">·</span>
+          <Link href="/notifications" className="text-xs text-[var(--color-accent)] hover:underline" onClick={() => setOpen(false)}>
+            Sales inbox
           </Link>
         </footer>
       </DropdownMenuContent>
