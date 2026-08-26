@@ -10,6 +10,7 @@ import {
   type EmployeeOption,
 } from '@/components/admin/AllWeeksTable';
 import { BalancesTable } from '@/components/admin/reports/BalancesTable';
+import { BalancesInsights } from '@/components/admin/reports/BalancesInsights';
 
 const PAGE_SIZE = 50;
 const VALID_STATUSES: WeekStatus[] = ['draft', 'submitted', 'approved', 'declined'];
@@ -146,7 +147,10 @@ export default async function AdminHome({
       {view === 'inbox' ? (
         <ApprovalsInbox queue={queue} panel={panel} />
       ) : view === 'balances' ? (
-        <BalancesTable rows={balances} downloadHref="/api/admin/reports/balances" />
+        <div className="space-y-5">
+          <BalancesInsights rows={balances} />
+          <BalancesTable rows={balances} downloadHref="/api/admin/reports/balances" />
+        </div>
       ) : (
         <AllWeeksTable
           rows={allWeeks}
