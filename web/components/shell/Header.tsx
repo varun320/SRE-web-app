@@ -45,18 +45,18 @@ interface NavItem {
   match: (pathname: string) => boolean;
 }
 
-// Top-level tabs. TIL bank + Vacation intentionally live under the Me dropdown
-// (they're already surfaced as cards on /home) to keep the top bar to four
-// primary tabs: Home, Week, Expenses, Admin.
+// Primary top-level tabs: high-frequency shared surfaces. Personal balances
+// (Expenses, TIL, Vacation, Notifications) live under the Me dropdown to keep
+// the top bar breathing room for the search box.
 const TOP_NAV: NavItem[] = [
-  { href: '/home',          label: 'Home',     icon: Home,         match: (p) => p === '/home' || p === '/' },
-  { href: '/week/current',  label: 'Week',     icon: CalendarDays, match: (p) => p.startsWith('/week') },
-  { href: '/expenses',      label: 'Expenses', icon: Receipt,      match: (p) => p.startsWith('/expenses') },
-  { href: '/clients',       label: 'Clients',  icon: MapPin,       match: (p) => p.startsWith('/clients') },
-  { href: '/projects',      label: 'Projects', icon: Briefcase,    match: (p) => p.startsWith('/projects') },
+  { href: '/home',         label: 'Home',     icon: Home,         match: (p) => p === '/home' || p === '/' },
+  { href: '/week/current', label: 'Week',     icon: CalendarDays, match: (p) => p.startsWith('/week') },
+  { href: '/clients',      label: 'Clients',  icon: MapPin,       match: (p) => p.startsWith('/clients') },
+  { href: '/projects',     label: 'Projects', icon: Briefcase,    match: (p) => p.startsWith('/projects') },
 ];
 
 const ME_NAV: NavItem[] = [
+  { href: '/expenses',         label: 'Expenses',      icon: Receipt,  match: (p) => p.startsWith('/expenses') },
   { href: '/me/til',           label: 'TIL bank',      icon: Clock,    match: (p) => p.startsWith('/me/til') },
   { href: '/me/vacation',      label: 'Vacation',      icon: Palmtree, match: (p) => p.startsWith('/me/vacation') },
   { href: '/me/notifications', label: 'Notifications', icon: Bell,     match: (p) => p.startsWith('/me/notifications') },
