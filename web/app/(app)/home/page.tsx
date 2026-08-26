@@ -3,8 +3,18 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { getSupabaseServer } from '@/shared/supabase/server';
 import { currentMonday, DAY_KEYS } from '@/shared/lib/dates';
 import { fetchSummary } from '@/features/expenses/queries';
+import { fetchUnreadCount } from '@/features/notifications/queries';
+import { fetchSalesUnreadCount } from '@/features/sales/notifications/queries';
+import { fetchMyPriorities } from '@/features/projects/queries';
+import { fetchIsAdmin } from '@/shared/lib/role';
+import { fetchSubmittedQueue } from '@/lib/admin/queries';
+import { fetchCurrentBalances } from '@/lib/admin/reports/balances';
+import { listOpportunities } from '@/features/sales/client';
+import { daysInStage } from '@/features/sales/types';
 import { StatusBadge } from '@/shared/ui/status-badge';
 import { HoursSparkline } from '@/components/home/HoursSparkline';
+import { AttentionStrip, AttentionIcons, type AttentionItem } from '@/components/home/AttentionStrip';
+import { AdminSnapshot } from '@/components/home/AdminSnapshot';
 import type { TimesheetStatus } from '@/shared/lib/types';
 
 function money(n: number): string {
@@ -111,6 +121,104 @@ export default async function HomePage() {
   const vacRemaining = Number(vacRes.data?.closing_balance ?? 0);
   const totalOwing = Number(expenseSummary?.total_owing ?? 0);
 
+  // Extra signals for the "Needs your attention" strip. These are additive —
+  // if a table isn't reachable (schema cache miss, etc.) the count falls back
+  // to 0 and the item just doesn't render.
+  const [tsUnread, salesUnread, myPriorities, isAdmin] = await Promise.all([
+    fetchUnreadCount(sb).catch(() => 0),
+    fetchSalesUnreadCount(sb).catch(() => 0),
+    fetchMyPriorities(sb, userId, 20).catch(() => []),
+    fetchIsAdmin(sb),
+  ]);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overdueTasks = myPriorities.filter((t) => {
+    if (!t.due_date) return false;
+    return new Date(t.due_date) < today;
+  }).length;
+  const openTasks = myPriorities.length;
+
+  const attention: AttentionItem[] = [];
+  if (status === 'declined') {
+    attention.push({
+      key: 'ts-declined',
+      icon: AttentionIcons.AlertTriangle,
+      label: 'Week sent back',
+      detail: 'Admin declined — resubmit with fixes',
+      href: `/week/${weekStart}`,
+      tone: 'danger',
+    });
+  }
+  if (tsUnread + salesUnread > 0) {
+    attention.push({
+      key: 'notifications',
+      icon: AttentionIcons.Bell,
+      label: `${tsUnread + salesUnread} unread notification${tsUnread + salesUnread === 1 ? '' : 's'}`,
+      detail: salesUnread > 0 ? `${salesUnread} from sales inbox` : 'Timesheet approvals',
+      href: salesUnread > 0 ? '/notifications' : '/me/notifications',
+      tone: 'info',
+    });
+  }
+  if (overdueTasks > 0) {
+    attention.push({
+      key: 'tasks-overdue',
+      icon: AttentionIcons.CheckSquare,
+      label: `${overdueTasks} overdue task${overdueTasks === 1 ? '' : 's'}`,
+      detail: openTasks > overdueTasks ? `+${openTasks - overdueTasks} more open` : 'Assigned to you',
+      href: '/projects/workload',
+      tone: 'danger',
+    });
+  } else if (openTasks > 0) {
+    attention.push({
+      key: 'tasks-open',
+      icon: AttentionIcons.CheckSquare,
+      label: `${openTasks} open task${openTasks === 1 ? '' : 's'}`,
+      detail: 'Assigned to you',
+      href: '/projects/workload',
+      tone: 'info',
+    });
+  }
+  if (vacRemaining < 8) {
+    attention.push({
+      key: 'vac-low',
+      icon: AttentionIcons.Palmtree,
+      label: 'Low vacation balance',
+      detail: `${vacRemaining.toFixed(1)} h remaining`,
+      href: '/me/vacation',
+      tone: 'warning',
+    });
+  }
+
+  // Admin snapshot: only fetch the extra queries if the user is actually admin.
+  // ponytail: sequential fetch behind the isAdmin gate — cheap because the
+  // sales client returns fixtures immediately when the sidecar isn't wired.
+  let adminSnapshotProps: React.ComponentProps<typeof AdminSnapshot> | null = null;
+  if (isAdmin) {
+    const [queueRows, opps, balances] = await Promise.all([
+      fetchSubmittedQueue(sb).catch(() => []),
+      listOpportunities().catch(() => ({ data: [], stale: true, source: 'fixture' as const })),
+      fetchCurrentBalances(sb).catch(() => []),
+    ]);
+    const openPipelineValue = opps.data
+      .filter((o) => o.status === 'open')
+      .reduce((a, o) => a + (o.monetaryValue ?? 0), 0);
+    const agingDeals = opps.data.filter(
+      (o) => o.status === 'open' && daysInStage(o.stageEnteredAt) >= 30,
+    ).length;
+    const balanceAlerts = balances.filter((b) => {
+      const lowVac = b.vacation_closing < 8;
+      const highTil = b.til_closing >= 80;
+      const negative = b.til_closing < 0 || b.vacation_closing < 0;
+      return lowVac || highTil || negative;
+    }).length;
+    adminSnapshotProps = {
+      pendingApprovals: queueRows.length,
+      openPipelineValue,
+      agingDeals,
+      balanceAlerts,
+    };
+  }
+
   const perDay: [number, number, number, number, number, number, number] = [0, 0, 0, 0, 0, 0, 0];
   for (const r of entriesRes.data ?? []) {
     perDay[0] += Number(r.mon_hrs ?? 0);
@@ -194,6 +302,8 @@ export default async function HomePage() {
         </p>
       </header>
 
+      <AttentionStrip items={attention} />
+
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
         <Link
           href={`/week/${weekStart}`}
@@ -243,6 +353,8 @@ export default async function HomePage() {
           />
         </div>
       </div>
+
+      {adminSnapshotProps ? <AdminSnapshot {...adminSnapshotProps} /> : null}
 
       <section className="max-w-3xl">
         <h2 className="text-h3 mb-3">Recent activity</h2>
