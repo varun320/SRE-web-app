@@ -118,7 +118,7 @@ export function Header({ email, isAdmin }: HeaderProps) {
           >
             <img src="/sre-mark.webp" alt="SRE" className="h-6 w-auto" />
           </span>
-          <span className="hidden sm:inline text-sm">SRE</span>
+          <span className="hidden sm:inline text-sm">SRE Nexus</span>
         </Link>
 
         {/* Center — tabs + search */}

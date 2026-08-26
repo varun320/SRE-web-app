@@ -19,7 +19,7 @@ export function FirstVisitHint() {
     }
     // Slight delay so it doesn't collide with route-change chrome.
     const t = window.setTimeout(() => {
-      toast('Welcome to SRE Timesheet', {
+      toast('Welcome to SRE Nexus', {
         description: 'Tap the (?) icons anywhere for a quick tip, or the ? in the top bar for the full guide.',
         duration: 10_000,
         action: { label: 'Got it', onClick: () => {} },

@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   // Auth-gated internal tool — do NOT index. Google finding /login is pure downside.
   robots: { index: false, follow: false, nocache: true },
   title: {
-    default: 'SRE Timesheet',
-    template: '%s · SRE Timesheet',
+    default: 'SRE Nexus',
+    template: '%s · SRE Nexus',
   },
   description: 'Weekly timesheet, TIL, and expense system for Sulfur Recovery Engineering Inc.',
-  applicationName: 'SRE Timesheet',
+  applicationName: 'SRE Nexus',
   formatDetection: { telephone: false, email: false, address: false },
 };
 

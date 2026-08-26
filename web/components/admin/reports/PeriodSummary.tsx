@@ -106,7 +106,7 @@ export function PeriodSummary({ employee, from, to, rows }: Props) {
 
       {/* Print-only helper at the bottom */}
       <p className="hidden print:block text-[10px] text-[var(--color-text-muted)] text-center mt-6">
-        Generated from the SRE Timesheet system on {generated}.
+        Generated from SRE Nexus on {generated}.
       </p>
     </article>
   );
