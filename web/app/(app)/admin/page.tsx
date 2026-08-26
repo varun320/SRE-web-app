@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getSupabaseServer } from '@/shared/supabase/server';
 import { fetchSubmittedQueue } from '@/lib/admin/queries';
+import { fetchCurrentBalances, type BalanceRow } from '@/lib/admin/reports/balances';
 import { ApprovalsInbox, type PanelPayload, type PanelLine } from '@/components/admin/ApprovalsInbox';
 import {
   AllWeeksTable,
@@ -8,10 +9,11 @@ import {
   type WeekStatus,
   type EmployeeOption,
 } from '@/components/admin/AllWeeksTable';
+import { BalancesTable } from '@/components/admin/reports/BalancesTable';
 
 const PAGE_SIZE = 50;
 const VALID_STATUSES: WeekStatus[] = ['draft', 'submitted', 'approved', 'declined'];
-type View = 'inbox' | 'history';
+type View = 'inbox' | 'history' | 'balances';
 
 interface SearchParams {
   view?: string;
@@ -27,7 +29,8 @@ export default async function AdminHome({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const view: View = sp.view === 'history' ? 'history' : 'inbox';
+  const view: View =
+    sp.view === 'history' ? 'history' : sp.view === 'balances' ? 'balances' : 'inbox';
   const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
   const status = (VALID_STATUSES as string[]).includes(sp.status ?? '')
     ? (sp.status as WeekStatus)
@@ -76,6 +79,11 @@ export default async function AdminHome({
   let allWeeks: WeekRow[] = [];
   let employees: EmployeeOption[] = [];
   let totalCount = 0;
+  let balances: BalanceRow[] = [];
+
+  if (view === 'balances') {
+    balances = await fetchCurrentBalances(sb);
+  }
 
   if (view === 'history') {
     const from = (page - 1) * PAGE_SIZE;
@@ -137,6 +145,8 @@ export default async function AdminHome({
 
       {view === 'inbox' ? (
         <ApprovalsInbox queue={queue} panel={panel} />
+      ) : view === 'balances' ? (
+        <BalancesTable rows={balances} downloadHref="/api/admin/reports/balances" />
       ) : (
         <AllWeeksTable
           rows={allWeeks}
@@ -174,6 +184,9 @@ function TabBar({
         </Tab>
         <Tab href="/admin?view=history" active={view === 'history'}>
           History
+        </Tab>
+        <Tab href="/admin?view=balances" active={view === 'balances'}>
+          Balances
         </Tab>
       </div>
       <div className="text-body-sm text-[var(--color-text-muted)] font-mono tabular">
