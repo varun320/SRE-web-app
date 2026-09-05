@@ -73,7 +73,7 @@ function fromSales(n: SalesNotificationRow): MergedItem {
     source: 'sales',
     id: n.id,
     title: n.title,
-    href: n.action_url ?? `/admin/sales?opp=${n.opportunity_id}`,
+    href: n.action_url ?? `/sales?opp=${n.opportunity_id}`,
     tone: CATEGORY_TONE[n.category] ?? 'neutral',
     createdAt: n.created_at,
     readAt: n.read_at,

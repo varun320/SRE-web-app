@@ -79,7 +79,7 @@ export default async function SalesInboxPage({
         <ul className="rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-surface)] overflow-hidden">
           {page.map((n) => {
             const tone = CATEGORY_TONE[n.category] ?? 'neutral';
-            const href = n.action_url ?? `/admin/sales?opp=${n.opportunity_id}`;
+            const href = n.action_url ?? `/sales?opp=${n.opportunity_id}`;
             return (
               <li
                 key={n.id}

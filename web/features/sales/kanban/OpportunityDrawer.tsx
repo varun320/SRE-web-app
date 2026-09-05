@@ -16,6 +16,7 @@ import type { OpportunityDetail, OpportunityStage } from '@/features/sales/types
 
 interface Props {
   opportunity: OpportunityDetail | null;
+  canEdit: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStageChange: (id: string, stage: OpportunityStage) => void;
@@ -43,6 +44,7 @@ function fmtCurrency(n?: number): string {
 
 export function OpportunityDrawer({
   opportunity,
+  canEdit,
   open,
   onOpenChange,
   onStageChange,
@@ -127,6 +129,12 @@ export function OpportunityDrawer({
           </a>
         ) : null}
 
+        {!canEdit ? (
+          <div className="rounded-md border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40 px-3 py-2 text-xs text-[var(--color-text-muted)]">
+            Read-only — this opportunity is assigned to {o.customFields?.sre_assigned_engineer ?? 'another engineer'}. Only the assigned engineer or an admin can change the stage or add notes.
+          </div>
+        ) : null}
+
         <div>
           <label className="block text-[11px] uppercase tracking-wide text-[var(--color-text-subtle)] mb-1">
             Stage
@@ -134,7 +142,7 @@ export function OpportunityDrawer({
           <select
             value={o.stage}
             onChange={(e) => onStageChange(o.id, e.target.value as OpportunityStage)}
-            disabled={pending}
+            disabled={pending || !canEdit}
             className="w-full rounded-md border border-[var(--color-border-soft)] bg-transparent px-2 py-1.5 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
           >
             {OPPORTUNITY_STAGES.map((s) => (
@@ -170,13 +178,14 @@ export function OpportunityDrawer({
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Add a note…"
+              placeholder={canEdit ? 'Add a note…' : 'Read-only'}
               rows={2}
-              className="flex-1 rounded-md border border-[var(--color-border-soft)] bg-transparent px-2 py-1.5 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+              disabled={!canEdit}
+              className="flex-1 rounded-md border border-[var(--color-border-soft)] bg-transparent px-2 py-1.5 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50"
             />
             <Button
               onClick={submit}
-              disabled={pending || note.trim().length === 0}
+              disabled={pending || !canEdit || note.trim().length === 0}
               size="sm"
             >
               {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Add'}

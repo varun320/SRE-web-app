@@ -14,6 +14,17 @@ type FilterKind = 'all' | 'mine' | 'country' | 'stage';
 interface Props {
   opportunities: OpportunityDetail[];
   currentEngineerId: string | null;
+  isAdmin: boolean;
+}
+
+function canEditOpp(
+  opp: OpportunityDetail,
+  currentEngineerId: string | null,
+  isAdmin: boolean,
+): boolean {
+  if (isAdmin) return true;
+  const owner = opp.customFields?.sre_engineer_user_id;
+  return Boolean(owner && currentEngineerId && owner === currentEngineerId);
 }
 
 function formatCurrency(n?: number): string {
@@ -33,7 +44,7 @@ function initialsOf(name: string): string {
     .toUpperCase();
 }
 
-export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
+export function KanbanBoard({ opportunities, currentEngineerId, isAdmin }: Props) {
   const [filter, setFilter] = useState<FilterKind>('all');
   const [country, setCountry] = useState<string>('');
   const [stage, setStage] = useState<OpportunityStage | ''>('');
@@ -125,8 +136,13 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
 
   const handleDrop = (id: string, next: OpportunityStage) => {
     const opp = opportunities.find((o) => o.id === id);
-    const currentEffective = opp ? overrides[id] ?? opp.stage : null;
-    if (!opp || currentEffective === next) return;
+    if (!opp) return;
+    if (!canEditOpp(opp, currentEngineerId, isAdmin)) {
+      toast.error('Only the assigned engineer or an admin can move this card.');
+      return;
+    }
+    const currentEffective = overrides[id] ?? opp.stage;
+    if (currentEffective === next) return;
     setOverrides((prev) => ({ ...prev, [id]: next }));
     handleStageChange(id, next);
   };
@@ -214,23 +230,31 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
                       —
                     </div>
                   ) : (
-                    rows.map((o) => (
-                      <OpportunityCard
-                        key={o.id}
-                        opp={o}
-                        onOpen={() => setSelectedId(o.id)}
-                        isDragging={draggingId === o.id}
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/plain', o.id);
-                          e.dataTransfer.effectAllowed = 'move';
-                          setDraggingId(o.id);
-                        }}
-                        onDragEnd={() => {
-                          setDraggingId(null);
-                          setDropTargetStage(null);
-                        }}
-                      />
-                    ))
+                    rows.map((o) => {
+                      const editable = canEditOpp(o, currentEngineerId, isAdmin);
+                      return (
+                        <OpportunityCard
+                          key={o.id}
+                          opp={o}
+                          canEdit={editable}
+                          onOpen={() => setSelectedId(o.id)}
+                          isDragging={draggingId === o.id}
+                          onDragStart={
+                            editable
+                              ? (e) => {
+                                  e.dataTransfer.setData('text/plain', o.id);
+                                  e.dataTransfer.effectAllowed = 'move';
+                                  setDraggingId(o.id);
+                                }
+                              : undefined
+                          }
+                          onDragEnd={() => {
+                            setDraggingId(null);
+                            setDropTargetStage(null);
+                          }}
+                        />
+                      );
+                    })
                   )}
                 </div>
               </section>
@@ -241,6 +265,7 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
 
       <OpportunityDrawer
         opportunity={selected}
+        canEdit={selected ? canEditOpp(selected, currentEngineerId, isAdmin) : false}
         open={selected !== null}
         onOpenChange={(o) => !o && setSelectedId(null)}
         onStageChange={handleStageChange}
@@ -253,13 +278,14 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
 
 interface CardProps {
   opp: OpportunityDetail;
+  canEdit: boolean;
   onOpen: () => void;
   isDragging: boolean;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-function OpportunityCard({ opp, onOpen, isDragging, onDragStart, onDragEnd }: CardProps) {
+function OpportunityCard({ opp, canEdit, onOpen, isDragging, onDragStart, onDragEnd }: CardProps) {
   const days = daysInStage(opp.stageEnteredAt);
   const engineer = opp.customFields?.sre_assigned_engineer ?? '—';
   const proposal = opp.customFields?.sre_proposal_number;
@@ -270,7 +296,7 @@ function OpportunityCard({ opp, onOpen, isDragging, onDragStart, onDragEnd }: Ca
     <div
       role="button"
       tabIndex={0}
-      draggable
+      draggable={canEdit}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onOpen}
@@ -280,8 +306,10 @@ function OpportunityCard({ opp, onOpen, isDragging, onDragStart, onDragEnd }: Ca
           onOpen();
         }
       }}
+      title={canEdit ? undefined : 'Read-only — assigned to another engineer'}
       className={[
-        'w-full text-left group rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-[var(--color-accent)] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]',
+        'w-full text-left group rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-3 py-2.5 hover:border-[var(--color-accent)] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]',
+        canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
         isDragging ? 'opacity-40' : '',
       ].join(' ')}
     >

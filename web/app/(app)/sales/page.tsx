@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { LineChart, AlertTriangle } from 'lucide-react';
 import { getSupabaseServer } from '@/shared/supabase/server';
+import { fetchIsAdmin } from '@/shared/lib/role';
 import { listOpportunities } from '@/features/sales/client';
 import { OPPORTUNITY_STAGES } from '@/features/sales/types';
 import { PageHeader } from '@/shared/ui/page-header';
 import { Button } from '@/shared/ui/button';
-import { KanbanBoard } from './KanbanBoard';
+import { KanbanBoard } from '@/features/sales/kanban/KanbanBoard';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,12 +16,11 @@ function fmtCurrency(n: number): string {
   return `$${n}`;
 }
 
-export default async function AdminSalesPage() {
+export default async function SalesPage() {
   const sb = await getSupabaseServer();
   const { data: authData } = await sb.auth.getUser();
-  // In fixture mode the fake engineer ids don't match Supabase UUIDs. Default
-  // to "u_maaz" so demo "My deals" isn't empty; live wiring will map real
-  // sre_engineer_user_id -> auth uid.
+  const isAdmin = await fetchIsAdmin(sb);
+  // Fixture mode maps auth uid → "u_maaz" so demo "My deals" isn't empty.
   const currentEngineerId =
     process.env.SRE_SALES_FIXTURES === '1' || !process.env.SRE_AUTOMATIONS_URL
       ? 'u_maaz'
@@ -46,10 +46,21 @@ export default async function AdminSalesPage() {
   return (
     <div className="px-3 md:px-4 py-5 md:py-6 space-y-5">
       <PageHeader
-        title="Sales pipeline"
-        description="Read/write mirror of the SRE Sales pipeline in GoHighLevel. GHL is the system of record."
+        title={
+          <span className="inline-flex items-center gap-2">
+            Sales pipeline
+            <span className="rounded-sm bg-[var(--color-accent-tint)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-accent)] leading-none">
+              Beta
+            </span>
+          </span>
+        }
+        description={
+          isAdmin
+            ? 'Read/write mirror of the SRE Sales pipeline in GoHighLevel. GHL is the system of record.'
+            : 'Everyone can see the pipeline. You can edit deals assigned to you; other cards are read-only.'
+        }
         action={
-          <Link href="/admin/sales/summary">
+          <Link href="/sales/summary">
             <Button variant="secondary" size="sm">
               <LineChart className="h-4 w-4" />
               Exec summary
@@ -71,7 +82,7 @@ export default async function AdminSalesPage() {
               <div className="mt-0.5 text-xs opacity-80">{error}</div>
             ) : (
               <div className="mt-0.5 text-xs opacity-80">
-                The GHL automations sidecar hasn't been wired up yet. Set{' '}
+                The GHL automations sidecar hasn&apos;t been wired up yet. Set{' '}
                 <code className="font-mono">SRE_AUTOMATIONS_URL</code> to connect.
               </div>
             )}
@@ -90,6 +101,7 @@ export default async function AdminSalesPage() {
       <KanbanBoard
         opportunities={opportunities}
         currentEngineerId={currentEngineerId}
+        isAdmin={isAdmin}
       />
     </div>
   );
@@ -136,7 +148,4 @@ function KpiStrip({
   );
 }
 
-// ponytail: assert-check for the "days in stage aging" bucketing lives inline
-// in the summary aggregator (fixtures.ts). If OPPORTUNITY_STAGES changes shape,
-// KanbanBoard's column loop will surface it at render.
 void OPPORTUNITY_STAGES;

@@ -20,6 +20,7 @@ import {
   MapPin,
   Briefcase,
   Search,
+  LineChart,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HelpButton } from './HelpButton';
@@ -43,6 +44,7 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   match: (pathname: string) => boolean;
+  badge?: string;
 }
 
 // Primary top-level tabs: high-frequency shared surfaces. Personal balances
@@ -53,6 +55,7 @@ const TOP_NAV: NavItem[] = [
   { href: '/week/current', label: 'Week',     icon: CalendarDays, match: (p) => p.startsWith('/week') },
   { href: '/clients',      label: 'Clients',  icon: MapPin,       match: (p) => p.startsWith('/clients') },
   { href: '/projects',     label: 'Projects', icon: Briefcase,    match: (p) => p.startsWith('/projects') },
+  { href: '/sales',        label: 'Sales',    icon: LineChart,    match: (p) => p.startsWith('/sales'), badge: 'BETA' },
 ];
 
 const ME_NAV: NavItem[] = [
@@ -215,6 +218,11 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     >
       <Icon className="h-3.5 w-3.5" />
       {item.label}
+      {item.badge ? (
+        <span className="ml-1 rounded-sm bg-[var(--color-accent-tint)] px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--color-accent)] leading-none">
+          {item.badge}
+        </span>
+      ) : null}
       {active ? (
         <span
           aria-hidden
@@ -393,6 +401,11 @@ function DrawerLink({ item, pathname }: { item: NavItem; pathname: string }) {
     >
       <Icon className="h-4 w-4" />
       {item.label}
+      {item.badge ? (
+        <span className="ml-1 rounded-sm bg-[var(--color-accent-tint)] px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--color-accent)] leading-none">
+          {item.badge}
+        </span>
+      ) : null}
     </Link>
   );
 }

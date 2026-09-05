@@ -43,7 +43,7 @@ export function AdminSnapshot({
     },
     {
       key: 'pipeline',
-      href: '/admin/sales',
+      href: '/sales',
       label: 'Sales pipeline',
       value: money(openPipelineValue),
       detail: agingDeals === 0 ? 'Nothing aging' : `${agingDeals} deal${agingDeals === 1 ? '' : 's'} ≥30d in stage`,

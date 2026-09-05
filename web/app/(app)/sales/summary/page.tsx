@@ -1,8 +1,7 @@
-import { AlertTriangle, Printer } from 'lucide-react';
+import { AlertTriangle, FileText } from 'lucide-react';
 import { getSummary } from '@/features/sales/client';
 import { PageHeader } from '@/shared/ui/page-header';
 import { EmptyState } from '@/shared/ui/empty-state';
-import { FileText } from 'lucide-react';
 import { PrintButton } from './PrintButton';
 
 export const dynamic = 'force-dynamic';
@@ -47,7 +46,7 @@ export default async function SalesSummaryPage() {
     <div className="px-3 md:px-4 py-5 md:py-6 space-y-6 print:py-2">
       <style>{`
         @media print {
-          nav[aria-label="Admin sections"] { display: none; }
+          nav { display: none; }
           .no-print { display: none; }
           body { background: white; }
         }
@@ -157,8 +156,8 @@ export default async function SalesSummaryPage() {
           headers={['Customer', 'Deals', 'Total value']}
           rows={summary.topCustomers.map((c) => [
             c.customer,
-            <span className="font-mono tabular">{c.count}</span>,
-            <span className="font-mono tabular">{fmtCurrency(c.value)}</span>,
+            <span key="c" className="font-mono tabular">{c.count}</span>,
+            <span key="v" className="font-mono tabular">{fmtCurrency(c.value)}</span>,
           ])}
         />
       </Section>
@@ -173,6 +172,7 @@ export default async function SalesSummaryPage() {
             headers={['Days', 'Stage', 'Deal']}
             rows={summary.agingDeals.map((d) => [
               <span
+                key="d"
                 className={`font-mono tabular ${
                   d.daysInStage >= 30
                     ? 'text-[var(--color-status-declined-fg)] font-medium'
@@ -193,8 +193,8 @@ export default async function SalesSummaryPage() {
           headers={['Country', 'Deals', 'Value']}
           rows={summary.byCountry.map((c) => [
             c.country,
-            <span className="font-mono tabular">{c.count}</span>,
-            <span className="font-mono tabular">{fmtCurrency(c.value)}</span>,
+            <span key="c" className="font-mono tabular">{c.count}</span>,
+            <span key="v" className="font-mono tabular">{fmtCurrency(c.value)}</span>,
           ])}
         />
       </Section>
@@ -253,6 +253,3 @@ function Table({
     </div>
   );
 }
-
-// Silence unused-import warnings if lucide list changes later.
-void Printer;
