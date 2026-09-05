@@ -39,6 +39,11 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
   const [stage, setStage] = useState<OpportunityStage | ''>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Optimistic override of an opp's stage after a drop — instant UI move
+  // while the server action fires; rolled back if the action fails.
+  const [overrides, setOverrides] = useState<Record<string, OpportunityStage>>({});
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dropTargetStage, setDropTargetStage] = useState<OpportunityStage | null>(null);
 
   const countries = useMemo(
     () =>
@@ -75,9 +80,12 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
   const byStage = useMemo(() => {
     const map = new Map<OpportunityStage, OpportunityDetail[]>();
     for (const s of OPPORTUNITY_STAGES) map.set(s, []);
-    for (const o of filtered) map.get(o.stage)?.push(o);
+    for (const o of filtered) {
+      const effective = overrides[o.id] ?? o.stage;
+      map.get(effective)?.push(o);
+    }
     return map;
-  }, [filtered]);
+  }, [filtered, overrides]);
 
   const totalValue = filtered.reduce((a, o) => a + (o.monetaryValue ?? 0), 0);
 
@@ -106,7 +114,21 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
       const { changeStageAction } = await import('./actions');
       const result = await changeStageAction({ id, stage: next });
       handleActionResult(result);
+      if (!result.ok) {
+        setOverrides((prev) => {
+          const { [id]: _, ...rest } = prev;
+          return rest;
+        });
+      }
     });
+  };
+
+  const handleDrop = (id: string, next: OpportunityStage) => {
+    const opp = opportunities.find((o) => o.id === id);
+    const currentEffective = opp ? overrides[id] ?? opp.stage : null;
+    if (!opp || currentEffective === next) return;
+    setOverrides((prev) => ({ ...prev, [id]: next }));
+    handleStageChange(id, next);
   };
 
   const handleAddNote = (id: string, body: string) => {
@@ -150,7 +172,30 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
               <section
                 key={s}
                 aria-label={`${s} column`}
-                className="flex flex-col rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface-2)]/40 min-h-[60vh]"
+                onDragOver={(e) => {
+                  if (!draggingId) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dropTargetStage !== s) setDropTargetStage(s);
+                }}
+                onDragLeave={(e) => {
+                  // Only clear if the pointer actually left the column, not just moved onto a child.
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  setDropTargetStage((prev) => (prev === s ? null : prev));
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = e.dataTransfer.getData('text/plain');
+                  setDropTargetStage(null);
+                  setDraggingId(null);
+                  if (id) handleDrop(id, s);
+                }}
+                className={[
+                  'flex flex-col rounded-xl border bg-[var(--color-surface-2)]/40 min-h-[60vh] transition-colors',
+                  dropTargetStage === s
+                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-tint)]/30'
+                    : 'border-[var(--color-border-soft)]',
+                ].join(' ')}
               >
                 <header className="sticky top-0 z-[1] rounded-t-xl bg-[var(--color-surface-2)]/70 backdrop-blur border-b border-[var(--color-border-soft)] px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
@@ -174,6 +219,16 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
                         key={o.id}
                         opp={o}
                         onOpen={() => setSelectedId(o.id)}
+                        isDragging={draggingId === o.id}
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/plain', o.id);
+                          e.dataTransfer.effectAllowed = 'move';
+                          setDraggingId(o.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null);
+                          setDropTargetStage(null);
+                        }}
                       />
                     ))
                   )}
@@ -199,9 +254,12 @@ export function KanbanBoard({ opportunities, currentEngineerId }: Props) {
 interface CardProps {
   opp: OpportunityDetail;
   onOpen: () => void;
+  isDragging: boolean;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-function OpportunityCard({ opp, onOpen }: CardProps) {
+function OpportunityCard({ opp, onOpen, isDragging, onDragStart, onDragEnd }: CardProps) {
   const days = daysInStage(opp.stageEnteredAt);
   const engineer = opp.customFields?.sre_assigned_engineer ?? '—';
   const proposal = opp.customFields?.sre_proposal_number;
@@ -209,10 +267,23 @@ function OpportunityCard({ opp, onOpen }: CardProps) {
   const sharepoint = opp.customFields?.sre_proposal_sharepoint_url;
   const aging = days >= 30;
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onClick={onOpen}
-      className="w-full text-left group rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-3 py-2.5 hover:border-[var(--color-accent)] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
+      className={[
+        'w-full text-left group rounded-lg border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-3 py-2.5 cursor-grab active:cursor-grabbing hover:border-[var(--color-accent)] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]',
+        isDragging ? 'opacity-40' : '',
+      ].join(' ')}
     >
       <div className="flex items-start justify-between gap-2">
         <h4 className="text-sm font-medium text-[var(--color-text)] leading-snug line-clamp-2">
@@ -253,7 +324,7 @@ function OpportunityCard({ opp, onOpen }: CardProps) {
           </span>
         ) : null}
       </div>
-    </button>
+    </div>
   );
 }
 
